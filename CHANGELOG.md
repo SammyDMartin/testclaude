@@ -4,6 +4,20 @@ All notable changes to the Ascent Universe companion website.
 
 ---
 
+## Session 13 (2026-06-10) — Threshold: First Fleet RTS Game
+
+### New Game
+- **Threshold: First Fleet** (`threshold-game.html`) — Fully playable real-time strategy game recreating the Battle of Threshold (2909 CE) from the Eszel prologue. Single self-contained page, canvas 2D, no dependencies.
+  - **Forces**: Player commands all ten Union destroyer battlegroups (Isidore, Jayapal, Acheron, Kepler, Novgorod, Tenacity + four more), each screened by nine unmanned corvettes — 100 ships, matching canon. Enemy: three Incisors and one Annihilator, AI-controlled.
+  - **Canon mechanics**: X-ray lasers intercept torpedoes at range (long volleys melt "like snow"; massed close-range volleys saturate the defence); invisible spinal duster fire kills ships "with no apparent cause" until the player analyses sensor logs (the Hansun moment) and unlocks submillimetre radar; Striver malware fires an uncommanded opening volley; weapons hold until Arco engages.
+  - **Signature tactics**: Play dead (drives cold, enemy ignores dark hulks beyond ~350 km) and the 30G suicide charge — irreversible, kills the crew, empties every tube point-blank and rams. Launched from cold at close range it strikes with total surprise: the Isidore gambit.
+  - **Enemy AI**: Incisors hold standoff outside railgun range, dodge incoming rounds, execute high-speed attack runs through the formation, and break off when wounded. Annihilator launches antimatter smart-missile swarms that detonate beyond PDC range. Arco withdraws through the interstice when the fleet is broken.
+  - **Aftermath scoring** graded against the historical record: 97 of 100 ships lost, one Incisor destroyed, sole survivor Ensign Hansun. Outcome tiers from ANNIHILATION to IMPOSSIBLE VICTORY.
+  - Balance verified by headless simulation: passive fleets are destroyed with zero kills; naive aggression matches history (1 kill); coordinated close volleys and cold charges are decisively rewarded.
+- Added to nav (`FIRST FLEET`), simulations hub (new PLAYABLE section), home page card grid, and README.
+
+---
+
 ## Session 12 (2026-03-07) — Infrastructure, New Content & Story Readers
 
 Major session: infrastructure improvements, new interactive content, and nine new story readers.

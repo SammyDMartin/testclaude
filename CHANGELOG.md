@@ -4,6 +4,31 @@ All notable changes to the Ascent Universe companion website.
 
 ---
 
+## Session 13b (2026-06-10) — First Fleet v2: Real-Scale Physics & Commander AI
+
+Major rework of `threshold-game.html` based on playtest feedback:
+
+### Realism (true scale throughout)
+- All quantities in real units: positions in km on a 90,000 × 60,000 km battlespace, velocities in km/s, accelerations in G (1 G = 0.00981 km/s²)
+- Real performance figures: destroyers 10 G military / 30 G destruct; Incisors 12 G / 28 G burst; Annihilator 5 G combat / 20 G peak (per the MSD spec sheet — Δv 6,931 kps cruise); torpedoes 50 G with 250 kps Δv budgets; F-AM micromissiles 250 G; railgun muzzle 20 kps; duster stream 2,000 kps; lasers effectively instantaneous
+- KSP-style time compression (1×/4×/16×/64×) on a fixed 0.2 s timestep — flip-and-burn arrival steering, ballistic drift when cold, segment-swept collision so 100+ kps closing speeds can't tunnel through trigger windows
+- CIC-style tactical plot: constant-size icons, 2-minute velocity-projection vectors, 10,000 km grid, scale bar, toggleable weapon range rings
+- Annihilator armed per its real MSD loadout: Neutraliser proton beam (1 TJ/shot), 4× 100 GW X-ray lasers, F-AM micromissile waves
+
+### Enemy commander AI (deliberate, not reactive)
+- Fleet-level commander designates a priority target (damage, isolation, threat, interstice proximity — herding the fleet off the wormhole, per canon)
+- Standoff bombardment doctrine with coordinated multi-vector strike runs every few minutes; bombardment weapons leave the strike target to the strikers
+- Railgun suppression response: ships under fire dodge (and a dodging ship cannot aim its spinal duster — Ngoni's "keep them dodging" is the literal mechanic), mass torpedo launches force squadron-wide evasive dispersal, wounded Incisors break off to long range
+- Physics-honest counterplay: laser point-defence kills any torpedo tracked >150 s, so only fresh-geometry launches at inbound ships survive; a 30 G charge can only deviate ~1,500 km in 100 s, so the dived-on battlegroup is the one that can make the Isidore's choice
+
+### New systems
+- Four opposing-force scenarios (1 Incisor / 2 / historical 3+Annihilator / 4+Annihilator), persisted across restarts
+- Railgun target designation [R] alongside torpedo volleys, with per-group fire-control state
+- Enemy intel panel: click any contact for its real spec sheet, estimated hull, velocity/acceleration readout, and current behaviour state (STRIKE RUN — INBOUND, EVADING SUPPRESSION FIRE, BREAKING OFF…)
+- Balance verified headless: passive play = annihilation with zero kills; scripted competent play reproduces history (1 kill with two more Incisors crippled); micro-tests confirm each kill path
+
+---
+
 ## Session 13 (2026-06-10) — Threshold: First Fleet RTS Game
 
 ### New Game

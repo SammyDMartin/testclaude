@@ -18,7 +18,7 @@ body { overflow: hidden; }
 /* ── HUD ─────────────────────────────────────────────────────────── */
 .hbtn {
   background: rgba(0,20,30,0.85); border: 1px solid var(--border); color: var(--text-dim);
-  font-family: var(--mono); font-size: 9px; letter-spacing: 2px; padding: 5px 10px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px; padding: 6px 12px;
   cursor: pointer; border-radius: 2px; transition: all 0.15s; white-space: nowrap;
 }
 .hbtn:hover { border-color: var(--accent); color: var(--accent); }
@@ -27,13 +27,13 @@ body { overflow: hidden; }
 .hbtn.danger:hover, .hbtn.danger.armed { border-color: #ff5040; color: #ff5040; background: rgba(255,60,40,0.1); }
 .hbtn:disabled { opacity: 0.35; cursor: default; }
 
-#hud-top { position: absolute; top: 8px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 6; flex-wrap: wrap; }
+#hud-top { position: absolute; top: 8px; left: 10px; display: flex; gap: 8px; align-items: center; z-index: 6; flex-wrap: wrap; }
 #clock { font-size: 11px; color: var(--accent); letter-spacing: 2px; min-width: 88px; }
 #scn-tag { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); border: 1px solid var(--border); padding: 4px 8px; border-radius: 2px; }
 
-#fleet-strip { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px; z-index: 6; }
+#fleet-strip { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 6; }
 .fs-cell {
-  width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 2px;
+  width: 24px; height: 24px; border: 1px solid var(--border); border-radius: 2px;
   font-size: 9px; display: flex; align-items: center; justify-content: center;
   color: var(--text-dim); background: rgba(0,15,22,0.8); cursor: pointer; position: relative;
 }
@@ -41,18 +41,18 @@ body { overflow: hidden; }
 .fs-cell.sel { border-color: #fff; color: #fff; }
 .fs-cell.lost { opacity: 0.3; text-decoration: line-through; }
 
-#arco-strip { position: absolute; top: 36px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 6; }
-.as-cell { font-size: 8px; letter-spacing: 1px; color: #ff7a5e; border: 1px solid rgba(255,107,53,0.35); padding: 2px 6px; border-radius: 2px; background: rgba(30,5,0,0.7); cursor: pointer; }
+#arco-strip { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 6; }
+.as-cell { font-size: 8px; letter-spacing: 1px; color: #ff7a5e; border: 1px solid rgba(255,107,53,0.35); padding: 3px 8px; border-radius: 2px; background: rgba(30,5,0,0.7); cursor: pointer; }
 .as-cell .bar { display: block; height: 2px; background: var(--accent2); margin-top: 2px; }
 .as-cell.lost { opacity: 0.3; text-decoration: line-through; }
 .as-cell.intel { border-color: #ff5040; }
 
 #event-log {
-  position: absolute; right: 10px; top: 64px; width: 330px; max-height: 38%;
-  z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 3px;
+  position: absolute; right: 12px; top: 72px; width: 320px; max-height: 36%;
+  z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 4px;
   overflow: hidden;
 }
-.ev { font-size: 9px; line-height: 1.5; letter-spacing: 0.5px; padding: 3px 8px; border-left: 2px solid var(--border);
+.ev { font-size: 9px; line-height: 1.6; letter-spacing: 0.5px; padding: 4px 10px; border-left: 2px solid var(--border);
       background: rgba(0,10,16,0.75); color: var(--text-dim); animation: evIn 0.3s ease; }
 .ev .ts { color: rgba(120,160,170,0.5); margin-right: 6px; }
 .ev.warn { border-left-color: #ff5040; color: #ff8a70; }
@@ -61,44 +61,44 @@ body { overflow: hidden; }
 @keyframes evIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 
 #intel {
-  position: absolute; right: 10px; bottom: 10px; width: 330px; z-index: 6;
+  position: absolute; right: 12px; bottom: 12px; width: 320px; z-index: 6;
   background: rgba(8,2,0,0.92); border: 1px solid rgba(255,107,53,0.4); border-radius: 2px;
-  padding: 8px 10px; font-size: 9px; line-height: 1.6; color: #d8a890; display: none;
+  padding: 10px 12px; font-size: 9px; line-height: 1.7; color: #d8a890; display: none;
 }
-#intel .ttl { color: var(--accent2); font-size: 10px; letter-spacing: 2px; margin-bottom: 4px; }
-#intel .row { display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(255,107,53,0.15); }
+#intel .ttl { color: var(--accent2); font-size: 10px; letter-spacing: 2px; margin-bottom: 6px; }
+#intel .row { display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(255,107,53,0.15); padding: 1px 0; }
 #intel .row span:first-child { color: rgba(255,150,110,0.55); }
 #intel .state { color: #ffce9e; }
 
 #hud-bottom {
-  position: absolute; left: 10px; bottom: 10px; right: 350px; z-index: 6;
-  display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+  position: absolute; left: 10px; bottom: 12px; right: 344px; z-index: 6;
+  display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
 }
-#sel-panel { display: flex; gap: 5px; flex-wrap: wrap; max-width: 62%; }
+#sel-panel { display: flex; gap: 6px; flex-wrap: wrap; max-width: 62%; }
 .sel-card {
   background: rgba(0,18,26,0.88); border: 1px solid var(--border); border-radius: 2px;
-  padding: 4px 8px; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); min-width: 130px;
+  padding: 5px 10px; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); min-width: 130px;
 }
 .sel-card .nm { color: var(--accent); font-size: 9px; margin-bottom: 2px; }
 .sel-card .hpb { height: 3px; background: rgba(255,255,255,0.08); margin: 3px 0; }
 .sel-card .hpb i { display: block; height: 100%; background: var(--accent); }
 .sel-card.cold .nm { color: #6a7e88; }
-#ability-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+#ability-bar { display: flex; gap: 8px; flex-wrap: wrap; }
 
 #mode-banner {
-  position: absolute; top: 64px; left: 50%; transform: translateX(-50%); z-index: 7;
+  position: absolute; top: 72px; left: 50%; transform: translateX(-50%); z-index: 7;
   font-size: 10px; letter-spacing: 3px; color: var(--accent); padding: 6px 16px;
   border: 1px solid var(--accent); background: rgba(0,20,30,0.9); display: none;
 }
 #mode-banner.danger { color: #ff5040; border-color: #ff5040; }
 
 #analyse-btn {
-  position: absolute; top: 110px; left: 50%; transform: translateX(-50%); z-index: 7;
+  position: absolute; top: 118px; left: 50%; transform: translateX(-50%); z-index: 7;
   display: none; animation: pulseBtn 1s ease-in-out infinite;
 }
 @keyframes pulseBtn { 0%,100% { box-shadow: 0 0 0 rgba(0,229,255,0); } 50% { box-shadow: 0 0 14px rgba(0,229,255,0.5); } }
 
-#scalebar { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 5;
+#scalebar { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 5;
   font-size: 8px; letter-spacing: 2px; color: rgba(120,180,200,0.6); text-align: center; pointer-events: none; }
 #scalebar .seg { display: block; height: 3px; border: 1px solid rgba(120,180,200,0.5); border-top: none; margin-bottom: 2px; }
 
@@ -140,12 +140,12 @@ body { overflow: hidden; }
 .spec-tbl td:first-child { color: var(--accent); white-space: nowrap; }
 
 @media (max-width: 900px) {
-  #event-log { width: 210px; top: 96px; }
+  #event-log { width: 210px; top: 100px; }
   #intel { width: 210px; }
-  #hud-bottom { right: 230px; }
-  #fleet-strip { top: 38px; }
-  #arco-strip { top: 66px; }
-  #analyse-btn { top: 140px; }
+  #hud-bottom { right: 224px; }
+  #fleet-strip { top: 40px; }
+  #arco-strip { top: 72px; }
+  #analyse-btn { top: 148px; }
 }
 </style>
 </head>
@@ -1265,8 +1265,8 @@ function handlePrimary(px, py, additive){
     if (a){
       const sel = selectedGroups();
       if (!sel.length){ log('No battlegroups selected.'); setMode(null); return; }
-      if (!game.weaponsFree){ log('WEAPONS HOLD — Admiral’s orders. Projectile fire may be read as hostile action.', 'warn'); setMode(null); return; }
-      if (mode === 'volley'){
+      if (!game.weaponsFree){ log(‘Firing before weapons free — Admiral has not authorised engagement.’, ‘warn’); game.weaponsFree = true; }
+      if (mode === ‘volley’){
         let fired = 0;
         for (const g of sel){ if (g.torps > 0){ fireVolley(g, a, 6, false); fired++; } }
         if (!fired) log('Torpedo magazines empty.');

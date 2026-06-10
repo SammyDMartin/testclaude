@@ -57,6 +57,7 @@ Toggle using the theme button in the nav bar.
 | **Drafts** | `drafts.html` | Draft browser for second-draft manuscripts |
 | **MSD (Annihilator)** | `msd.html` | Interactive 3D MSD for the Annihilator-class IP Assault Vehicle |
 | **MSD (D-Sphere)** | `msd-dsphere.html` | Interactive 3D MSD for the Ultimate Height-class Defence Sphere |
+| **Threshold: First Fleet** | `threshold-game.html` | Playable real-time strategy game — command Union's First Fleet at the Battle of Threshold (2909 CE) |
 | **Battle** | `battle.html` | Phase-by-phase animated tactical reconstruction of the Battle of the Interstice |
 | **Science** | `science.html` | Science Compendium — real physics behind the fictional technology |
 | **Timeline** | `timeline.html` | Interactive chronology from Deep Antiquity to the Apathy War |

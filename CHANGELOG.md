@@ -19,6 +19,14 @@ All notable changes to the Ascent Universe companion website.
   - Full SIM autoplay mode for observing AI fleet behaviour
   - Added to nav, simulations hub, home page card grid, and README
 
+### Playtest Fixes (both games)
+- **Clicks always fire**: weapon-mode clicks snap to the nearest living contact instead of requiring a pixel-perfect hit (the old 18–30 px gate silently cancelled the volley)
+- **Railguns close to range**: designating a railgun target beyond the 6,000 km envelope now makes battlegroups burn to the firing envelope instead of sitting idle
+- **Visible interceptions**: beam and explosion FX now decay in real time, not sim time — laser point-defence interceptions are visible at 16×/64× compression instead of flashing for milliseconds
+- **Canon hard numbers**: A-sphere corrected to 90 G ("the insane ninety-gee acceleration"); D-sphere spec sheet aligned to the MSD (4 Gt dry / 8 Gt wet, 220× 600 GW X-ray lasers, 8× 2,200 GW gamma cannons, 0.99c frameshift at 1.06 s cycle, crew 3); fleet framed as twenty wings of the canon first hundred A-spheres
+- **War of All Wars map recentred**: 10,000 × 7,000 Mm battlespace with the interstice at the centre; D-spheres screen the threat axis, A-sphere wings picket forward; FIT now frames the action, not the empty world
+- **HUD fix**: fleet strip moved off the top control row (it collided with the time controls at 1280 px)
+
 ### Visual Improvements (threshold-game.html)
 - Torpedo launch reticle FX: expanding ring + dashed vector line to target + diamond reticle + count badge
 - Enhanced velocity vectors: thicker when accelerating, 60s tick marks, red during charge

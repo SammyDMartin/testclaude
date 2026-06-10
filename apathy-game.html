@@ -33,7 +33,7 @@ body { overflow: hidden; }
 #clock { font-size: 11px; color: var(--accent); letter-spacing: 2px; min-width: 88px; }
 #scn-tag { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); border: 1px solid var(--border); padding: 4px 8px; border-radius: 2px; }
 
-#fleet-strip { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 6; }
+#fleet-strip { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 6; }
 .fs-cell {
   width: 24px; height: 24px; border: 1px solid var(--border); border-radius: 2px;
   font-size: 7px; display: flex; align-items: center; justify-content: center;
@@ -45,7 +45,7 @@ body { overflow: hidden; }
 .fs-cell.dsphere { border-color: rgba(180,120,255,0.5); color: #b078ff; width: 30px; }
 .fs-cell.dsphere .bar { background: #b078ff; }
 
-#enemy-strip { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 6; }
+#enemy-strip { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 6; }
 .es-cell { font-size: 8px; letter-spacing: 1px; color: #ff4040; border: 1px solid rgba(255,60,60,0.35); padding: 3px 8px; border-radius: 2px; background: rgba(30,0,0,0.7); cursor: pointer; }
 .es-cell .bar { display: block; height: 2px; background: #ff4040; margin-top: 2px; }
 .es-cell.intel { border-color: #ff5040; }
@@ -149,8 +149,8 @@ body { overflow: hidden; }
   #event-log { width: 210px; top: 100px; }
   #intel { width: 210px; }
   #hud-bottom { right: 224px; }
-  #fleet-strip { top: 40px; }
-  #enemy-strip { top: 72px; }
+  #fleet-strip { top: 64px; }
+  #enemy-strip { top: 96px; }
 }
 </style>
 </head>
@@ -201,8 +201,8 @@ body { overflow: hidden; }
       <p class="quote">You are almost certainly not real.<br>&mdash; The Apathy</p>
       <p>An <b>Earth-mass agglomeration</b> is decelerating at <b>40,000 G</b> toward Heppolon.
       Six billion people behind you. The interstice is your only evacuation route.
-      You command the <b>Battle Constellation</b>: three Defence Spheres, eight hundred
-      A-spheres, and whatever time you can buy.</p>
+      You command the leading edge of the <b>Battle Constellation</b>: three Defence Spheres
+      and twenty wings of the first hundred A-spheres &mdash; and whatever time you can buy.</p>
       <p>The Apathy does not negotiate. It does not explain. It consumes all mass
       it reaches and converts it to more of itself. Every minute you hold is a
       million more through the interstice.</p>
@@ -211,8 +211,8 @@ body { overflow: hidden; }
       <div class="scn-grid" id="scn-grid"></div>
       <div class="ov-rule"></div>
       <table class="spec-tbl">
-        <tr><td>A-SPHERE</td><td>Attack craft &middot; 90-130 G &middot; Frameshift to 0.99c (1M km range) &middot; Monopole PDC &middot; Graver cannon &middot; Slasher torpedoes &middot; Conversion bombs</td></tr>
-        <tr><td>D-SPHERE</td><td>3,200 m &middot; 4 Gt &middot; GUT reactor &middot; 10 m hyperdiamond hull &middot; Frameshift &middot; 220&times; X-ray laser &middot; 8&times; Gamma cannon &middot; Slasher &amp; Destructor torpedoes &middot; 35&times; Masscannon</td></tr>
+        <tr><td>A-SPHERE</td><td>Attack craft &middot; 90 G &middot; Frameshift to 0.99c (1M km range) &middot; Monopole PDC &middot; Graver cannon &middot; Slasher torpedoes &middot; Conversion bombs &middot; Crew: 1</td></tr>
+        <tr><td>D-SPHERE</td><td>3,200 m &middot; 4 Gt dry / 8 Gt wet &middot; GUT vacuum-energy sink &middot; 10 m hyperdiamond hull &middot; Frameshift 0.99c (1.06 s cycle) &middot; 220&times; 600 GW X-ray laser &middot; 8&times; 2,200 GW Gamma cannon &middot; Slasher &amp; Destructor torpedoes &middot; 35&times; Masscannon &middot; Crew: 3</td></tr>
         <tr><td>APATHY</td><td>Earth-mass &middot; 40,000 G decel &middot; Graver spikes &middot; Stellar-grade lasers &middot; Anti-mind affects &middot; Matter projection &middot; Replicates from consumed mass</td></tr>
       </table>
       <div class="ov-rule"></div>
@@ -288,9 +288,9 @@ const G = 0.00981;
 const H = 0.5;
 const C = 299792;   // speed of light, km/s
 const Mm = 1000;    // 1 megametre = 1000 km; world coords in Mm
-const WORLD = { w: 6000, h: 4000 };  // 6M x 4M km battlespace
-const INTERSTICE = { x: 300, y: 2000 };
-const PLANET = { x: 1200, y: 2000 };
+const WORLD = { w: 10000, h: 7000 };  // 10M x 7M km battlespace (~33 light-seconds wide)
+const INTERSTICE = { x: 5000, y: 3500 };   // the evacuation route is the heart of the map
+const PLANET = { x: 3600, y: 3500 };       // Heppolon, behind the interstice from the threat axis
 
 const cam = { x: WORLD.w/2, y: WORLD.h/2, z: 0.15 };
 
@@ -329,7 +329,7 @@ let dragStart = null, dragNow = null, panning = false, panLast = null;
 const CLS = {
   asphere: {
     label: 'A-SPHERE ATTACK CRAFT',
-    acc: 100*G, accBurst: 130*G, vmax: 800,
+    acc: 90*G, accBurst: 90*G, vmax: 800,   // canon: "the insane ninety-gee acceleration the A-sphere could manage"
     hull: 40, armor: 10,
     frameshiftRange: 1000, frameshiftCd: 8,
     pdcRange: 80, pdcDmg: 2, pdcCycle: 2,
@@ -434,26 +434,26 @@ function initGame(){
   game.t = 0; game.morale = 100; game.trapActive = false; game.trapT = 0;
   game.evacPop = 0; game.evacRate = 0; game.over = false; game.endTimer = -1;
 
-  // D-spheres in defensive formation near the interstice
+  // D-spheres screen the interstice on the threat axis
   for (let i = 0; i < 3; i++){
     const u = makeUnit('dsphere', DSPHERE_NAMES[i],
-      INTERSTICE.x + 200 + i*100, INTERSTICE.y - 150 + i*150);
+      INTERSTICE.x + 700, INTERSTICE.y - 500 + i*500);
     u.id = nextId++;
     units.push(u);
   }
-  // A-sphere wings spread across the battlespace
+  // A-sphere wings picket forward of the constellation, toward the approach vector
   for (let i = 0; i < 20; i++){
     const ang = (i / 20) * Math.PI * 2;
-    const r = 400 + rnd()*300;
+    const r = 500 + rnd()*350;
     const u = makeUnit('asphere', ASPHERE_NAMES[i],
-      WORLD.w/2 + Math.cos(ang)*r, WORLD.h/2 + Math.sin(ang)*r);
+      INTERSTICE.x + 2200 + Math.cos(ang)*r, INTERSTICE.y + Math.sin(ang)*r);
     u.id = nextId++;
     units.push(u);
   }
 
   // Apathy: arrives from the right edge
   const apathyHp = Math.min(scn.mass / 100, 10000);
-  const ap = makeApathy(WORLD.w - 200, WORLD.h/2, apathyHp);
+  const ap = makeApathy(WORLD.w - 300, WORLD.h/2, apathyHp);
   ap.vx = -scn.speed * C / Mm * 0.001; // very slow in world coords, decelerating
   enemies.push(ap);
 
@@ -781,8 +781,7 @@ function updateProjectiles(dt){
     }
   }
 
-  for (const b of beams) b.life -= dt;
-  for (const f of fx) f.t += dt;
+  /* beams & fx decay in REAL time (in loop) so they stay visible at high compression */
 }
 
 /* ── autoplay AI ─────────────────────────────────────────────────── */
@@ -930,6 +929,15 @@ function enemyAt(wp){
   for (const e of enemies){ if (e.dead) continue; if (Math.hypot(e.x-wp.x, e.y-wp.y)*cam.z < 30) return e; }
   return null;
 }
+function nearestEnemy(wp){
+  let best = null, bd = Infinity;
+  for (const e of enemies){
+    if (e.dead) continue;
+    const d = Math.hypot(e.x-wp.x, e.y-wp.y)*cam.z;
+    if (d < bd){ bd = d; best = e; }
+  }
+  return best;
+}
 function unitAt(wp){
   for (const u of units){ if (u.dead) continue; if (Math.hypot(u.x-wp.x, u.y-wp.y)*cam.z < 14) return u; }
   return null;
@@ -949,21 +957,28 @@ function handlePrimary(px, py, additive){
       for (const u of sel) doOverload(u);
       setMode(null); return;
     }
-    const e = enemyAt(wp);
+    /* weapon mode: snap to the nearest living enemy — a click always acts */
+    const e = nearestEnemy(wp);
     if (e){
       if (mode === 'slasher'){
-        for (const u of sel) if (u.slashers > 0) fireSlasher(u, e);
+        let n = 0;
+        for (const u of sel) if (u.slashers > 0){ fireSlasher(u, e); n++; }
+        if (n) log(n + ' Slasher torpedoes away.', 'good'); else log('Slasher tubes empty.', 'warn');
       } else if (mode === 'conversion'){
-        for (const u of sel) if (u.conversions > 0) fireConversion(u, e);
+        let n = 0;
+        for (const u of sel) if (u.conversions > 0){ fireConversion(u, e); n++; }
+        if (n) log(n + ' conversion bombs deployed — arming.', 'good'); else log('Conversion magazines empty.', 'warn');
       } else if (mode === 'gamma'){
-        for (const u of sel.filter(u => u.cls === 'dsphere')){
+        const ds = sel.filter(u => u.cls === 'dsphere');
+        for (const u of ds){
           beams.push({ x1:u.x, y1:u.y, x2:e.x, y2:e.y, life:0.6, color:'rgba(140,255,160,0.95)', w:4 });
           hitApathy(e, CLS.dsphere.gammaDmg * 2);
           stats.gammaFired++;
         }
+        if (!ds.length) log('Gamma cannons require a Defence Sphere in the selection.', 'warn');
       }
       setMode(null);
-    } else setMode(null);
+    } else { log('No enemy contacts remain.', 'warn'); setMode(null); }
     return;
   }
   const e = enemyAt(wp);
@@ -1061,8 +1076,18 @@ document.getElementById('btn-speed').addEventListener('click', () => {
 
 /* ── camera ──────────────────────────────────────────────────────── */
 function fitCamera(){
-  cam.x = WORLD.w/2; cam.y = WORLD.h/2;
-  cam.z = Math.min(vw/WORLD.w, vh/WORLD.h) * 0.96;
+  /* frame the action — fleet, enemies, interstice and planet — not the empty world */
+  let x0 = INTERSTICE.x, x1 = INTERSTICE.x, y0 = INTERSTICE.y, y1 = INTERSTICE.y;
+  const grow = p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); };
+  grow(PLANET);
+  for (const u of units) if (!u.dead) grow(u);
+  for (const e of enemies) if (!e.dead) grow(e);
+  const pad = 400;
+  x0 -= pad; x1 += pad; y0 -= pad; y1 += pad;
+  cam.x = (x0+x1)/2; cam.y = (y0+y1)/2;
+  cam.z = Math.min(vw/(x1-x0), vh/(y1-y0));
+  const fitW = Math.min(vw/WORLD.w, vh/WORLD.h);
+  cam.z = clamp(cam.z, fitW, fitW*40);
 }
 function resize(){
   const root = document.getElementById('game-root');
@@ -1176,8 +1201,8 @@ function draw(){
   // Grid (500 Mm = 500,000 km)
   ctx.strokeStyle = 'rgba(0,229,255,0.04)';
   ctx.lineWidth = 1/cam.z;
-  for (let gx = 0; gx <= WORLD.w; gx += 500){ ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, WORLD.h); ctx.stroke(); }
-  for (let gy = 0; gy <= WORLD.h; gy += 500){ ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(WORLD.w, gy); ctx.stroke(); }
+  for (let gx = 0; gx <= WORLD.w; gx += 1000){ ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, WORLD.h); ctx.stroke(); }
+  for (let gy = 0; gy <= WORLD.h; gy += 1000){ ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(WORLD.w, gy); ctx.stroke(); }
   ctx.strokeStyle = 'rgba(0,229,255,0.15)'; ctx.strokeRect(0, 0, WORLD.w, WORLD.h);
 
   // Interstice
@@ -1370,8 +1395,6 @@ function update(dt){
   updateAutoplay(dt);
 
   for (let i=projectiles.length-1;i>=0;i--) if (projectiles[i].dead) projectiles.splice(i,1);
-  for (let i=beams.length-1;i>=0;i--) if (beams[i].life <= 0) beams.splice(i,1);
-  for (let i=fx.length-1;i>=0;i--) if (fx[i].t >= fx[i].dur) fx.splice(i,1);
 
   checkEnd(dt);
   document.getElementById('clock').textContent = 'T+' + logTime();
@@ -1388,6 +1411,12 @@ function loop(now){
     while (simAcc >= H && n < 300){ update(H); simAcc -= H; n++; }
     if (n >= 300) simAcc = 0;
   }
+  /* fx decay in real time so beams and blasts read at any compression */
+  for (const b of beams) b.life -= fdt;
+  for (const f of fx) f.t += fdt;
+  for (let i=beams.length-1;i>=0;i--) if (beams[i].life <= 0) beams.splice(i,1);
+  for (let i=fx.length-1;i>=0;i--) if (fx[i].t >= fx[i].dur) fx.splice(i,1);
+  if (beams.length > 120) beams.splice(0, beams.length - 120);
   draw();
 }
 

@@ -4,6 +4,31 @@ All notable changes to the Ascent Universe companion website.
 
 ---
 
+## Session 13c (2026-06-10) — War of All Wars RTS & First Fleet Visual Polish
+
+### New Game
+- **War of All Wars** (`apathy-game.html`) — Playable RTS at relativistic scale: command 20 A-spheres and 3 D-spheres against the Apathy, an Earth-mass alien entity decelerating at 40,000 G.
+  - 6,000 × 4,000 Mm battlespace (light-minute scale), 0.5s fixed timestep, time compression to 64×
+  - A-spheres: 100G accel, frameshift drives (1000 Mm range), 12 Slasher torpedoes, 2 conversion bombs
+  - D-spheres: 2G accel (5G burst), 800 HP + 100 armour, 220 X-ray lasers, 8 gamma cannons, 60 Slashers, 30 conversion bombs
+  - Apathy: graver spikes (probabilistic), stellar-grade lasers, shearing gravity waves (AoE), anti-mind morale drain, anthropic trap
+  - Morale system: anti-mind affects degrade fire rate; anthropic trap triggers dramatic "YOU ARE ALMOST CERTAINLY NOT REAL" overlay
+  - Evacuation counter: 800k people/second through the interstice — hold long enough to save billions
+  - Four scenarios: Scout (1000t), Standard/Heppolon (5.97e9t), Onslaught (5.97e11t), Extinction (5.97e13t)
+  - Player abilities: Slashers [T], Gamma Cannons [G], Conversion Bombs [C], Frameshift [V], Reactor Overload [X]
+  - Full SIM autoplay mode for observing AI fleet behaviour
+  - Added to nav, simulations hub, home page card grid, and README
+
+### Visual Improvements (threshold-game.html)
+- Torpedo launch reticle FX: expanding ring + dashed vector line to target + diamond reticle + count badge
+- Enhanced velocity vectors: thicker when accelerating, 60s tick marks, red during charge
+- Torpedo projection lines (30s ahead while fuel remains)
+- Selected ship waypoint/target visualisation
+- SIM autoplay mode with Union fleet AI tactics
+- Starting cordon increased from 17,000 → 25,000 km
+
+---
+
 ## Session 13b (2026-06-10) — First Fleet v2: Real-Scale Physics & Commander AI
 
 Major rework of `threshold-game.html` based on playtest feedback:

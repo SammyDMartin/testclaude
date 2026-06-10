@@ -18,7 +18,7 @@ body { overflow: hidden; }
 /* ── HUD ─────────────────────────────────────────────────────────── */
 .hbtn {
   background: rgba(0,20,30,0.85); border: 1px solid var(--border); color: var(--text-dim);
-  font-family: var(--mono); font-size: 9px; letter-spacing: 2px; padding: 5px 10px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px; padding: 6px 12px;
   cursor: pointer; border-radius: 2px; transition: all 0.15s; white-space: nowrap;
 }
 .hbtn:hover { border-color: var(--accent); color: var(--accent); }
@@ -27,13 +27,13 @@ body { overflow: hidden; }
 .hbtn.danger:hover, .hbtn.danger.armed { border-color: #ff5040; color: #ff5040; background: rgba(255,60,40,0.1); }
 .hbtn:disabled { opacity: 0.35; cursor: default; }
 
-#hud-top { position: absolute; top: 8px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 6; flex-wrap: wrap; }
+#hud-top { position: absolute; top: 8px; left: 10px; display: flex; gap: 8px; align-items: center; z-index: 6; flex-wrap: wrap; }
 #clock { font-size: 11px; color: var(--accent); letter-spacing: 2px; min-width: 88px; }
 #scn-tag { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); border: 1px solid var(--border); padding: 4px 8px; border-radius: 2px; }
 
-#fleet-strip { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px; z-index: 6; }
+#fleet-strip { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 6; }
 .fs-cell {
-  width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 2px;
+  width: 24px; height: 24px; border: 1px solid var(--border); border-radius: 2px;
   font-size: 9px; display: flex; align-items: center; justify-content: center;
   color: var(--text-dim); background: rgba(0,15,22,0.8); cursor: pointer; position: relative;
 }
@@ -41,18 +41,18 @@ body { overflow: hidden; }
 .fs-cell.sel { border-color: #fff; color: #fff; }
 .fs-cell.lost { opacity: 0.3; text-decoration: line-through; }
 
-#arco-strip { position: absolute; top: 36px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 6; }
-.as-cell { font-size: 8px; letter-spacing: 1px; color: #ff7a5e; border: 1px solid rgba(255,107,53,0.35); padding: 2px 6px; border-radius: 2px; background: rgba(30,5,0,0.7); cursor: pointer; }
+#arco-strip { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 6; }
+.as-cell { font-size: 8px; letter-spacing: 1px; color: #ff7a5e; border: 1px solid rgba(255,107,53,0.35); padding: 3px 8px; border-radius: 2px; background: rgba(30,5,0,0.7); cursor: pointer; }
 .as-cell .bar { display: block; height: 2px; background: var(--accent2); margin-top: 2px; }
 .as-cell.lost { opacity: 0.3; text-decoration: line-through; }
 .as-cell.intel { border-color: #ff5040; }
 
 #event-log {
-  position: absolute; right: 10px; top: 64px; width: 330px; max-height: 38%;
-  z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 3px;
+  position: absolute; right: 12px; top: 72px; width: 320px; max-height: 36%;
+  z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 4px;
   overflow: hidden;
 }
-.ev { font-size: 9px; line-height: 1.5; letter-spacing: 0.5px; padding: 3px 8px; border-left: 2px solid var(--border);
+.ev { font-size: 9px; line-height: 1.6; letter-spacing: 0.5px; padding: 4px 10px; border-left: 2px solid var(--border);
       background: rgba(0,10,16,0.75); color: var(--text-dim); animation: evIn 0.3s ease; }
 .ev .ts { color: rgba(120,160,170,0.5); margin-right: 6px; }
 .ev.warn { border-left-color: #ff5040; color: #ff8a70; }
@@ -61,44 +61,44 @@ body { overflow: hidden; }
 @keyframes evIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 
 #intel {
-  position: absolute; right: 10px; bottom: 10px; width: 330px; z-index: 6;
+  position: absolute; right: 12px; bottom: 12px; width: 320px; z-index: 6;
   background: rgba(8,2,0,0.92); border: 1px solid rgba(255,107,53,0.4); border-radius: 2px;
-  padding: 8px 10px; font-size: 9px; line-height: 1.6; color: #d8a890; display: none;
+  padding: 10px 12px; font-size: 9px; line-height: 1.7; color: #d8a890; display: none;
 }
-#intel .ttl { color: var(--accent2); font-size: 10px; letter-spacing: 2px; margin-bottom: 4px; }
-#intel .row { display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(255,107,53,0.15); }
+#intel .ttl { color: var(--accent2); font-size: 10px; letter-spacing: 2px; margin-bottom: 6px; }
+#intel .row { display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(255,107,53,0.15); padding: 1px 0; }
 #intel .row span:first-child { color: rgba(255,150,110,0.55); }
 #intel .state { color: #ffce9e; }
 
 #hud-bottom {
-  position: absolute; left: 10px; bottom: 10px; right: 350px; z-index: 6;
-  display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
+  position: absolute; left: 10px; bottom: 12px; right: 344px; z-index: 6;
+  display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
 }
-#sel-panel { display: flex; gap: 5px; flex-wrap: wrap; max-width: 62%; }
+#sel-panel { display: flex; gap: 6px; flex-wrap: wrap; max-width: 62%; }
 .sel-card {
   background: rgba(0,18,26,0.88); border: 1px solid var(--border); border-radius: 2px;
-  padding: 4px 8px; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); min-width: 130px;
+  padding: 5px 10px; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); min-width: 130px;
 }
 .sel-card .nm { color: var(--accent); font-size: 9px; margin-bottom: 2px; }
 .sel-card .hpb { height: 3px; background: rgba(255,255,255,0.08); margin: 3px 0; }
 .sel-card .hpb i { display: block; height: 100%; background: var(--accent); }
 .sel-card.cold .nm { color: #6a7e88; }
-#ability-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+#ability-bar { display: flex; gap: 8px; flex-wrap: wrap; }
 
 #mode-banner {
-  position: absolute; top: 64px; left: 50%; transform: translateX(-50%); z-index: 7;
+  position: absolute; top: 72px; left: 50%; transform: translateX(-50%); z-index: 7;
   font-size: 10px; letter-spacing: 3px; color: var(--accent); padding: 6px 16px;
   border: 1px solid var(--accent); background: rgba(0,20,30,0.9); display: none;
 }
 #mode-banner.danger { color: #ff5040; border-color: #ff5040; }
 
 #analyse-btn {
-  position: absolute; top: 110px; left: 50%; transform: translateX(-50%); z-index: 7;
+  position: absolute; top: 118px; left: 50%; transform: translateX(-50%); z-index: 7;
   display: none; animation: pulseBtn 1s ease-in-out infinite;
 }
 @keyframes pulseBtn { 0%,100% { box-shadow: 0 0 0 rgba(0,229,255,0); } 50% { box-shadow: 0 0 14px rgba(0,229,255,0.5); } }
 
-#scalebar { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 5;
+#scalebar { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 5;
   font-size: 8px; letter-spacing: 2px; color: rgba(120,180,200,0.6); text-align: center; pointer-events: none; }
 #scalebar .seg { display: block; height: 3px; border: 1px solid rgba(120,180,200,0.5); border-top: none; margin-bottom: 2px; }
 
@@ -140,12 +140,12 @@ body { overflow: hidden; }
 .spec-tbl td:first-child { color: var(--accent); white-space: nowrap; }
 
 @media (max-width: 900px) {
-  #event-log { width: 210px; top: 96px; }
+  #event-log { width: 210px; top: 100px; }
   #intel { width: 210px; }
-  #hud-bottom { right: 230px; }
-  #fleet-strip { top: 38px; }
-  #arco-strip { top: 66px; }
-  #analyse-btn { top: 140px; }
+  #hud-bottom { right: 224px; }
+  #fleet-strip { top: 40px; }
+  #arco-strip { top: 72px; }
+  #analyse-btn { top: 148px; }
 }
 </style>
 </head>
@@ -160,6 +160,7 @@ body { overflow: hidden; }
     <button class="hbtn" id="btn-fit">FIT [F]</button>
     <button class="hbtn" id="btn-rings">RINGS [O]</button>
     <button class="hbtn" id="btn-help">?</button>
+    <button class="hbtn" id="btn-sim" title="Autoplay: AI controls both sides">SIM</button>
     <span id="scn-tag"></span>
   </div>
 
@@ -190,7 +191,7 @@ body { overflow: hidden; }
       <p>The hijacked freighter <b>Atbarah</b> has rammed through the interstice. Two hundred thousand are dead
       on the far side, Striver malware is buried in the fleet network, and Arco warships are coming through
       the wormhole mouth. You command Union&rsquo;s <b>First Fleet</b>: ten destroyer battlegroups, each
-      screened by nine unmanned corvettes, holding a cordon 17,000 km out from the interstice.</p>
+      screened by nine unmanned corvettes, holding a cordon 25,000 km out from the interstice.</p>
       <div class="ov-rule"></div>
       <div class="sub" style="margin-bottom:8px">SELECT OPPOSING FORCE</div>
       <div class="scn-grid" id="scn-grid"></div>
@@ -297,7 +298,8 @@ const game = {
   running: false, paused: false, over: false,
   t: 0, timeScale: 4, weaponsFree: false, submm: false,
   dustHits: 0, analyse: 0, analyseT: 0,
-  withdrawing: false, endTimer: -1, rings: true
+  withdrawing: false, endTimer: -1, rings: true,
+  autoplay: false, autoT: 0
 };
 const stats = { destroyersLost: 0, corvLost: 0, incisors: 0, annihilators: 0,
                 torpsFired: 0, salvosFired: 0, dustFired: 0, strikes: 0,
@@ -394,8 +396,8 @@ function lead(sx, sy, t, ps, maxT){
 /* ── setup ───────────────────────────────────────────────────────── */
 function makeGroup(i){
   const ang = (-52 + 104*i/9) * Math.PI/180;
-  const x = INTERSTICE.x - Math.cos(ang)*17000;
-  const y = INTERSTICE.y + Math.sin(ang)*17000;
+  const x = INTERSTICE.x - Math.cos(ang)*25000;
+  const y = INTERSTICE.y + Math.sin(ang)*25000;
   const c = CLS.destroyer;
   return {
     kind:'union', id:i+1, name:'USV '+GNAMES[i], x, y, vx:0, vy:0, curAcc:0,
@@ -543,6 +545,7 @@ function fireVolley(g, target, n, uncommanded){
     });
   }
   g.flash = 0.15;
+  fx.push({ type:'launch', x:g.x, y:g.y, tx:target.x, ty:target.y, t:0, dur:2.5, maxR:500, color:'rgba(0,229,255,0.7)', n });
 }
 function fireSalvo(g, target){
   const L = lead(g.x, g.y, target, CLS.salvo.muzzle);
@@ -1145,6 +1148,56 @@ function finishAnalyse(){
   log('Radar switched to submillimetre band. Incoming dust streams now visible at 2,000 kps. Evasion solutions loaded.', 'good');
 }
 
+/* ── autoplay AI (sim mode) ──────────────────────────────────────── */
+function updateAutoplay(dt){
+  if (!game.autoplay || !game.weaponsFree) return;
+  game.autoT -= dt;
+  if (game.autoT > 0) return;
+  game.autoT = 3 + rnd()*5;
+
+  if (game.analyse === 1){ startAnalyse(); }
+
+  const alive = arco.filter(a => !a.dead && !a.escaped);
+  if (!alive.length) return;
+
+  for (const g of groups){
+    if (g.dead || g.derelict || g.charging) continue;
+    const nearest = alive.reduce((best, a) => {
+      const d = dist(g, a);
+      return (!best || d < best.d) ? {a, d} : best;
+    }, null);
+    if (!nearest) continue;
+    const a = nearest.a, d = nearest.d;
+
+    /* railgun targeting: pick nearest or strike-running target */
+    const striker = alive.find(s => s.strikeRole && cmdr.strike);
+    g.railTarget = striker || a;
+
+    /* torpedo volleys at inbound targets inside 8000 km */
+    if (d < 8000 && g.torps > 0 && (a.strikeRole || d < 4000)){
+      fireVolley(g, a, Math.min(6, g.torps), false);
+    }
+
+    /* play dead if nothing close, wake up if enemy nearby */
+    if (d > 20000 && !g.playingDead && g.torps > 12 && rnd() < 0.1){
+      g.playingDead = true; g.dest = null; g.attackTarget = null; g.railTarget = null;
+    }
+    if (g.playingDead && d < 4000){
+      g.playingDead = false;
+      if (g.torps > 0) fireVolley(g, a, Math.min(g.torps, 6), false);
+    }
+
+    /* 30G charge: last resort when low on torps and enemy is close */
+    if (!g.playingDead && g.torps <= 2 && d < 6000 && g.hp < 50){
+      orderCharge(g, a);
+    }
+    /* Isidore gambit: cold hull close range */
+    if (g.playingDead && d < 3000 && g.torps <= 6){
+      orderCharge(g, a);
+    }
+  }
+}
+
 /* ── end conditions ──────────────────────────────────────────────── */
 function activeUnion(){ return groups.filter(g => !g.dead && !g.derelict).length; }
 function checkEnd(dt){
@@ -1221,10 +1274,10 @@ function setMode(m){
   const b = document.getElementById('mode-banner');
   if (m === 'volley'){
     b.style.display = 'block'; b.className = '';
-    b.textContent = 'DESIGNATE TORPEDO VOLLEY TARGET — EFFECTIVE INSIDE ~4,000 KM — ESC TO CANCEL';
+    b.textContent = 'DESIGNATE TORPEDO VOLLEY TARGET — CLICK AN ENEMY CONTACT — ESC TO CANCEL';
   } else if (m === 'rail'){
     b.style.display = 'block'; b.className = '';
-    b.textContent = 'DESIGNATE RAILGUN TARGET — SUPPRESSION FIRE, MAX 6,000 KM — ESC TO CANCEL';
+    b.textContent = 'DESIGNATE RAILGUN TARGET — CLICK AN ENEMY CONTACT — ESC TO CANCEL';
   } else if (m === 'charge'){
     b.style.display = 'block'; b.className = 'danger';
     b.textContent = 'DESIGNATE 30G CHARGE TARGET — THE CREW WILL NOT SURVIVE — ESC TO CANCEL';
@@ -1265,7 +1318,7 @@ function handlePrimary(px, py, additive){
     if (a){
       const sel = selectedGroups();
       if (!sel.length){ log('No battlegroups selected.'); setMode(null); return; }
-      if (!game.weaponsFree){ log('WEAPONS HOLD — Admiral’s orders. Projectile fire may be read as hostile action.', 'warn'); setMode(null); return; }
+      if (!game.weaponsFree){ log('Firing before weapons free — Admiral has not authorised engagement.', 'warn'); game.weaponsFree = true; }
       if (mode === 'volley'){
         let fired = 0;
         for (const g of sel){ if (g.torps > 0){ fireVolley(g, a, 6, false); fired++; } }
@@ -1681,11 +1734,21 @@ function draw(){
   for (const t of torps){
     if (t.dead) continue;
     const m = Math.hypot(t.vx, t.vy) || 1;
-    ctx.strokeStyle = 'rgba(0,229,255,0.5)';
+    /* engine trail */
+    ctx.strokeStyle = t.fuel > 0 ? 'rgba(0,229,255,0.5)' : 'rgba(0,229,255,0.2)';
     ctx.lineWidth = 1.4/cam.z;
     const tr = Math.min(900, m*12);
     ctx.beginPath(); ctx.moveTo(t.x - t.vx/m*tr, t.y - t.vy/m*tr); ctx.lineTo(t.x, t.y); ctx.stroke();
-    icon(t.x, t.y, () => { ctx.fillStyle = '#bff4ff'; ctx.fillRect(-1.5, -1.5, 3, 3); });
+    /* velocity projection: where the torpedo will be in 30s */
+    if (t.fuel > 0 && t.target && !t.target.dead){
+      ctx.strokeStyle = 'rgba(0,229,255,0.12)';
+      ctx.lineWidth = 0.8/cam.z;
+      ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(t.x + t.vx*30, t.y + t.vy*30); ctx.stroke();
+    }
+    icon(t.x, t.y, () => {
+      ctx.fillStyle = t.fuel > 0 ? '#bff4ff' : '#5a8a90';
+      ctx.fillRect(-1.5, -1.5, 3, 3);
+    });
   }
   /* railgun salvos */
   for (const r of salvos){
@@ -1713,9 +1776,16 @@ function draw(){
     /* velocity projection: position in +120 s */
     const v = Math.hypot(g.vx, g.vy);
     if (v > 0.3 && !g.dead){
-      ctx.strokeStyle = cold ? 'rgba(110,140,150,0.25)' : 'rgba(0,229,255,0.25)';
-      ctx.lineWidth = 1/cam.z;
+      ctx.strokeStyle = cold ? 'rgba(110,140,150,0.25)' : g.charging ? 'rgba(255,120,60,0.35)' : 'rgba(0,229,255,0.25)';
+      ctx.lineWidth = (g.curAcc > 0.01 ? 1.5 : 1)/cam.z;
       ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.x + g.vx*120, g.y + g.vy*120); ctx.stroke();
+      /* tick mark at 60s for scale */
+      if (v > 2){
+        icon(g.x + g.vx*60, g.y + g.vy*60, () => {
+          ctx.fillStyle = cold ? 'rgba(110,140,150,0.3)' : 'rgba(0,229,255,0.3)';
+          ctx.fillRect(-2, -2, 4, 4);
+        });
+      }
     }
     icon(g.x, g.y, () => {
       /* corvette screen dots (symbolic) */
@@ -1756,12 +1826,38 @@ function draw(){
         }
       }
     });
-    if (selected.has(g.id) && g.dest){
-      ctx.strokeStyle = 'rgba(0,229,255,0.3)';
-      ctx.setLineDash([800, 800]);
-      ctx.lineWidth = 1/cam.z;
-      ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.dest.x, g.dest.y); ctx.stroke();
-      ctx.setLineDash([]);
+    if (selected.has(g.id)){
+      /* movement/attack vector lines */
+      let tx = null, ty = null, col = 'rgba(0,229,255,0.3)';
+      if (g.charging && g.chargeTarget && !g.chargeTarget.dead){
+        tx = g.chargeTarget.x; ty = g.chargeTarget.y; col = 'rgba(255,80,60,0.5)';
+      } else if (g.attackTarget && !g.attackTarget.dead && !g.attackTarget.escaped){
+        tx = g.attackTarget.x; ty = g.attackTarget.y; col = 'rgba(255,150,80,0.35)';
+      } else if (g.dest){
+        tx = g.dest.x; ty = g.dest.y;
+      }
+      if (tx !== null){
+        ctx.strokeStyle = col;
+        ctx.setLineDash([800, 800]);
+        ctx.lineWidth = 1/cam.z;
+        ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(tx, ty); ctx.stroke();
+        ctx.setLineDash([]);
+        /* waypoint marker */
+        icon(tx, ty, () => {
+          ctx.strokeStyle = col; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(-4,0); ctx.lineTo(4,0); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0,-4); ctx.lineTo(0,4); ctx.stroke();
+        });
+      }
+      /* railgun target indicator */
+      if (g.railTarget && !g.railTarget.dead && !g.railTarget.escaped){
+        ctx.strokeStyle = 'rgba(230,245,255,0.2)';
+        ctx.setLineDash([400, 600]);
+        ctx.lineWidth = 0.8/cam.z;
+        ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.railTarget.x, g.railTarget.y); ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
   }
 
@@ -1770,9 +1866,15 @@ function draw(){
     if (a.dead || a.escaped) continue;
     const v = Math.hypot(a.vx, a.vy);
     if (v > 0.3){
-      ctx.strokeStyle = 'rgba(255,107,53,0.25)';
-      ctx.lineWidth = 1/cam.z;
+      ctx.strokeStyle = a.strikeRole ? 'rgba(255,80,50,0.35)' : 'rgba(255,107,53,0.25)';
+      ctx.lineWidth = (a.curAcc > 0.01 ? 1.5 : 1)/cam.z;
       ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(a.x + a.vx*120, a.y + a.vy*120); ctx.stroke();
+      if (v > 2){
+        icon(a.x + a.vx*60, a.y + a.vy*60, () => {
+          ctx.fillStyle = 'rgba(255,107,53,0.3)';
+          ctx.fillRect(-2, -2, 4, 4);
+        });
+      }
     }
     icon(a.x, a.y, () => {
       ctx.rotate(a.angle);
@@ -1822,6 +1924,38 @@ function draw(){
   for (const f of fx){
     const p = f.t/f.dur;
     if (p >= 1) continue;
+    if (f.type === 'launch'){
+      /* torpedo launch reticle: expanding ring + vector line to target */
+      ctx.globalAlpha = (1-p)*(1-p);
+      ctx.strokeStyle = f.color;
+      ctx.lineWidth = 1.5/cam.z;
+      const r = f.maxR * (0.3 + p*0.7);
+      ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, Math.PI*2); ctx.stroke();
+      /* targeting vector to target's position at launch */
+      if (p < 0.6){
+        ctx.globalAlpha = (1-p/0.6)*0.5;
+        ctx.setLineDash([600, 400]);
+        ctx.beginPath(); ctx.moveTo(f.x, f.y); ctx.lineTo(f.tx, f.ty); ctx.stroke();
+        ctx.setLineDash([]);
+        /* reticle diamond at target */
+        icon(f.tx, f.ty, () => {
+          ctx.strokeStyle = f.color; ctx.lineWidth = 1.2; ctx.globalAlpha = (1-p/0.6)*0.5;
+          ctx.beginPath();
+          ctx.moveTo(0, -10); ctx.lineTo(10, 0); ctx.lineTo(0, 10); ctx.lineTo(-10, 0); ctx.closePath();
+          ctx.stroke();
+        });
+      }
+      /* count badge */
+      if (p < 0.4){
+        icon(f.x, f.y, () => {
+          ctx.globalAlpha = 1-p/0.4;
+          ctx.fillStyle = '#bff4ff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+          ctx.fillText(f.n + ' TORPS', 0, -18);
+        });
+      }
+      ctx.globalAlpha = 1;
+      continue;
+    }
     ctx.globalAlpha = 1 - p;
     ctx.strokeStyle = f.color;
     ctx.lineWidth = (f.type === 'gamma' ? 3 : 2)/cam.z;
@@ -1867,6 +2001,7 @@ function update(dt){
     if (game.analyseT <= 0) finishAnalyse();
   }
   updateCommander(dt);
+  updateAutoplay(dt);
   for (const g of groups) updateGroup(g, dt);
   for (const a of arco) updateArco(a, dt);
   updateProjectiles(dt);
@@ -1915,6 +2050,12 @@ document.getElementById('btn-rail').addEventListener('click', () => setMode(mode
 document.getElementById('btn-charge').addEventListener('click', () => setMode(mode === 'charge' ? null : 'charge'));
 document.getElementById('btn-dead').addEventListener('click', togglePlayDead);
 document.getElementById('analyse-btn').addEventListener('click', startAnalyse);
+document.getElementById('btn-sim').addEventListener('click', () => {
+  game.autoplay = !game.autoplay;
+  document.getElementById('btn-sim').classList.toggle('armed', game.autoplay);
+  if (game.autoplay){ selectAll(); log('AUTOPLAY: AI assuming tactical control of all Union forces.', 'good'); }
+  else log('Autoplay disengaged. You have the conn.');
+});
 document.getElementById('btn-help').addEventListener('click', () => {
   document.getElementById('helpov').style.display = 'flex';
   game.paused = true;
@@ -1929,7 +2070,7 @@ document.getElementById('btn-start').addEventListener('click', () => {
   document.getElementById('briefing').style.display = 'none';
   game.running = true;
   document.getElementById('btn-rings').classList.add('armed');
-  log('First Fleet on station — ten battlegroups, ninety corvettes, a cordon 17,000 km out from the interstice.');
+  log('First Fleet on station — ten battlegroups, ninety corvettes, a cordon 25,000 km out from the interstice.');
   log('Time compression available: 1× / 4× / 16× / 64×. Space is big. Use it.');
 });
 document.getElementById('btn-restart').addEventListener('click', () => location.reload());

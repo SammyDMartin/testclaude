@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The War of All Wars — Ascent Universe</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<style>
+body { overflow: hidden; }
+#game-root {
+  position: fixed; top: 40px; left: 0; right: 0; bottom: 28px;
+  background: #020308; overflow: hidden; cursor: crosshair;
+  font-family: var(--mono);
+}
+#gc { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* ── HUD ─────────────────────────────────────────────────────────── */
+.hbtn {
+  background: rgba(0,20,30,0.85); border: 1px solid var(--border); color: var(--text-dim);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px; padding: 6px 12px;
+  cursor: pointer; border-radius: 2px; transition: all 0.15s; white-space: nowrap;
+}
+.hbtn:hover { border-color: var(--accent); color: var(--accent); }
+.hbtn.armed { border-color: var(--accent); color: var(--accent); background: rgba(0,229,255,0.08); }
+.hbtn.danger { border-color: rgba(255,80,60,0.5); color: #ff6b50; }
+.hbtn.danger:hover, .hbtn.danger.armed { border-color: #ff5040; color: #ff5040; background: rgba(255,60,40,0.1); }
+.hbtn:disabled { opacity: 0.35; cursor: default; }
+.hbtn.purple { border-color: rgba(180,120,255,0.5); color: #b078ff; }
+.hbtn.purple:hover, .hbtn.purple.armed { border-color: #b070ff; color: #b070ff; background: rgba(180,120,255,0.1); }
+
+#hud-top { position: absolute; top: 8px; left: 10px; display: flex; gap: 8px; align-items: center; z-index: 6; flex-wrap: wrap; }
+#clock { font-size: 11px; color: var(--accent); letter-spacing: 2px; min-width: 88px; }
+#scn-tag { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); border: 1px solid var(--border); padding: 4px 8px; border-radius: 2px; }
+
+#fleet-strip { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 6; }
+.fs-cell {
+  width: 24px; height: 24px; border: 1px solid var(--border); border-radius: 2px;
+  font-size: 7px; display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim); background: rgba(0,15,22,0.8); cursor: pointer; position: relative;
+}
+.fs-cell .bar { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--accent); }
+.fs-cell.sel { border-color: #fff; color: #fff; }
+.fs-cell.lost { opacity: 0.3; text-decoration: line-through; }
+.fs-cell.dsphere { border-color: rgba(180,120,255,0.5); color: #b078ff; width: 30px; }
+.fs-cell.dsphere .bar { background: #b078ff; }
+
+#enemy-strip { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 6; }
+.es-cell { font-size: 8px; letter-spacing: 1px; color: #ff4040; border: 1px solid rgba(255,60,60,0.35); padding: 3px 8px; border-radius: 2px; background: rgba(30,0,0,0.7); cursor: pointer; }
+.es-cell .bar { display: block; height: 2px; background: #ff4040; margin-top: 2px; }
+.es-cell.intel { border-color: #ff5040; }
+
+#event-log {
+  position: absolute; right: 12px; top: 72px; width: 320px; max-height: 36%;
+  z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 4px;
+  overflow: hidden;
+}
+.ev { font-size: 9px; line-height: 1.6; letter-spacing: 0.5px; padding: 4px 10px; border-left: 2px solid var(--border);
+      background: rgba(0,10,16,0.75); color: var(--text-dim); animation: evIn 0.3s ease; }
+.ev .ts { color: rgba(120,160,170,0.5); margin-right: 6px; }
+.ev.warn { border-left-color: #ff5040; color: #ff8a70; }
+.ev.good { border-left-color: var(--accent); color: var(--accent); }
+.ev.quote { border-left-color: var(--accent2); color: #d8c8a8; font-style: italic; }
+.ev.trap { border-left-color: #b070ff; color: #c8a0ff; }
+@keyframes evIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+
+#intel {
+  position: absolute; right: 12px; bottom: 12px; width: 320px; z-index: 6;
+  background: rgba(8,2,0,0.92); border: 1px solid rgba(255,60,60,0.4); border-radius: 2px;
+  padding: 10px 12px; font-size: 9px; line-height: 1.7; color: #d88890; display: none;
+}
+#intel .ttl { color: #ff5040; font-size: 10px; letter-spacing: 2px; margin-bottom: 6px; }
+#intel .row { display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(255,60,60,0.15); padding: 1px 0; }
+#intel .row span:first-child { color: rgba(255,100,100,0.55); }
+#intel .state { color: #ffce9e; }
+
+#hud-bottom {
+  position: absolute; left: 10px; bottom: 12px; right: 344px; z-index: 6;
+  display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+}
+#sel-panel { display: flex; gap: 6px; flex-wrap: wrap; max-width: 62%; }
+.sel-card {
+  background: rgba(0,18,26,0.88); border: 1px solid var(--border); border-radius: 2px;
+  padding: 5px 10px; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); min-width: 130px;
+}
+.sel-card .nm { color: var(--accent); font-size: 9px; margin-bottom: 2px; }
+.sel-card.dsphere .nm { color: #b078ff; }
+.sel-card .hpb { height: 3px; background: rgba(255,255,255,0.08); margin: 3px 0; }
+.sel-card .hpb i { display: block; height: 100%; background: var(--accent); }
+#ability-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+
+#mode-banner {
+  position: absolute; top: 72px; left: 50%; transform: translateX(-50%); z-index: 7;
+  font-size: 10px; letter-spacing: 3px; color: var(--accent); padding: 6px 16px;
+  border: 1px solid var(--accent); background: rgba(0,20,30,0.9); display: none;
+}
+#mode-banner.danger { color: #ff5040; border-color: #ff5040; }
+#mode-banner.purple { color: #b070ff; border-color: #b070ff; }
+
+#morale-bar {
+  position: absolute; left: 10px; top: 42px; z-index: 6;
+  font-size: 8px; letter-spacing: 2px; color: var(--text-dim);
+}
+#morale-bar .bar-bg { width: 140px; height: 4px; background: rgba(255,255,255,0.08); margin-top: 3px; }
+#morale-bar .bar-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+
+#scalebar { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 5;
+  font-size: 8px; letter-spacing: 2px; color: rgba(120,180,200,0.6); text-align: center; pointer-events: none; }
+#scalebar .seg { display: block; height: 3px; border: 1px solid rgba(120,180,200,0.5); border-top: none; margin-bottom: 2px; }
+
+/* ── Overlays ────────────────────────────────────────────────────── */
+.overlay {
+  position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,4,8,0.88); backdrop-filter: blur(3px);
+}
+.ov-panel {
+  max-width: 700px; width: calc(100% - 40px); max-height: 92%; overflow-y: auto;
+  border: 1px solid var(--border); background: rgba(2,12,18,0.97); padding: 28px 32px; border-radius: 3px;
+}
+.ov-panel h1 { font-size: 16px; letter-spacing: 6px; color: var(--accent); margin: 0 0 2px; font-weight: 400; }
+.ov-panel .sub { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 18px; }
+.ov-panel p { font-size: 11px; line-height: 1.8; color: var(--text-dim); margin: 0 0 12px; }
+.ov-panel p b { color: var(--text); font-weight: 600; }
+.ov-panel .ctl { font-size: 9px; line-height: 2; color: var(--text-dim); letter-spacing: 1px; }
+.ov-panel .ctl b { color: var(--accent); display: inline-block; min-width: 130px; font-weight: 400; }
+.ov-panel .quote { border-left: 2px solid var(--accent2); padding-left: 12px; font-style: italic; color: #cbb894; font-size: 10px; }
+.ov-rule { height: 1px; background: var(--border); margin: 16px 0; }
+.big-btn {
+  display: block; width: 100%; margin-top: 18px; padding: 12px; text-align: center;
+  background: rgba(0,229,255,0.06); border: 1px solid var(--accent); color: var(--accent);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 5px; cursor: pointer; transition: all 0.2s;
+}
+.big-btn:hover { background: rgba(0,229,255,0.15); }
+.stat-row { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 1px; color: var(--text-dim); padding: 4px 0; border-bottom: 1px dotted rgba(255,255,255,0.06); }
+.stat-row span:last-child { color: var(--text); }
+#aftermath-title { font-size: 18px; letter-spacing: 6px; margin-bottom: 4px; }
+.scn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+.scn-btn { border: 1px solid var(--border); background: rgba(0,15,22,0.7); padding: 10px 12px; cursor: pointer;
+  font-family: var(--mono); text-align: left; transition: all 0.15s; border-radius: 2px; }
+.scn-btn:hover { border-color: var(--accent); }
+.scn-btn.sel { border-color: var(--accent); background: rgba(0,229,255,0.08); }
+.scn-btn .sn { font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-bottom: 3px; }
+.scn-btn .sd { font-size: 8px; letter-spacing: 1px; color: var(--text-dim); line-height: 1.5; }
+.spec-tbl { width: 100%; font-size: 9px; letter-spacing: 0.5px; color: var(--text-dim); border-collapse: collapse; margin-bottom: 8px; }
+.spec-tbl td { padding: 2px 6px; border-bottom: 1px dotted rgba(255,255,255,0.06); }
+.spec-tbl td:first-child { color: var(--accent); white-space: nowrap; }
+
+@media (max-width: 900px) {
+  #event-log { width: 210px; top: 100px; }
+  #intel { width: 210px; }
+  #hud-bottom { right: 224px; }
+  #fleet-strip { top: 64px; }
+  #enemy-strip { top: 96px; }
+}
+</style>
+</head>
+<body>
+<div id="game-root">
+  <canvas id="gc"></canvas>
+
+  <div id="hud-top">
+    <span id="clock">T+00:00</span>
+    <button class="hbtn" id="btn-pause">PAUSE</button>
+    <button class="hbtn" id="btn-speed">4&times;</button>
+    <button class="hbtn" id="btn-fit">FIT [F]</button>
+    <button class="hbtn" id="btn-rings">RINGS [O]</button>
+    <button class="hbtn" id="btn-help">?</button>
+    <button class="hbtn" id="btn-sim" title="Autoplay: AI controls your fleet">SIM</button>
+    <span id="scn-tag"></span>
+  </div>
+
+  <div id="morale-bar">
+    FLEET MORALE <span id="morale-pct">100%</span>
+    <div class="bar-bg"><div class="bar-fill" id="morale-fill" style="width:100%"></div></div>
+  </div>
+
+  <div id="fleet-strip"></div>
+  <div id="enemy-strip"></div>
+  <div id="event-log"></div>
+  <div id="intel"></div>
+  <div id="mode-banner"></div>
+  <div id="scalebar"><span class="seg" id="scaleseg"></span><span id="scalelbl"></span></div>
+
+  <div id="hud-bottom">
+    <div id="ability-bar">
+      <button class="hbtn" id="btn-all">ALL [A]</button>
+      <button class="hbtn" id="btn-slasher">SLASHERS [T]</button>
+      <button class="hbtn" id="btn-gamma">GAMMA CANNONS [G]</button>
+      <button class="hbtn purple" id="btn-conversion">CONVERSION BOMB [C]</button>
+      <button class="hbtn" id="btn-frameshift">FRAMESHIFT [V]</button>
+      <button class="hbtn danger" id="btn-overload">REACTOR OVERLOAD [X]</button>
+    </div>
+    <div id="sel-panel"></div>
+  </div>
+
+  <!-- Briefing -->
+  <div class="overlay" id="briefing">
+    <div class="ov-panel">
+      <h1>THE WAR OF ALL WARS</h1>
+      <div class="sub">~3200 CE &middot; HEPPOLON SYSTEM &middot; DEFENCE SPHERE CONSTELLATION</div>
+      <p class="quote">You are almost certainly not real.<br>&mdash; The Apathy</p>
+      <p>An <b>Earth-mass agglomeration</b> is decelerating at <b>40,000 G</b> toward Heppolon.
+      Six billion people behind you. The interstice is your only evacuation route.
+      You command the leading edge of the <b>Battle Constellation</b>: three Defence Spheres
+      and twenty wings of the first hundred A-spheres &mdash; and whatever time you can buy.</p>
+      <p>The Apathy does not negotiate. It does not explain. It consumes all mass
+      it reaches and converts it to more of itself. Every minute you hold is a
+      million more through the interstice.</p>
+      <div class="ov-rule"></div>
+      <div class="sub" style="margin-bottom:8px">SELECT ENGAGEMENT</div>
+      <div class="scn-grid" id="scn-grid"></div>
+      <div class="ov-rule"></div>
+      <table class="spec-tbl">
+        <tr><td>A-SPHERE</td><td>Attack craft &middot; 90 G &middot; Frameshift to 0.99c (1M km range) &middot; Monopole PDC &middot; Graver cannon &middot; Slasher torpedoes &middot; Conversion bombs &middot; Crew: 1</td></tr>
+        <tr><td>D-SPHERE</td><td>3,200 m &middot; 4 Gt dry / 8 Gt wet &middot; GUT vacuum-energy sink &middot; 10 m hyperdiamond hull &middot; Frameshift 0.99c (1.06 s cycle) &middot; 220&times; 600 GW X-ray laser &middot; 8&times; 2,200 GW Gamma cannon &middot; Slasher &amp; Destructor torpedoes &middot; 35&times; Masscannon &middot; Crew: 3</td></tr>
+        <tr><td>APATHY</td><td>Earth-mass &middot; 40,000 G decel &middot; Graver spikes &middot; Stellar-grade lasers &middot; Anti-mind affects &middot; Matter projection &middot; Replicates from consumed mass</td></tr>
+      </table>
+      <div class="ov-rule"></div>
+      <div class="ctl">
+        <b>SLASHERS [T]</b> micro-singularity torpedoes &mdash; frameshift-boosted, devastating on impact<br>
+        <b>GAMMA [G]</b> 2,200 GW gamma cannons &mdash; long-range capital ship weapons<br>
+        <b>CONVERSION [C]</b> matter-to-energy bombs &mdash; teraton yield, slow to arm, your best weapon<br>
+        <b>FRAMESHIFT [V]</b> tactical FTL jump &mdash; 0.99c, 1M km max range, 1s cooldown<br>
+        <b>OVERLOAD [X]</b> detonate reactor &mdash; massive blast, kills the ship, damages anything nearby<br>
+        <b>A-SPHERE DOCTRINE</b> fast and fragile. Frameshift in, fire, frameshift out. Die in seconds under direct fire.<br>
+        <b>D-SPHERE DOCTRINE</b> city-sized fortress. Massive firepower but limited acceleration. Area denial.<br>
+        <b>THE ANTHROPIC TRAP</b> the Apathy will try to convince your crews they are not real. Morale will drop. Ignore the trap &mdash; if you are a simulation, the real you is fighting too.<br>
+      </div>
+      <button class="big-btn" id="btn-start">ASSUME COMMAND</button>
+    </div>
+  </div>
+
+  <!-- Help overlay -->
+  <div class="overlay" id="helpov" style="display:none">
+    <div class="ov-panel">
+      <h1>COMMAND REFERENCE</h1>
+      <div class="sub">DEFENCE SPHERE CONSTELLATION</div>
+      <div class="ctl">
+        <b>LEFT-CLICK</b> select unit or designate target in weapon mode<br>
+        <b>RIGHT-CLICK</b> move selected units to position / attack-move on enemy<br>
+        <b>SHIFT+CLICK</b> add to selection &middot; <b>A</b> select all &middot; <b>1-9</b> select by number<br>
+        <b>SCROLL</b> zoom &middot; <b>MIDDLE-DRAG</b> pan &middot; <b>ARROWS</b> pan<br>
+        <b>SPACE</b> pause &middot; <b>+/-</b> time compression &middot; <b>F</b> fit view &middot; <b>O</b> range rings<br>
+      </div>
+      <div class="ov-rule"></div>
+      <div class="ctl">
+        <b>APATHY GRAVER SPIKES</b> predictive gravity weapons. Hard to dodge. Shred missiles and ships alike.<br>
+        <b>SHEARING WAVES</b> gravity gradients that disable frameshift drives and sever hull armour.<br>
+        <b>ANTI-MIND AFFECTS</b> memetic weapons that reduce fleet morale. Lower morale = reduced crew effectiveness.<br>
+        <b>REPLICATION</b> the Apathy converts consumed mass into more of itself. Do not let it reach the planet.<br>
+        <b>WIN CONDITION</b> destroy the Apathy fragment before it reaches the interstice. Or hold long enough for full evacuation.<br>
+      </div>
+      <button class="big-btn" id="btn-helpclose">RETURN TO CIC</button>
+    </div>
+  </div>
+
+  <!-- Aftermath -->
+  <div class="overlay" id="aftermath" style="display:none">
+    <div class="ov-panel">
+      <h1 id="aftermath-title"></h1>
+      <div class="sub" id="aftermath-sub"></div>
+      <div id="aftermath-stats"></div>
+      <div class="ov-rule"></div>
+      <p class="quote" id="aftermath-quote"></p>
+      <p class="ctl" id="aftermath-canon" style="margin-top:12px;"></p>
+      <button class="big-btn" id="btn-restart">NEW ENGAGEMENT</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ════════════════════════════════════════════════════════════════════
+   THE WAR OF ALL WARS — Apathy War, ~3200 CE
+   Real units: positions in Mm (megametres = 1000 km), velocity in km/s,
+   acceleration in km/s^2. 1 G = 0.00981 km/s^2.
+   Frameshift: instant repositioning up to 1,000,000 km (1000 Mm).
+   Fixed-timestep sim with time compression.
+   ════════════════════════════════════════════════════════════════════ */
+
+const canvas = document.getElementById('gc');
+const ctx = canvas.getContext('2d');
+let vw = 100, vh = 100, dpr = 1;
+
+const G = 0.00981;
+const H = 0.5;
+const C = 299792;   // speed of light, km/s
+const Mm = 1000;    // 1 megametre = 1000 km; world coords in Mm
+const WORLD = { w: 10000, h: 7000 };  // 10M x 7M km battlespace (~33 light-seconds wide)
+const INTERSTICE = { x: 5000, y: 3500 };   // the evacuation route is the heart of the map
+const PLANET = { x: 3600, y: 3500 };       // Heppolon, behind the interstice from the threat axis
+
+const cam = { x: WORLD.w/2, y: WORLD.h/2, z: 0.15 };
+
+const SCENARIOS = {
+  scout:     { label: 'SCOUT FRAGMENT',    desc: 'Small Apathy fragment, 1000 tons. Reconnaissance in force.', mass: 1000, speed: 0.3 },
+  standard:  { label: 'HEPPOLON DEFENCE',  desc: 'Earth-mass agglomeration. The battle as the record shows. Hold the line.', mass: 5.97e9, speed: 0.7 },
+  onslaught: { label: 'ONSLAUGHT',         desc: 'Multiple fragments. Faster approach. Limited evacuation time.', mass: 5.97e11, speed: 0.85 },
+  extinction:{ label: 'EXTINCTION EVENT',  desc: 'Maximum-mass Apathy. 0.95c. Everything or nothing.', mass: 5.97e13, speed: 0.95 }
+};
+let scnKey = 'standard';
+try { scnKey = localStorage.getItem('woaw-scn') || 'standard'; } catch(e){}
+if (!SCENARIOS[scnKey]) scnKey = 'standard';
+
+const game = {
+  running: false, paused: false, over: false,
+  t: 0, timeScale: 4, rings: true,
+  morale: 100, trapActive: false, trapT: 0,
+  evacPop: 0, evacRate: 0,
+  autoplay: false, autoT: 0,
+  endTimer: -1
+};
+const stats = {
+  asphereDestroyed: 0, dsphereDestroyed: 0,
+  slashersFired: 0, gammaFired: 0, conversionFired: 0,
+  overloads: 0, frameshifts: 0,
+  apathyDamage: 0
+};
+
+const units = [], enemies = [], projectiles = [], beams = [], fx = [];
+let selected = new Set();
+let mode = null;
+let intelTarget = null;
+let dragStart = null, dragNow = null, panning = false, panLast = null;
+
+/* ── class data ─────────────────────────────────────────────────── */
+const CLS = {
+  asphere: {
+    label: 'A-SPHERE ATTACK CRAFT',
+    acc: 90*G, accBurst: 90*G, vmax: 800,   // canon: "the insane ninety-gee acceleration the A-sphere could manage"
+    hull: 40, armor: 10,
+    frameshiftRange: 1000, frameshiftCd: 8,
+    pdcRange: 80, pdcDmg: 2, pdcCycle: 2,
+    graverRange: 400, graverDmg: 8, graverCycle: 15,
+    slasherCount: 12, slasherSpeed: 200, slasherDmg: 15,
+    conversionCount: 2, conversionDmg: 80, conversionArm: 10,
+    overloadDmg: 120, overloadRadius: 60
+  },
+  dsphere: {
+    label: 'ULTIMATE HEIGHT-CLASS DEFENCE SPHERE',
+    acc: 2*G, accBurst: 5*G, vmax: 50,
+    hull: 800, armor: 100,
+    frameshiftRange: 1000, frameshiftCd: 15,
+    xrayCount: 220, xrayRange: 600, xrayDmg: 1, xrayCycle: 3,
+    gammaCount: 8, gammaRange: 1200, gammaDmg: 12, gammaCycle: 12,
+    slasherCount: 60, slasherSpeed: 150, slasherDmg: 20,
+    conversionCount: 30, conversionDmg: 120, conversionArm: 15,
+    masscannon: 35, massRange: 200, massDmg: 3, massCycle: 1,
+    overloadDmg: 500, overloadRadius: 150
+  },
+  apathy: {
+    label: 'APATHY AGGLOMERATION',
+    acc: 40000*G,
+    graverRange: 800, graverDmg: 30, graverCycle: 4,
+    laserRange: 2000, laserDmg: 15, laserCycle: 2,
+    waveRange: 400, waveDmg: 50,
+    antimindRange: 3000, antimindCycle: 60,
+    trapRange: 5000, trapCd: 180,
+    replicateRate: 0.001
+  }
+};
+
+const ASPHERE_NAMES = [];
+for (let i = 1; i <= 20; i++) ASPHERE_NAMES.push('A-' + String(i).padStart(2,'0'));
+const DSPHERE_NAMES = ['ULTIMATE HEIGHT', 'RESOLUTE DAWN', 'IRON COVENANT'];
+
+/* ── helpers ─────────────────────────────────────────────────────── */
+const rnd = Math.random;
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function fmt(n){ return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+function thrustToward(e, dvx, dvy, acc, dt){
+  const dm = Math.hypot(dvx, dvy) || 1e-9;
+  const am = Math.min(acc*dt, dm);
+  e.vx += dvx/dm*am; e.vy += dvy/dm*am;
+  e.curAcc = am/dt;
+}
+function arrive(e, tx, ty, acc, dt, vmax){
+  const dx = tx-e.x, dy = ty-e.y, d = Math.hypot(dx,dy) || 1e-9;
+  const sp = Math.min(vmax, Math.sqrt(2*acc*Math.max(d-1,0))*0.85);
+  thrustToward(e, dx/d*sp - e.vx, dy/d*sp - e.vy, acc, dt);
+}
+function pursue(e, tx, ty, acc, dt, vmax){
+  const dx = tx-e.x, dy = ty-e.y, d = Math.hypot(dx,dy) || 1e-9;
+  thrustToward(e, dx/d*vmax - e.vx, dy/d*vmax - e.vy, acc, dt);
+}
+function brake(e, acc, dt){
+  thrustToward(e, -e.vx, -e.vy, acc, dt);
+  if (Math.hypot(e.vx, e.vy) < 0.05){ e.vx = 0; e.vy = 0; e.curAcc = 0; }
+}
+function lead(sx, sy, t, ps, maxT){
+  let tx = t.x, ty = t.y;
+  for (let i=0;i<3;i++){
+    const tt = Math.min(Math.hypot(tx-sx, ty-sy)*Mm/ps, maxT || 1e9);
+    tx = t.x + t.vx*tt/Mm; ty = t.y + t.vy*tt/Mm;
+  }
+  return { x: tx, y: ty };
+}
+
+/* ── setup ───────────────────────────────────────────────────────── */
+function makeUnit(cls, name, x, y){
+  const c = CLS[cls];
+  return {
+    kind: 'fleet', cls, name, x, y, vx: 0, vy: 0, curAcc: 0,
+    hp: c.hull, maxHp: c.hull, armor: c.armor || 0, angle: 0,
+    dest: null, attackTarget: null,
+    slashers: c.slasherCount || 0,
+    conversions: c.conversionCount || 0,
+    frameshiftCd: 0, xrayCd: 0, gammaCd: 0, pdcCd: 0, massCd: 0,
+    dead: false, flash: 0, id: 0
+  };
+}
+
+function makeApathy(x, y, hp){
+  return {
+    kind: 'apathy', cls: 'apathy', name: 'APATHY FRAGMENT',
+    x, y, vx: 0, vy: 0, curAcc: 0, angle: Math.PI,
+    hp, maxHp: hp, armor: 0,
+    graverCd: 0, laserCd: 0, waveCd: 0, antimindCd: 30, trapCd: 60,
+    dead: false, flash: 0, replicateAcc: 0,
+    target: null, state: 'approach'
+  };
+}
+
+let nextId = 1;
+function initGame(){
+  const scn = SCENARIOS[scnKey];
+  units.length = 0; enemies.length = 0; projectiles.length = 0; beams.length = 0; fx.length = 0;
+  selected.clear(); nextId = 1;
+  Object.keys(stats).forEach(k => stats[k] = 0);
+  game.t = 0; game.morale = 100; game.trapActive = false; game.trapT = 0;
+  game.evacPop = 0; game.evacRate = 0; game.over = false; game.endTimer = -1;
+
+  // D-spheres screen the interstice on the threat axis
+  for (let i = 0; i < 3; i++){
+    const u = makeUnit('dsphere', DSPHERE_NAMES[i],
+      INTERSTICE.x + 700, INTERSTICE.y - 500 + i*500);
+    u.id = nextId++;
+    units.push(u);
+  }
+  // A-sphere wings picket forward of the constellation, toward the approach vector
+  for (let i = 0; i < 20; i++){
+    const ang = (i / 20) * Math.PI * 2;
+    const r = 500 + rnd()*350;
+    const u = makeUnit('asphere', ASPHERE_NAMES[i],
+      INTERSTICE.x + 2200 + Math.cos(ang)*r, INTERSTICE.y + Math.sin(ang)*r);
+    u.id = nextId++;
+    units.push(u);
+  }
+
+  // Apathy: arrives from the right edge
+  const apathyHp = Math.min(scn.mass / 100, 10000);
+  const ap = makeApathy(WORLD.w - 300, WORLD.h/2, apathyHp);
+  ap.vx = -scn.speed * C / Mm * 0.001; // very slow in world coords, decelerating
+  enemies.push(ap);
+
+  game.evacRate = 800000; // people per second through the interstice
+}
+
+/* ── event log ───────────────────────────────────────────────────── */
+const logEl = document.getElementById('event-log');
+function logTime(){
+  const t = game.t, m = Math.floor(t/60), s = Math.floor(t%60);
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function log(msg, cls){
+  const d = document.createElement('div');
+  d.className = 'ev' + (cls ? ' '+cls : '');
+  d.innerHTML = '<span class="ts">'+logTime()+'</span>' + msg;
+  logEl.insertBefore(d, logEl.firstChild);
+  while (logEl.children.length > 9) logEl.removeChild(logEl.lastChild);
+}
+
+/* ── combat ──────────────────────────────────────────────────────── */
+function hitUnit(u, dmg, type){
+  if (u.dead) return;
+  const absorbed = Math.min(u.armor, dmg * 0.5);
+  u.armor -= absorbed * 0.1;
+  u.hp -= (dmg - absorbed);
+  u.flash = 0.25;
+  if (u.hp <= 0) destroyUnit(u);
+}
+function destroyUnit(u){
+  if (u.dead) return;
+  u.dead = true; u.hp = 0;
+  if (u.cls === 'asphere') stats.asphereDestroyed++;
+  else stats.dsphereDestroyed++;
+  selected.delete(u.id);
+  fx.push({ type:'boom', x:u.x, y:u.y, t:0, dur:u.cls==='dsphere'?2:0.8, maxR:u.cls==='dsphere'?80:30, color:'rgba(255,200,140,1)' });
+  log(u.name + ' destroyed.', 'warn');
+  refreshFleetStrip();
+}
+function hitApathy(a, dmg){
+  if (a.dead) return;
+  a.hp -= dmg; a.flash = 0.25;
+  stats.apathyDamage += dmg;
+  if (a.hp <= 0){
+    a.dead = true;
+    fx.push({ type:'boom', x:a.x, y:a.y, t:0, dur:4, maxR:300, color:'rgba(255,255,230,1)' });
+    log('APATHY FRAGMENT DESTROYED. The agglomeration is breaking apart, consumed in its own energy.', 'good');
+  }
+}
+
+/* ── unit actions ────────────────────────────────────────────────── */
+function fireSlasher(u, target){
+  if (u.dead || u.slashers <= 0 || !target || target.dead) return;
+  u.slashers--;
+  stats.slashersFired++;
+  const spd = CLS[u.cls].slasherSpeed;
+  const L = lead(u.x, u.y, target, spd*Mm, 30);
+  const d = Math.hypot(L.x-u.x, L.y-u.y) || 1;
+  projectiles.push({
+    type: 'slasher', x: u.x, y: u.y,
+    vx: (L.x-u.x)/d*spd + u.vx/Mm, vy: (L.y-u.y)/d*spd + u.vy/Mm,
+    target, dmg: CLS[u.cls].slasherDmg, life: 60, dead: false, age: 0
+  });
+  u.flash = 0.1;
+  fx.push({ type:'launch', x:u.x, y:u.y, tx:target.x, ty:target.y, t:0, dur:1.5, maxR:20, color:'rgba(0,229,255,0.6)', n:1 });
+}
+function fireConversion(u, target){
+  if (u.dead || u.conversions <= 0 || !target || target.dead) return;
+  u.conversions--;
+  stats.conversionFired++;
+  const spd = 80;
+  const L = lead(u.x, u.y, target, spd*Mm, 40);
+  const d = Math.hypot(L.x-u.x, L.y-u.y) || 1;
+  projectiles.push({
+    type: 'conversion', x: u.x, y: u.y,
+    vx: (L.x-u.x)/d*spd + u.vx/Mm, vy: (L.y-u.y)/d*spd + u.vy/Mm,
+    target, dmg: CLS[u.cls].conversionDmg, life: 120, dead: false, age: 0,
+    armTime: CLS[u.cls].conversionArm
+  });
+  u.flash = 0.15;
+  fx.push({ type:'launch', x:u.x, y:u.y, tx:target.x, ty:target.y, t:0, dur:2, maxR:30, color:'rgba(180,120,255,0.7)', n:1 });
+  log(u.name + ': Conversion bomb away. Teraton yield. Arm time ' + CLS[u.cls].conversionArm + 's.', 'good');
+}
+function doFrameshift(u, tx, ty){
+  if (u.dead || u.frameshiftCd > 0) return;
+  const maxR = CLS[u.cls].frameshiftRange;
+  const d = Math.hypot(tx-u.x, ty-u.y);
+  if (d > maxR){ tx = u.x + (tx-u.x)/d*maxR; ty = u.y + (ty-u.y)/d*maxR; }
+  fx.push({ type:'ring', x:u.x, y:u.y, t:0, dur:0.6, maxR:40, color:'rgba(160,200,255,0.8)' });
+  u.x = tx; u.y = ty;
+  u.frameshiftCd = CLS[u.cls].frameshiftCd;
+  stats.frameshifts++;
+  fx.push({ type:'ring', x:u.x, y:u.y, t:0, dur:0.8, maxR:50, color:'rgba(160,200,255,0.9)' });
+}
+function doOverload(u){
+  if (u.dead) return;
+  const c = CLS[u.cls];
+  stats.overloads++;
+  fx.push({ type:'gamma', x:u.x, y:u.y, t:0, dur:2.5, maxR:c.overloadRadius, color:'rgba(255,255,200,1)' });
+  for (const e of enemies){
+    if (e.dead) continue;
+    if (dist(u, e) < c.overloadRadius) hitApathy(e, c.overloadDmg);
+  }
+  for (const o of units){
+    if (o.dead || o === u) continue;
+    if (dist(u, o) < c.overloadRadius * 0.5) hitUnit(o, c.overloadDmg * 0.3, 'blast');
+  }
+  log(u.name + ': Reactor overload. Vacuum energy discharge. ' + (u.cls === 'dsphere' ? 'The detonation outshines the star.' : 'A brief, brilliant point of light.'), 'warn');
+  destroyUnit(u);
+}
+
+/* ── update: fleet units ─────────────────────────────────────────── */
+function updateUnit(u, dt){
+  if (u.dead) return;
+  u.flash = Math.max(0, u.flash - dt);
+  u.frameshiftCd = Math.max(0, u.frameshiftCd - dt);
+  const c = CLS[u.cls];
+
+  // Movement
+  if (u.attackTarget && !u.attackTarget.dead){
+    const d = dist(u, u.attackTarget);
+    const standoff = u.cls === 'dsphere' ? 600 : 300;
+    if (d > standoff) pursue(u, u.attackTarget.x, u.attackTarget.y, c.acc, dt, c.vmax);
+    else brake(u, c.acc, dt);
+  } else if (u.dest){
+    arrive(u, u.dest.x, u.dest.y, c.acc, dt, c.vmax);
+    if (dist(u, u.dest) < 5 && Math.hypot(u.vx,u.vy) < 1){ u.dest = null; u.vx = 0; u.vy = 0; }
+  } else {
+    brake(u, c.acc, dt);
+  }
+  u.x = clamp(u.x + u.vx/Mm*dt, 10, WORLD.w-10);
+  u.y = clamp(u.y + u.vy/Mm*dt, 10, WORLD.h-10);
+  if (Math.hypot(u.vx,u.vy) > 1) u.angle = Math.atan2(u.vy, u.vx);
+
+  // Morale effect on fire rate
+  const moraleF = 0.5 + 0.5 * (game.morale / 100);
+
+  // Auto weapons vs nearest enemy
+  const target = enemies.find(e => !e.dead);
+  if (!target) return;
+  const d = dist(u, target);
+
+  if (u.cls === 'dsphere'){
+    // X-ray lasers: continuous barrage
+    u.xrayCd -= dt;
+    if (u.xrayCd <= 0 && d < c.xrayRange){
+      u.xrayCd = c.xrayCycle / moraleF;
+      beams.push({ x1:u.x, y1:u.y, x2:target.x, y2:target.y, life:0.2, color:'rgba(255,235,255,0.85)', w:1.5 });
+      hitApathy(target, c.xrayDmg);
+    }
+    // Gamma cannons
+    u.gammaCd -= dt;
+    if (u.gammaCd <= 0 && d < c.gammaRange){
+      u.gammaCd = c.gammaCycle / moraleF;
+      beams.push({ x1:u.x, y1:u.y, x2:target.x, y2:target.y, life:0.4, color:'rgba(140,255,160,0.95)', w:3 });
+      hitApathy(target, c.gammaDmg);
+      stats.gammaFired++;
+    }
+    // Masscannons
+    u.massCd -= dt;
+    if (u.massCd <= 0 && d < c.massRange){
+      u.massCd = c.massCycle;
+      hitApathy(target, c.massDmg);
+    }
+  } else {
+    // A-sphere: PDC + graver cannon
+    u.pdcCd -= dt;
+    if (u.pdcCd <= 0 && d < c.pdcRange){
+      u.pdcCd = c.pdcCycle / moraleF;
+      beams.push({ x1:u.x, y1:u.y, x2:target.x, y2:target.y, life:0.1, color:'rgba(200,255,220,0.7)', w:1 });
+      hitApathy(target, c.pdcDmg);
+    }
+    u.gammaCd = (u.gammaCd || 0) - dt;
+    if (u.gammaCd <= 0 && d < c.graverRange){
+      u.gammaCd = c.graverCycle / moraleF;
+      beams.push({ x1:u.x, y1:u.y, x2:target.x+rnd()*20-10, y2:target.y+rnd()*20-10, life:0.3, color:'rgba(160,220,255,0.9)', w:2 });
+      hitApathy(target, c.graverDmg);
+    }
+  }
+}
+
+/* ── update: apathy ──────────────────────────────────────────────── */
+function updateApathy(a, dt){
+  if (a.dead) return;
+  a.flash = Math.max(0, a.flash - dt);
+
+  // Approach the interstice/planet
+  if (a.state === 'approach'){
+    arrive(a, PLANET.x, PLANET.y, CLS.apathy.acc * 0.0001, dt, 200);
+  }
+  a.x += a.vx/Mm*dt; a.y += a.vy/Mm*dt;
+
+  // Pick target: nearest unit
+  const alive = units.filter(u => !u.dead);
+  if (!alive.length) return;
+  let nearest = null, nd = Infinity;
+  for (const u of alive){ const d = dist(a, u); if (d < nd){ nd = d; nearest = u; } }
+  a.target = nearest;
+
+  // Graver spikes: predictive targeting
+  a.graverCd -= dt;
+  if (a.graverCd <= 0 && nd < CLS.apathy.graverRange){
+    a.graverCd = CLS.apathy.graverCycle;
+    const tgt = alive[Math.floor(rnd()*alive.length)];
+    if (tgt && dist(a, tgt) < CLS.apathy.graverRange){
+      const d2 = dist(a, tgt);
+      const p = d2 < 100 ? 0.7 : d2 < 300 ? 0.4 : 0.2;
+      beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.5, color:'rgba(255,60,60,0.95)', w:4 });
+      if (rnd() < p) hitUnit(tgt, CLS.apathy.graverDmg, 'graver');
+      else fx.push({ type:'ring', x:tgt.x, y:tgt.y, t:0, dur:0.4, maxR:30, color:'rgba(255,60,60,0.5)' });
+    }
+  }
+
+  // Stellar-grade lasers
+  a.laserCd -= dt;
+  if (a.laserCd <= 0 && nd < CLS.apathy.laserRange){
+    a.laserCd = CLS.apathy.laserCycle;
+    const targets = alive.sort(() => rnd()-0.5).slice(0, 3);
+    for (const tgt of targets){
+      if (dist(a, tgt) < CLS.apathy.laserRange){
+        beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.3, color:'rgba(255,120,40,0.9)', w:2.5 });
+        hitUnit(tgt, CLS.apathy.laserDmg, 'laser');
+      }
+    }
+  }
+
+  // Shearing gravity wave (close range area effect)
+  a.waveCd -= dt;
+  if (a.waveCd <= 0){
+    a.waveCd = 20;
+    let hit = false;
+    for (const u of alive){
+      if (dist(a, u) < CLS.apathy.waveRange){
+        hitUnit(u, CLS.apathy.waveDmg, 'wave');
+        u.frameshiftCd = Math.max(u.frameshiftCd, 10);
+        hit = true;
+      }
+    }
+    if (hit){
+      fx.push({ type:'gamma', x:a.x, y:a.y, t:0, dur:1.5, maxR:CLS.apathy.waveRange, color:'rgba(255,40,40,0.5)' });
+      log('Shearing gravity wave. Frameshift drives disrupted. Hull armour severed.', 'warn');
+    }
+  }
+
+  // Anti-mind affects
+  a.antimindCd -= dt;
+  if (a.antimindCd <= 0 && nd < CLS.apathy.antimindRange){
+    a.antimindCd = CLS.apathy.antimindCycle;
+    game.morale = Math.max(10, game.morale - 8);
+    log('Anti-mind affects detected. Crew reporting consciousness disruption, existential dread. Morale degrading.', 'trap');
+  }
+
+  // Anthropic trap
+  a.trapCd -= dt;
+  if (a.trapCd <= 0 && nd < CLS.apathy.trapRange && !game.trapActive){
+    a.trapCd = CLS.apathy.trapCd;
+    game.trapActive = true; game.trapT = 30;
+    game.morale = Math.max(5, game.morale - 15);
+    log('ANTHROPIC TRAP DEPLOYING. Thousand-kilometre holographic display: "You are almost certainly not real."', 'trap');
+    log('Probability evidence projecting. 999,999 in 1,000,000 chance you are a simulation. Surrender terms offered.', 'trap');
+  }
+  if (game.trapActive){
+    game.trapT -= dt;
+    if (game.trapT <= 0){
+      game.trapActive = false;
+      log('Anthropic trap fading. Protocol: ignore. If fighting, the real you is fighting too.', 'good');
+      game.morale = Math.min(100, game.morale + 5);
+    }
+  }
+
+  // Self-replication (slow HP recovery)
+  if (a.hp < a.maxHp){
+    a.replicateAcc += dt;
+    if (a.replicateAcc >= 10){
+      a.replicateAcc = 0;
+      a.hp = Math.min(a.maxHp, a.hp + a.maxHp * CLS.apathy.replicateRate);
+    }
+  }
+}
+
+/* ── projectiles ─────────────────────────────────────────────────── */
+function updateProjectiles(dt){
+  for (const p of projectiles){
+    if (p.dead) continue;
+    p.life -= dt; p.age += dt;
+    if (p.life <= 0){ p.dead = true; continue; }
+    if (!p.target || p.target.dead){ p.dead = true; continue; }
+
+    // Guidance
+    const L = lead(p.x, p.y, p.target, Math.max(100, Math.hypot(p.vx,p.vy)*Mm), 30);
+    const dx = L.x-p.x, dy = L.y-p.y, d2 = Math.hypot(dx,dy) || 1;
+    const maxAcc = 50; // Mm/s^2 equivalent
+    p.vx += dx/d2*maxAcc*dt*0.01; p.vy += dy/d2*maxAcc*dt*0.01;
+
+    p.x += p.vx*dt; p.y += p.vy*dt;
+
+    // Hit detection
+    const hitD = dist(p, p.target);
+    if (hitD < (p.type === 'conversion' ? 20 : 8)){
+      if (p.type === 'conversion' && p.age < p.armTime){
+        // Not armed yet - dud
+        p.dead = true;
+        fx.push({ type:'ring', x:p.x, y:p.y, t:0, dur:0.5, maxR:20, color:'rgba(180,120,255,0.4)' });
+        continue;
+      }
+      p.dead = true;
+      hitApathy(p.target, p.dmg);
+      if (p.type === 'conversion'){
+        fx.push({ type:'gamma', x:p.x, y:p.y, t:0, dur:3, maxR:100, color:'rgba(255,255,200,1)' });
+        log('CONVERSION BOMB DETONATION. Energy beyond SI prefixes. The fabric of space itself warps.', 'good');
+        // Splash damage to nearby friendlies
+        for (const u of units){
+          if (u.dead) continue;
+          if (dist(p, u) < 80) hitUnit(u, 20, 'blast');
+        }
+      } else {
+        fx.push({ type:'boom', x:p.x, y:p.y, t:0, dur:1, maxR:40, color:'rgba(200,240,255,0.9)' });
+      }
+    }
+
+    // Apathy graver spike intercepts projectiles
+    if (p.age > 2 && rnd() < 0.002 * dt){
+      p.dead = true;
+      fx.push({ type:'ring', x:p.x, y:p.y, t:0, dur:0.3, maxR:15, color:'rgba(255,60,60,0.5)' });
+    }
+  }
+
+  /* beams & fx decay in REAL time (in loop) so they stay visible at high compression */
+}
+
+/* ── autoplay AI ─────────────────────────────────────────────────── */
+function updateAutoplay(dt){
+  if (!game.autoplay) return;
+  game.autoT -= dt;
+  if (game.autoT > 0) return;
+  game.autoT = 2 + rnd()*3;
+
+  const target = enemies.find(e => !e.dead);
+  if (!target) return;
+
+  for (const u of units){
+    if (u.dead) continue;
+    const d = dist(u, target);
+
+    if (u.cls === 'asphere'){
+      u.attackTarget = target;
+      // Fire slashers at medium range
+      if (d < 500 && u.slashers > 0 && rnd() < 0.3){
+        fireSlasher(u, target);
+      }
+      // Conversion bombs at closer range
+      if (d < 300 && u.conversions > 0 && rnd() < 0.1){
+        fireConversion(u, target);
+      }
+      // Frameshift repositioning
+      if (d < 150 && u.frameshiftCd <= 0 && rnd() < 0.2){
+        const ang = rnd()*Math.PI*2;
+        doFrameshift(u, target.x + Math.cos(ang)*350, target.y + Math.sin(ang)*350);
+      }
+      // Overload when nearly dead and close
+      if (u.hp < 10 && d < 100){
+        doOverload(u);
+      }
+    } else {
+      // D-sphere: maintain standoff, fire everything
+      u.attackTarget = target;
+      if (u.slashers > 0 && rnd() < 0.15){
+        fireSlasher(u, target);
+      }
+      if (u.conversions > 0 && d < 800 && rnd() < 0.05){
+        fireConversion(u, target);
+      }
+    }
+  }
+}
+
+/* ── end conditions ──────────────────────────────────────────────── */
+function checkEnd(dt){
+  if (game.over) return;
+  game.evacPop += game.evacRate * dt;
+
+  const ap = enemies.find(e => !e.dead);
+  const fleetGone = units.every(u => u.dead);
+
+  if (ap && dist(ap, PLANET) < 50){
+    game.endTimer = 3;
+    log('The Apathy has reached Heppolon. Replication beginning. Surface consumed.', 'warn');
+  }
+  if (!ap || fleetGone){
+    if (game.endTimer < 0) game.endTimer = 4;
+  }
+  if (game.endTimer >= 0){
+    game.endTimer -= dt;
+    if (game.endTimer <= 0) endGame();
+  }
+}
+function endGame(){
+  if (game.over) return;
+  game.over = true; game.running = false;
+  const ap = enemies.find(e => !e.dead);
+  const apathyDestroyed = !ap;
+  const evacuated = Math.floor(game.evacPop);
+  const fleetLeft = units.filter(u => !u.dead).length;
+
+  let title, sub, quote;
+  if (apathyDestroyed && fleetLeft > 0){
+    title = 'VICTORY'; sub = 'APATHY FRAGMENT DESTROYED';
+    quote = 'The agglomeration is gone. Scattered into exotic particles. For the first time in the war, something died that was not us.';
+  } else if (apathyDestroyed){
+    title = 'MUTUAL DESTRUCTION'; sub = 'ALL FORCES LOST';
+    quote = 'The last ship detonated its reactor inside the Apathy mass. Both fleets are gone. But six billion live.';
+  } else if (evacuated > 4e9){
+    title = 'PYRRHIC SURVIVAL'; sub = 'PLANET LOST, POPULATION EVACUATED';
+    quote = 'Heppolon is consumed. But the interstice held long enough. ' + fmt(evacuated) + ' through the wormhole. That is what we fought for.';
+  } else {
+    title = 'CATASTROPHE'; sub = 'PLANET LOST';
+    quote = 'Not enough time. Only ' + fmt(evacuated) + ' made it through. The Apathy consumes Heppolon and grows. The war continues.';
+  }
+
+  document.getElementById('aftermath-title').textContent = title;
+  document.getElementById('aftermath-title').style.color = apathyDestroyed ? 'var(--accent)' : '#ff6b50';
+  document.getElementById('aftermath-sub').textContent = SCENARIOS[scnKey].label + ' — ' + sub;
+  document.getElementById('aftermath-stats').innerHTML =
+    '<div class="stat-row"><span>ENGAGEMENT DURATION</span><span>' + logTime() + '</span></div>' +
+    '<div class="stat-row"><span>A-SPHERES LOST</span><span>' + stats.asphereDestroyed + ' / 20</span></div>' +
+    '<div class="stat-row"><span>D-SPHERES LOST</span><span>' + stats.dsphereDestroyed + ' / 3</span></div>' +
+    '<div class="stat-row"><span>SLASHERS FIRED</span><span>' + stats.slashersFired + '</span></div>' +
+    '<div class="stat-row"><span>CONVERSION BOMBS</span><span>' + stats.conversionFired + '</span></div>' +
+    '<div class="stat-row"><span>REACTOR OVERLOADS</span><span>' + stats.overloads + '</span></div>' +
+    '<div class="stat-row"><span>APATHY DAMAGE</span><span>' + fmt(stats.apathyDamage) + '</span></div>' +
+    '<div class="stat-row"><span>POPULATION EVACUATED</span><span>' + fmt(evacuated) + '</span></div>';
+  document.getElementById('aftermath-quote').textContent = quote;
+  document.getElementById('aftermath-canon').innerHTML =
+    'HISTORICAL RECORD: Heppolon was defended by a Battle Constellation of 3 D-spheres, 800 A-spheres, and millions of expendable drones. ' +
+    'The engagement lasted 45 minutes. The Apathy was destroyed through coordinated conversion bomb strikes and reactor overloads. ' +
+    'The interstice held long enough for full evacuation. The war continued.';
+  document.getElementById('aftermath').style.display = 'flex';
+}
+
+/* ── selection & input ───────────────────────────────────────────── */
+function setMode(m){
+  mode = m;
+  const b = document.getElementById('mode-banner');
+  if (m === 'slasher'){
+    b.style.display = 'block'; b.className = '';
+    b.textContent = 'DESIGNATE SLASHER TORPEDO TARGET — CLICK ENEMY — ESC TO CANCEL';
+  } else if (m === 'gamma'){
+    b.style.display = 'block'; b.className = '';
+    b.textContent = 'DESIGNATE GAMMA CANNON TARGET — D-SPHERES ONLY — ESC TO CANCEL';
+  } else if (m === 'conversion'){
+    b.style.display = 'block'; b.className = 'purple';
+    b.textContent = 'DESIGNATE CONVERSION BOMB TARGET — TERATON YIELD — ESC TO CANCEL';
+  } else if (m === 'frameshift'){
+    b.style.display = 'block'; b.className = '';
+    b.textContent = 'DESIGNATE FRAMESHIFT DESTINATION — CLICK POSITION — 1M KM MAX — ESC TO CANCEL';
+  } else if (m === 'overload'){
+    b.style.display = 'block'; b.className = 'danger';
+    b.textContent = 'REACTOR OVERLOAD — CLICK TO CONFIRM — THE SHIP WILL BE DESTROYED — ESC TO CANCEL';
+  } else b.style.display = 'none';
+  document.getElementById('btn-slasher').classList.toggle('armed', m==='slasher');
+  document.getElementById('btn-gamma').classList.toggle('armed', m==='gamma');
+  document.getElementById('btn-conversion').classList.toggle('armed', m==='conversion');
+  document.getElementById('btn-frameshift').classList.toggle('armed', m==='frameshift');
+  document.getElementById('btn-overload').classList.toggle('armed', m==='overload');
+}
+function selectedUnits(){ return units.filter(u => selected.has(u.id) && !u.dead); }
+function selectAll(){ selected.clear(); for (const u of units) if (!u.dead) selected.add(u.id); refreshFleetStrip(); }
+
+function screenToWorld(px, py){ return { x: (px - vw/2)/cam.z + cam.x, y: (py - vh/2)/cam.z + cam.y }; }
+function worldToScreen(x, y){ return { x: (x - cam.x)*cam.z + vw/2, y: (y - cam.y)*cam.z + vh/2 }; }
+
+function enemyAt(wp){
+  for (const e of enemies){ if (e.dead) continue; if (Math.hypot(e.x-wp.x, e.y-wp.y)*cam.z < 30) return e; }
+  return null;
+}
+function nearestEnemy(wp){
+  let best = null, bd = Infinity;
+  for (const e of enemies){
+    if (e.dead) continue;
+    const d = Math.hypot(e.x-wp.x, e.y-wp.y)*cam.z;
+    if (d < bd){ bd = d; best = e; }
+  }
+  return best;
+}
+function unitAt(wp){
+  for (const u of units){ if (u.dead) continue; if (Math.hypot(u.x-wp.x, u.y-wp.y)*cam.z < 14) return u; }
+  return null;
+}
+
+function handlePrimary(px, py, additive){
+  const wp = screenToWorld(px, py);
+  if (mode){
+    const sel = selectedUnits();
+    if (!sel.length){ setMode(null); return; }
+
+    if (mode === 'frameshift'){
+      for (const u of sel) doFrameshift(u, wp.x, wp.y);
+      setMode(null); return;
+    }
+    if (mode === 'overload'){
+      for (const u of sel) doOverload(u);
+      setMode(null); return;
+    }
+    /* weapon mode: snap to the nearest living enemy — a click always acts */
+    const e = nearestEnemy(wp);
+    if (e){
+      if (mode === 'slasher'){
+        let n = 0;
+        for (const u of sel) if (u.slashers > 0){ fireSlasher(u, e); n++; }
+        if (n) log(n + ' Slasher torpedoes away.', 'good'); else log('Slasher tubes empty.', 'warn');
+      } else if (mode === 'conversion'){
+        let n = 0;
+        for (const u of sel) if (u.conversions > 0){ fireConversion(u, e); n++; }
+        if (n) log(n + ' conversion bombs deployed — arming.', 'good'); else log('Conversion magazines empty.', 'warn');
+      } else if (mode === 'gamma'){
+        const ds = sel.filter(u => u.cls === 'dsphere');
+        for (const u of ds){
+          beams.push({ x1:u.x, y1:u.y, x2:e.x, y2:e.y, life:0.6, color:'rgba(140,255,160,0.95)', w:4 });
+          hitApathy(e, CLS.dsphere.gammaDmg * 2);
+          stats.gammaFired++;
+        }
+        if (!ds.length) log('Gamma cannons require a Defence Sphere in the selection.', 'warn');
+      }
+      setMode(null);
+    } else { log('No enemy contacts remain.', 'warn'); setMode(null); }
+    return;
+  }
+  const e = enemyAt(wp);
+  if (e){ setIntel(e); return; }
+  const u = unitAt(wp);
+  if (u){
+    if (!additive) selected.clear();
+    if (additive && selected.has(u.id)) selected.delete(u.id); else selected.add(u.id);
+  } else if (!additive) selected.clear();
+  refreshFleetStrip();
+}
+function handleOrder(px, py){
+  const wp = screenToWorld(px, py);
+  const sel = selectedUnits();
+  if (!sel.length) return;
+  const e = enemyAt(wp);
+  if (e){
+    for (const u of sel){ u.attackTarget = e; u.dest = null; }
+    fx.push({ type:'ring', x:e.x, y:e.y, t:0, dur:0.5, maxR:30, color:'rgba(255,80,60,0.8)' });
+  } else {
+    const n = sel.length;
+    sel.forEach((u, i) => {
+      const off = n > 1 ? 20 : 0;
+      u.dest = { x: wp.x + (i-n/2)*off*0.3, y: wp.y + (i%2-0.5)*off*0.6 };
+      u.attackTarget = null;
+    });
+    fx.push({ type:'ring', x:wp.x, y:wp.y, t:0, dur:0.4, maxR:20, color:'rgba(0,229,255,0.6)' });
+  }
+}
+
+/* ── mouse / keyboard ────────────────────────────────────────────── */
+canvas.addEventListener('mousedown', e => {
+  if (e.button === 1 || (e.button === 0 && e.altKey)){ panning = true; panLast = {x:e.offsetX,y:e.offsetY}; return; }
+  if (e.button === 2){ e.preventDefault(); handleOrder(e.offsetX, e.offsetY); return; }
+  dragStart = {x:e.offsetX, y:e.offsetY};
+});
+canvas.addEventListener('mousemove', e => {
+  if (panning && panLast){ cam.x -= (e.offsetX-panLast.x)/cam.z; cam.y -= (e.offsetY-panLast.y)/cam.z; panLast={x:e.offsetX,y:e.offsetY}; return; }
+  if (dragStart) dragNow = {x:e.offsetX, y:e.offsetY};
+});
+canvas.addEventListener('mouseup', e => {
+  if (panning){ panning = false; panLast = null; return; }
+  if (dragStart && dragNow && Math.hypot(dragNow.x-dragStart.x, dragNow.y-dragStart.y) > 10){
+    const w1 = screenToWorld(Math.min(dragStart.x,dragNow.x), Math.min(dragStart.y,dragNow.y));
+    const w2 = screenToWorld(Math.max(dragStart.x,dragNow.x), Math.max(dragStart.y,dragNow.y));
+    if (!e.shiftKey) selected.clear();
+    for (const u of units){ if (u.dead) continue; if (u.x>=w1.x&&u.x<=w2.x&&u.y>=w1.y&&u.y<=w2.y) selected.add(u.id); }
+    refreshFleetStrip();
+  } else if (dragStart){
+    handlePrimary(dragStart.x, dragStart.y, e.shiftKey || e.ctrlKey);
+  }
+  dragStart = null; dragNow = null;
+});
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const f = e.deltaY > 0 ? 0.85 : 1.18;
+  cam.z = clamp(cam.z * f, 0.01, 5);
+}, { passive: false });
+
+window.addEventListener('keydown', e => {
+  if (e.repeat) return;
+  const k = e.key.toLowerCase();
+  if (k === ' '){ e.preventDefault(); togglePause(); return; }
+  if (k === 'escape'){ setMode(null); setIntel(null); return; }
+  if (k === 'a'){ selectAll(); return; }
+  if (k === 't'){ setMode(mode === 'slasher' ? null : 'slasher'); return; }
+  if (k === 'g'){ setMode(mode === 'gamma' ? null : 'gamma'); return; }
+  if (k === 'c'){ setMode(mode === 'conversion' ? null : 'conversion'); return; }
+  if (k === 'v'){ setMode(mode === 'frameshift' ? null : 'frameshift'); return; }
+  if (k === 'x'){ setMode(mode === 'overload' ? null : 'overload'); return; }
+  if (k === 'f'){ fitCamera(); return; }
+  if (k === 'o'){ game.rings = !game.rings; document.getElementById('btn-rings').classList.toggle('armed', game.rings); return; }
+  if (k === '+' || k === '='){ stepSpeed(1); return; }
+  if (k === '-' || k === '_'){ stepSpeed(-1); return; }
+  if (k === 'arrowleft') cam.x -= 60/cam.z;
+  if (k === 'arrowright') cam.x += 60/cam.z;
+  if (k === 'arrowup') cam.y -= 60/cam.z;
+  if (k === 'arrowdown') cam.y += 60/cam.z;
+});
+
+/* ── time compression ────────────────────────────────────────────── */
+const SPEEDS = [1, 4, 16, 64];
+function stepSpeed(d){
+  let i = SPEEDS.indexOf(game.timeScale) + d;
+  i = clamp(i, 0, SPEEDS.length-1);
+  game.timeScale = SPEEDS[i];
+  document.getElementById('btn-speed').textContent = game.timeScale + '×';
+}
+document.getElementById('btn-speed').addEventListener('click', () => {
+  const i = (SPEEDS.indexOf(game.timeScale) + 1) % SPEEDS.length;
+  game.timeScale = SPEEDS[i];
+  document.getElementById('btn-speed').textContent = game.timeScale + '×';
+});
+
+/* ── camera ──────────────────────────────────────────────────────── */
+function fitCamera(){
+  /* frame the action — fleet, enemies, interstice and planet — not the empty world */
+  let x0 = INTERSTICE.x, x1 = INTERSTICE.x, y0 = INTERSTICE.y, y1 = INTERSTICE.y;
+  const grow = p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); };
+  grow(PLANET);
+  for (const u of units) if (!u.dead) grow(u);
+  for (const e of enemies) if (!e.dead) grow(e);
+  const pad = 400;
+  x0 -= pad; x1 += pad; y0 -= pad; y1 += pad;
+  cam.x = (x0+x1)/2; cam.y = (y0+y1)/2;
+  cam.z = Math.min(vw/(x1-x0), vh/(y1-y0));
+  const fitW = Math.min(vw/WORLD.w, vh/WORLD.h);
+  cam.z = clamp(cam.z, fitW, fitW*40);
+}
+function resize(){
+  const root = document.getElementById('game-root');
+  vw = root.clientWidth; vh = root.clientHeight;
+  dpr = window.devicePixelRatio || 1;
+  canvas.width = vw*dpr; canvas.height = vh*dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', () => { resize(); fitCamera(); });
+
+/* ── HUD ─────────────────────────────────────────────────────────── */
+const fleetEl = document.getElementById('fleet-strip');
+const enemyEl = document.getElementById('enemy-strip');
+
+function refreshFleetStrip(){
+  fleetEl.innerHTML = '';
+  units.forEach(u => {
+    const c = document.createElement('div');
+    c.className = 'fs-cell' + (selected.has(u.id) ? ' sel' : '') + (u.dead ? ' lost' : '') + (u.cls === 'dsphere' ? ' dsphere' : '');
+    c.textContent = u.cls === 'dsphere' ? u.name.slice(0,2) : String(u.id - 3);
+    c.title = u.name;
+    if (!u.dead){
+      const b = document.createElement('span'); b.className = 'bar';
+      b.style.width = Math.round(u.hp/u.maxHp*100) + '%';
+      if (u.hp < u.maxHp*0.35) b.style.background = '#ff5040';
+      c.appendChild(b);
+    }
+    c.addEventListener('click', () => { if (u.dead) return; selected.clear(); selected.add(u.id); refreshFleetStrip(); });
+    fleetEl.appendChild(c);
+  });
+}
+function refreshEnemyStrip(){
+  enemyEl.innerHTML = '';
+  enemies.forEach(e => {
+    const c = document.createElement('div');
+    c.className = 'es-cell' + (e.dead ? ' lost' : '') + (intelTarget === e ? ' intel' : '');
+    c.textContent = e.name + (e.dead ? ' [DESTROYED]' : '');
+    const b = document.createElement('span'); b.className = 'bar';
+    b.style.width = e.dead ? '0%' : Math.round(e.hp/e.maxHp*100) + '%';
+    c.appendChild(b);
+    c.addEventListener('click', () => { if (!e.dead) setIntel(e); });
+    enemyEl.appendChild(c);
+  });
+}
+
+const intelEl = document.getElementById('intel');
+function setIntel(e){
+  intelTarget = e; refreshEnemyStrip();
+  if (!e){ intelEl.style.display = 'none'; return; }
+  intelEl.style.display = 'block';
+}
+function refreshIntel(){
+  const e = intelTarget;
+  if (!e || e.dead){ if (e) setIntel(null); return; }
+  let h = '<div class="ttl">' + e.name + '</div>';
+  h += '<div class="row"><span>EST. INTEGRITY</span><span>' + Math.max(0, Math.round(e.hp/e.maxHp*100)) + '%</span></div>';
+  h += '<div class="row"><span>TOTAL DAMAGE</span><span>' + fmt(stats.apathyDamage) + '</span></div>';
+  h += '<div class="row"><span>VELOCITY</span><span>' + Math.hypot(e.vx,e.vy).toFixed(0) + ' KM/S</span></div>';
+  h += '<div class="row"><span>DIST TO PLANET</span><span>' + fmt(dist(e, PLANET)*Mm) + ' KM</span></div>';
+  h += '<div class="row"><span>DIST TO INTERSTICE</span><span>' + fmt(dist(e, INTERSTICE)*Mm) + ' KM</span></div>';
+  h += '<div class="row"><span>BEHAVIOUR</span><span class="state">APPROACH / REPLICATE</span></div>';
+  intelEl.innerHTML = h;
+}
+
+const selPanel = document.getElementById('sel-panel');
+setInterval(() => {
+  if (game.over) return;
+  const sel = units.filter(u => selected.has(u.id));
+  selPanel.innerHTML = sel.slice(0, 5).map(u => {
+    const v = Math.hypot(u.vx, u.vy);
+    const fsReady = u.frameshiftCd <= 0 ? 'READY' : Math.ceil(u.frameshiftCd) + 's';
+    return '<div class="sel-card' + (u.cls==='dsphere'?' dsphere':'') + '">' +
+      '<div class="nm">' + u.name + '</div>' +
+      '<div class="hpb"><i style="width:' + Math.round(u.hp/u.maxHp*100) + '%' + (u.hp<u.maxHp*0.35?';background:#ff5040':'') + '"></i></div>' +
+      'SLASHERS ' + u.slashers + ' · CONV ' + u.conversions + '<br>' +
+      'VEL ' + v.toFixed(0) + ' KPS · FS ' + fsReady +
+      '</div>';
+  }).join('') + (sel.length > 5 ? '<div class="sel-card">+' + (sel.length-5) + ' MORE</div>' : '');
+  refreshFleetStrip();
+  refreshEnemyStrip();
+  refreshIntel();
+  document.getElementById('morale-pct').textContent = Math.round(game.morale) + '%';
+  document.getElementById('morale-fill').style.width = game.morale + '%';
+  document.getElementById('morale-fill').style.background = game.morale < 30 ? '#ff5040' : game.morale < 60 ? 'var(--accent2)' : 'var(--accent)';
+}, 400);
+
+/* ── render ──────────────────────────────────────────────────────── */
+const stars = [];
+for (let i=0;i<300;i++) stars.push({ x: rnd()*WORLD.w, y: rnd()*WORLD.h, s: rnd()*1.2+0.2, a: rnd()*0.4+0.1 });
+
+function icon(x, y, fn){ ctx.save(); ctx.translate(x, y); ctx.scale(1/cam.z, 1/cam.z); fn(); ctx.restore(); }
+
+function draw(){
+  ctx.clearRect(0, 0, vw, vh);
+  ctx.fillStyle = '#020308';
+  ctx.fillRect(0, 0, vw, vh);
+
+  ctx.save();
+  ctx.translate(vw/2, vh/2);
+  ctx.scale(cam.z, cam.z);
+  ctx.translate(-cam.x, -cam.y);
+
+  // Stars
+  for (const s of stars){
+    ctx.globalAlpha = s.a;
+    ctx.fillStyle = '#cfe8f0';
+    ctx.fillRect(s.x, s.y, s.s/cam.z, s.s/cam.z);
+  }
+  ctx.globalAlpha = 1;
+
+  // Grid (500 Mm = 500,000 km)
+  ctx.strokeStyle = 'rgba(0,229,255,0.04)';
+  ctx.lineWidth = 1/cam.z;
+  for (let gx = 0; gx <= WORLD.w; gx += 1000){ ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, WORLD.h); ctx.stroke(); }
+  for (let gy = 0; gy <= WORLD.h; gy += 1000){ ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(WORLD.w, gy); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(0,229,255,0.15)'; ctx.strokeRect(0, 0, WORLD.w, WORLD.h);
+
+  // Interstice
+  const it = performance.now()/1000;
+  ctx.save(); ctx.translate(INTERSTICE.x, INTERSTICE.y);
+  const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, 60);
+  grad.addColorStop(0, 'rgba(150,200,255,0.3)'); grad.addColorStop(1, 'rgba(150,200,255,0)');
+  ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI*2); ctx.fill();
+  for (let r2 = 0; r2 < 3; r2++){
+    ctx.strokeStyle = 'rgba(160,210,255,' + (0.5-r2*0.15) + ')'; ctx.lineWidth = 1.5/cam.z;
+    ctx.save(); ctx.rotate(it*0.2*(r2%2?1:-1)+r2);
+    ctx.beginPath();
+    for (let i=0;i<=12;i++){ const a2=i/12*Math.PI*2; if(i===0)ctx.moveTo(Math.cos(a2)*25,Math.sin(a2)*25);else ctx.lineTo(Math.cos(a2)*25,Math.sin(a2)*25); }
+    ctx.stroke(); ctx.restore();
+  }
+  icon(INTERSTICE.x, INTERSTICE.y, () => { ctx.fillStyle='rgba(160,200,255,0.6)'; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.fillText('INTERSTICE', 0, -30); });
+  ctx.restore();
+
+  // Planet
+  ctx.save(); ctx.translate(PLANET.x, PLANET.y);
+  const pg = ctx.createRadialGradient(0, 0, 10, 0, 0, 40);
+  pg.addColorStop(0, 'rgba(100,180,120,0.4)'); pg.addColorStop(1, 'rgba(100,180,120,0)');
+  ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(0, 0, 40, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(100,180,120,0.8)'; ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+  icon(PLANET.x, PLANET.y, () => { ctx.fillStyle='rgba(100,180,120,0.6)'; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.fillText('HEPPOLON', 0, -22); });
+
+  // Anthropic trap visual
+  if (game.trapActive){
+    ctx.globalAlpha = 0.15 + 0.1 * Math.sin(it*3);
+    ctx.fillStyle = '#b070ff';
+    ctx.font = (80/cam.z) + 'px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('YOU ARE ALMOST CERTAINLY NOT REAL', WORLD.w/2, WORLD.h/2 - 200);
+    ctx.font = (40/cam.z) + 'px monospace';
+    ctx.fillText('999,999 / 1,000,000', WORLD.w/2, WORLD.h/2 - 100);
+    ctx.globalAlpha = 1;
+  }
+
+  // Projectiles
+  for (const p of projectiles){
+    if (p.dead) continue;
+    const m = Math.hypot(p.vx, p.vy) || 1;
+    if (p.type === 'conversion'){
+      ctx.strokeStyle = 'rgba(180,120,255,0.7)'; ctx.lineWidth = 2/cam.z;
+      const tr = Math.min(40, m*5);
+      ctx.beginPath(); ctx.moveTo(p.x-p.vx/m*tr, p.y-p.vy/m*tr); ctx.lineTo(p.x, p.y); ctx.stroke();
+      icon(p.x, p.y, () => { ctx.fillStyle = p.age >= p.armTime ? '#d0a0ff' : '#705088'; ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fill(); });
+    } else {
+      ctx.strokeStyle = 'rgba(0,229,255,0.5)'; ctx.lineWidth = 1.4/cam.z;
+      const tr = Math.min(30, m*5);
+      ctx.beginPath(); ctx.moveTo(p.x-p.vx/m*tr, p.y-p.vy/m*tr); ctx.lineTo(p.x, p.y); ctx.stroke();
+      icon(p.x, p.y, () => { ctx.fillStyle='#bff4ff'; ctx.fillRect(-1.5,-1.5,3,3); });
+    }
+  }
+
+  // Fleet units
+  for (const u of units){
+    if (u.dead) continue;
+    const v = Math.hypot(u.vx, u.vy);
+    if (v > 1){
+      ctx.strokeStyle = u.cls==='dsphere' ? 'rgba(180,120,255,0.25)' : 'rgba(0,229,255,0.25)';
+      ctx.lineWidth = (u.curAcc>0.01?1.5:1)/cam.z;
+      ctx.beginPath(); ctx.moveTo(u.x, u.y); ctx.lineTo(u.x+u.vx/Mm*60, u.y+u.vy/Mm*60); ctx.stroke();
+    }
+    icon(u.x, u.y, () => {
+      if (u.cls === 'dsphere'){
+        // Large hexagonal ship
+        ctx.fillStyle = u.flash > 0 ? '#fff' : '#b078ff';
+        ctx.beginPath();
+        for (let i=0;i<6;i++){ const a2=i/6*Math.PI*2-Math.PI/6; if(i===0)ctx.moveTo(Math.cos(a2)*10,Math.sin(a2)*10);else ctx.lineTo(Math.cos(a2)*10,Math.sin(a2)*10); }
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = 'rgba(180,120,255,0.5)'; ctx.lineWidth = 1; ctx.stroke();
+        if (u.curAcc > 0.01){
+          ctx.fillStyle = 'rgba(180,150,255,0.6)';
+          ctx.beginPath(); ctx.moveTo(-10, -3); ctx.lineTo(-18, 0); ctx.lineTo(-10, 3); ctx.closePath(); ctx.fill();
+        }
+      } else {
+        // Small diamond
+        ctx.rotate(u.angle);
+        ctx.fillStyle = u.flash > 0 ? '#fff' : '#9adfd0';
+        ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(0,3); ctx.lineTo(-5,0); ctx.lineTo(0,-3); ctx.closePath(); ctx.fill();
+        if (u.curAcc > 0.01){
+          ctx.fillStyle = 'rgba(120,220,255,0.6)';
+          ctx.beginPath(); ctx.moveTo(-5,-1.5); ctx.lineTo(-10,0); ctx.lineTo(-5,1.5); ctx.closePath(); ctx.fill();
+        }
+        ctx.rotate(-u.angle);
+      }
+      if (selected.has(u.id)){
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(0, 0, u.cls==='dsphere'?14:8, 0, Math.PI*2); ctx.stroke();
+      }
+    });
+    // Waypoint lines for selected
+    if (selected.has(u.id)){
+      let tx = null, ty = null, col = u.cls==='dsphere' ? 'rgba(180,120,255,0.3)' : 'rgba(0,229,255,0.3)';
+      if (u.attackTarget && !u.attackTarget.dead){ tx = u.attackTarget.x; ty = u.attackTarget.y; col = 'rgba(255,80,60,0.35)'; }
+      else if (u.dest){ tx = u.dest.x; ty = u.dest.y; }
+      if (tx !== null){
+        ctx.strokeStyle = col; ctx.setLineDash([30,30]); ctx.lineWidth = 1/cam.z;
+        ctx.beginPath(); ctx.moveTo(u.x, u.y); ctx.lineTo(tx, ty); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+  }
+
+  // Apathy
+  for (const e of enemies){
+    if (e.dead) continue;
+    icon(e.x, e.y, () => {
+      // Dark, menacing mass
+      const sc = Math.min(30, 10 + e.hp/e.maxHp * 20);
+      ctx.fillStyle = e.flash > 0 ? '#ff4040' : '#1a0008';
+      ctx.beginPath(); ctx.arc(0, 0, sc, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,40,40,' + (0.4 + 0.2*Math.sin(it*4)) + ')';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, sc+3, 0, Math.PI*2); ctx.stroke();
+      // Inner glow
+      ctx.fillStyle = 'rgba(255,0,0,0.15)';
+      ctx.beginPath(); ctx.arc(0, 0, sc*0.6, 0, Math.PI*2); ctx.fill();
+      // Name
+      ctx.fillStyle = 'rgba(255,60,60,0.85)'; ctx.font = '10px monospace'; ctx.textAlign = 'center';
+      ctx.fillText(e.name, 0, -sc-8);
+      // HP bar
+      const w = sc*2;
+      ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(-w/2, sc+6, w, 3);
+      ctx.fillStyle = '#ff4040'; ctx.fillRect(-w/2, sc+6, w*e.hp/e.maxHp, 3);
+      if (intelTarget === e){
+        ctx.strokeStyle = 'rgba(255,60,60,0.9)'; ctx.lineWidth = 1.2;
+        ctx.strokeRect(-sc-6, -sc-4, sc*2+12, sc*2+8);
+      }
+    });
+  }
+
+  // Beams
+  for (const b of beams){
+    if (b.life <= 0) continue;
+    ctx.strokeStyle = b.color; ctx.globalAlpha = Math.min(1, b.life*6);
+    ctx.lineWidth = b.w/cam.z;
+    ctx.beginPath(); ctx.moveTo(b.x1, b.y1); ctx.lineTo(b.x2, b.y2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // FX
+  for (const f of fx){
+    const p = f.t/f.dur;
+    if (p >= 1) continue;
+    if (f.type === 'launch'){
+      ctx.globalAlpha = (1-p)*(1-p);
+      ctx.strokeStyle = f.color; ctx.lineWidth = 1.5/cam.z;
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.maxR*(0.3+p*0.7), 0, Math.PI*2); ctx.stroke();
+      if (p < 0.5){
+        ctx.globalAlpha = (1-p*2)*0.4;
+        ctx.setLineDash([20,15]); ctx.beginPath(); ctx.moveTo(f.x,f.y); ctx.lineTo(f.tx,f.ty); ctx.stroke(); ctx.setLineDash([]);
+      }
+      ctx.globalAlpha = 1; continue;
+    }
+    ctx.globalAlpha = 1-p;
+    ctx.strokeStyle = f.color; ctx.lineWidth = (f.type==='gamma'?3:2)/cam.z;
+    ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(f.maxR*p, 1), 0, Math.PI*2); ctx.stroke();
+    if (f.type === 'boom' && p < 0.4){
+      ctx.fillStyle = f.color; ctx.globalAlpha = (1-p/0.4)*0.9;
+      ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(f.maxR*0.3*(1-p),1), 0, Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+
+  // Selection box
+  if (dragStart && dragNow && Math.hypot(dragNow.x-dragStart.x, dragNow.y-dragStart.y) > 7){
+    ctx.strokeStyle = 'rgba(0,229,255,0.7)'; ctx.fillStyle = 'rgba(0,229,255,0.06)'; ctx.lineWidth = 1;
+    const x = Math.min(dragStart.x, dragNow.x), y = Math.min(dragStart.y, dragNow.y);
+    ctx.fillRect(x,y,Math.abs(dragNow.x-dragStart.x),Math.abs(dragNow.y-dragStart.y));
+    ctx.strokeRect(x,y,Math.abs(dragNow.x-dragStart.x),Math.abs(dragNow.y-dragStart.y));
+  }
+
+  // Scale bar
+  const segMm = 500;
+  document.getElementById('scaleseg').style.width = (segMm*cam.z) + 'px';
+  document.getElementById('scalelbl').textContent = '500,000 KM';
+}
+
+/* ── main loop ──────────────────────────────────────────────────── */
+function update(dt){
+  game.t += dt;
+  for (const u of units) updateUnit(u, dt);
+  for (const e of enemies) updateApathy(e, dt);
+  updateProjectiles(dt);
+  updateAutoplay(dt);
+
+  for (let i=projectiles.length-1;i>=0;i--) if (projectiles[i].dead) projectiles.splice(i,1);
+
+  checkEnd(dt);
+  document.getElementById('clock').textContent = 'T+' + logTime();
+}
+
+let last = 0, simAcc = 0;
+function loop(now){
+  requestAnimationFrame(loop);
+  const fdt = Math.min((now - last)/1000, 0.1);
+  last = now;
+  if (game.running && !game.paused && !game.over){
+    simAcc += fdt * game.timeScale;
+    let n = 0;
+    while (simAcc >= H && n < 300){ update(H); simAcc -= H; n++; }
+    if (n >= 300) simAcc = 0;
+  }
+  /* fx decay in real time so beams and blasts read at any compression */
+  for (const b of beams) b.life -= fdt;
+  for (const f of fx) f.t += fdt;
+  for (let i=beams.length-1;i>=0;i--) if (beams[i].life <= 0) beams.splice(i,1);
+  for (let i=fx.length-1;i>=0;i--) if (fx[i].t >= fx[i].dur) fx.splice(i,1);
+  if (beams.length > 120) beams.splice(0, beams.length - 120);
+  draw();
+}
+
+/* ── UI wiring ──────────────────────────────────────────────────── */
+function togglePause(){
+  if (!game.running || game.over) return;
+  game.paused = !game.paused;
+  document.getElementById('btn-pause').textContent = game.paused ? 'RESUME' : 'PAUSE';
+  document.getElementById('btn-pause').classList.toggle('armed', game.paused);
+}
+document.getElementById('btn-pause').addEventListener('click', togglePause);
+document.getElementById('btn-fit').addEventListener('click', fitCamera);
+document.getElementById('btn-rings').addEventListener('click', () => { game.rings = !game.rings; document.getElementById('btn-rings').classList.toggle('armed', game.rings); });
+document.getElementById('btn-all').addEventListener('click', selectAll);
+document.getElementById('btn-slasher').addEventListener('click', () => setMode(mode==='slasher'?null:'slasher'));
+document.getElementById('btn-gamma').addEventListener('click', () => setMode(mode==='gamma'?null:'gamma'));
+document.getElementById('btn-conversion').addEventListener('click', () => setMode(mode==='conversion'?null:'conversion'));
+document.getElementById('btn-frameshift').addEventListener('click', () => setMode(mode==='frameshift'?null:'frameshift'));
+document.getElementById('btn-overload').addEventListener('click', () => setMode(mode==='overload'?null:'overload'));
+document.getElementById('btn-sim').addEventListener('click', () => {
+  game.autoplay = !game.autoplay;
+  document.getElementById('btn-sim').classList.toggle('armed', game.autoplay);
+  if (game.autoplay){ selectAll(); log('AUTOPLAY: Utilitaria assuming tactical control.', 'good'); }
+  else log('Manual control restored.');
+});
+document.getElementById('btn-help').addEventListener('click', () => { document.getElementById('helpov').style.display = 'flex'; game.paused = true; document.getElementById('btn-pause').textContent = 'RESUME'; });
+document.getElementById('btn-helpclose').addEventListener('click', () => { document.getElementById('helpov').style.display = 'none'; game.paused = false; document.getElementById('btn-pause').textContent = 'PAUSE'; });
+document.getElementById('btn-start').addEventListener('click', () => {
+  document.getElementById('briefing').style.display = 'none';
+  game.running = true;
+  document.getElementById('btn-rings').classList.add('armed');
+  log('Battle Constellation on station. Three Defence Spheres, twenty A-sphere wings. The Apathy approaches.');
+  log('Interstice evacuation rate: 800,000 per second. Every minute you hold is 48 million people through.');
+});
+document.getElementById('btn-restart').addEventListener('click', () => location.reload());
+
+/* scenario picker */
+const scnGrid = document.getElementById('scn-grid');
+Object.keys(SCENARIOS).forEach(k => {
+  const s = SCENARIOS[k];
+  const b = document.createElement('button');
+  b.className = 'scn-btn' + (k === scnKey ? ' sel' : '');
+  b.innerHTML = '<div class="sn">' + s.label + '</div><div class="sd">' + s.desc + '</div>';
+  b.addEventListener('click', () => {
+    scnKey = k;
+    try { localStorage.setItem('woaw-scn', k); } catch(e){}
+    scnGrid.querySelectorAll('.scn-btn').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    document.getElementById('scn-tag').textContent = s.label;
+    initGame();
+    refreshFleetStrip(); refreshEnemyStrip();
+  });
+  scnGrid.appendChild(b);
+});
+document.getElementById('scn-tag').textContent = SCENARIOS[scnKey].label;
+
+/* ── boot ────────────────────────────────────────────────────────── */
+initGame();
+resize();
+fitCamera();
+refreshFleetStrip();
+refreshEnemyStrip();
+document.getElementById('btn-speed').textContent = game.timeScale + '×';
+requestAnimationFrame(loop);
+
+window.__woaw = { game, units, enemies, projectiles, update, draw, stats, CLS, SCENARIOS,
+                  setScenario(k){ scnKey = k; initGame(); } };
+
+})();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

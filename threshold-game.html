@@ -27,8 +27,10 @@ body { overflow: hidden; }
 .hbtn.danger:hover, .hbtn.danger.armed { border-color: #ff5040; color: #ff5040; background: rgba(255,60,40,0.1); }
 .hbtn:disabled { opacity: 0.35; cursor: default; }
 
-#hud-top { position: absolute; top: 8px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 6; }
-#clock { font-size: 11px; color: var(--accent); letter-spacing: 2px; min-width: 64px; }
+#hud-top { position: absolute; top: 8px; left: 10px; display: flex; gap: 6px; align-items: center; z-index: 6; flex-wrap: wrap; }
+#clock { font-size: 11px; color: var(--accent); letter-spacing: 2px; min-width: 88px; }
+#scn-tag { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); border: 1px solid var(--border); padding: 4px 8px; border-radius: 2px; }
+
 #fleet-strip { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px; z-index: 6; }
 .fs-cell {
   width: 22px; height: 22px; border: 1px solid var(--border); border-radius: 2px;
@@ -40,12 +42,13 @@ body { overflow: hidden; }
 .fs-cell.lost { opacity: 0.3; text-decoration: line-through; }
 
 #arco-strip { position: absolute; top: 36px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 6; }
-.as-cell { font-size: 8px; letter-spacing: 1px; color: #ff7a5e; border: 1px solid rgba(255,107,53,0.35); padding: 2px 6px; border-radius: 2px; background: rgba(30,5,0,0.7); }
+.as-cell { font-size: 8px; letter-spacing: 1px; color: #ff7a5e; border: 1px solid rgba(255,107,53,0.35); padding: 2px 6px; border-radius: 2px; background: rgba(30,5,0,0.7); cursor: pointer; }
 .as-cell .bar { display: block; height: 2px; background: var(--accent2); margin-top: 2px; }
 .as-cell.lost { opacity: 0.3; text-decoration: line-through; }
+.as-cell.intel { border-color: #ff5040; }
 
 #event-log {
-  position: absolute; right: 10px; top: 64px; width: 320px; max-height: 50%;
+  position: absolute; right: 10px; top: 64px; width: 330px; max-height: 38%;
   z-index: 5; pointer-events: none; display: flex; flex-direction: column; gap: 3px;
   overflow: hidden;
 }
@@ -57,20 +60,30 @@ body { overflow: hidden; }
 .ev.quote { border-left-color: var(--accent2); color: #d8c8a8; font-style: italic; }
 @keyframes evIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 
+#intel {
+  position: absolute; right: 10px; bottom: 10px; width: 330px; z-index: 6;
+  background: rgba(8,2,0,0.92); border: 1px solid rgba(255,107,53,0.4); border-radius: 2px;
+  padding: 8px 10px; font-size: 9px; line-height: 1.6; color: #d8a890; display: none;
+}
+#intel .ttl { color: var(--accent2); font-size: 10px; letter-spacing: 2px; margin-bottom: 4px; }
+#intel .row { display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(255,107,53,0.15); }
+#intel .row span:first-child { color: rgba(255,150,110,0.55); }
+#intel .state { color: #ffce9e; }
+
 #hud-bottom {
-  position: absolute; left: 10px; bottom: 10px; right: 340px; z-index: 6;
+  position: absolute; left: 10px; bottom: 10px; right: 350px; z-index: 6;
   display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;
 }
-#sel-panel { display: flex; gap: 5px; flex-wrap: wrap; max-width: 60%; }
+#sel-panel { display: flex; gap: 5px; flex-wrap: wrap; max-width: 62%; }
 .sel-card {
   background: rgba(0,18,26,0.88); border: 1px solid var(--border); border-radius: 2px;
-  padding: 4px 8px; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); min-width: 96px;
+  padding: 4px 8px; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); min-width: 130px;
 }
 .sel-card .nm { color: var(--accent); font-size: 9px; margin-bottom: 2px; }
 .sel-card .hpb { height: 3px; background: rgba(255,255,255,0.08); margin: 3px 0; }
 .sel-card .hpb i { display: block; height: 100%; background: var(--accent); }
 .sel-card.cold .nm { color: #6a7e88; }
-#ability-bar { display: flex; gap: 6px; }
+#ability-bar { display: flex; gap: 6px; flex-wrap: wrap; }
 
 #mode-banner {
   position: absolute; top: 64px; left: 50%; transform: translateX(-50%); z-index: 7;
@@ -85,13 +98,17 @@ body { overflow: hidden; }
 }
 @keyframes pulseBtn { 0%,100% { box-shadow: 0 0 0 rgba(0,229,255,0); } 50% { box-shadow: 0 0 14px rgba(0,229,255,0.5); } }
 
+#scalebar { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 5;
+  font-size: 8px; letter-spacing: 2px; color: rgba(120,180,200,0.6); text-align: center; pointer-events: none; }
+#scalebar .seg { display: block; height: 3px; border: 1px solid rgba(120,180,200,0.5); border-top: none; margin-bottom: 2px; }
+
 /* ── Overlays ────────────────────────────────────────────────────── */
 .overlay {
   position: absolute; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
   background: rgba(0,4,8,0.88); backdrop-filter: blur(3px);
 }
 .ov-panel {
-  max-width: 620px; width: calc(100% - 40px); max-height: 90%; overflow-y: auto;
+  max-width: 680px; width: calc(100% - 40px); max-height: 92%; overflow-y: auto;
   border: 1px solid var(--border); background: rgba(2,12,18,0.97); padding: 28px 32px; border-radius: 3px;
 }
 .ov-panel h1 { font-size: 16px; letter-spacing: 6px; color: var(--accent); margin: 0 0 2px; font-weight: 400; }
@@ -99,7 +116,7 @@ body { overflow: hidden; }
 .ov-panel p { font-size: 11px; line-height: 1.8; color: var(--text-dim); margin: 0 0 12px; }
 .ov-panel p b { color: var(--text); font-weight: 600; }
 .ov-panel .ctl { font-size: 9px; line-height: 2; color: var(--text-dim); letter-spacing: 1px; }
-.ov-panel .ctl b { color: var(--accent); display: inline-block; min-width: 110px; font-weight: 400; }
+.ov-panel .ctl b { color: var(--accent); display: inline-block; min-width: 120px; font-weight: 400; }
 .ov-panel .quote { border-left: 2px solid var(--accent2); padding-left: 12px; font-style: italic; color: #cbb894; font-size: 10px; }
 .ov-rule { height: 1px; background: var(--border); margin: 16px 0; }
 .big-btn {
@@ -111,10 +128,21 @@ body { overflow: hidden; }
 .stat-row { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 1px; color: var(--text-dim); padding: 4px 0; border-bottom: 1px dotted rgba(255,255,255,0.06); }
 .stat-row span:last-child { color: var(--text); }
 #aftermath-title { font-size: 18px; letter-spacing: 6px; margin-bottom: 4px; }
+.scn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+.scn-btn { border: 1px solid var(--border); background: rgba(0,15,22,0.7); padding: 10px 12px; cursor: pointer;
+  font-family: var(--mono); text-align: left; transition: all 0.15s; border-radius: 2px; }
+.scn-btn:hover { border-color: var(--accent); }
+.scn-btn.sel { border-color: var(--accent); background: rgba(0,229,255,0.08); }
+.scn-btn .sn { font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-bottom: 3px; }
+.scn-btn .sd { font-size: 8px; letter-spacing: 1px; color: var(--text-dim); line-height: 1.5; }
+.spec-tbl { width: 100%; font-size: 9px; letter-spacing: 0.5px; color: var(--text-dim); border-collapse: collapse; margin-bottom: 8px; }
+.spec-tbl td { padding: 2px 6px; border-bottom: 1px dotted rgba(255,255,255,0.06); }
+.spec-tbl td:first-child { color: var(--accent); white-space: nowrap; }
 
-@media (max-width: 800px) {
-  #event-log { width: 200px; top: 96px; }
-  #hud-bottom { right: 10px; }
+@media (max-width: 900px) {
+  #event-log { width: 210px; top: 96px; }
+  #intel { width: 210px; }
+  #hud-bottom { right: 230px; }
   #fleet-strip { top: 38px; }
   #arco-strip { top: 66px; }
   #analyse-btn { top: 140px; }
@@ -128,21 +156,26 @@ body { overflow: hidden; }
   <div id="hud-top">
     <span id="clock">T+00:00</span>
     <button class="hbtn" id="btn-pause">PAUSE</button>
-    <button class="hbtn" id="btn-speed">1&times;</button>
-    <button class="hbtn" id="btn-fit">FIT</button>
+    <button class="hbtn" id="btn-speed">4&times;</button>
+    <button class="hbtn" id="btn-fit">FIT [F]</button>
+    <button class="hbtn" id="btn-rings">RINGS [O]</button>
     <button class="hbtn" id="btn-help">?</button>
+    <span id="scn-tag"></span>
   </div>
 
   <div id="fleet-strip"></div>
   <div id="arco-strip"></div>
   <div id="event-log"></div>
+  <div id="intel"></div>
   <div id="mode-banner"></div>
   <button class="hbtn" id="analyse-btn">ANALYSE SENSOR LOGS [H]</button>
+  <div id="scalebar"><span class="seg" id="scaleseg"></span><span id="scalelbl"></span></div>
 
   <div id="hud-bottom">
     <div id="ability-bar">
       <button class="hbtn" id="btn-all">ALL [A]</button>
-      <button class="hbtn" id="btn-volley">TORPEDO VOLLEY [T]</button>
+      <button class="hbtn" id="btn-rail">RAILGUNS [R]</button>
+      <button class="hbtn" id="btn-volley">TORPEDOES [T]</button>
       <button class="hbtn" id="btn-dead">PLAY DEAD [D]</button>
       <button class="hbtn danger" id="btn-charge">30G CHARGE [X]</button>
     </div>
@@ -155,25 +188,26 @@ body { overflow: hidden; }
       <div class="sub">2909 CE &middot; TRAILING LAGRANGE POINT OF DELIVERANCE &middot; REAL-TIME TACTICAL COMMAND</div>
       <p class="quote">In toil, absolution. In strife, salvation. In death, release.<br>&mdash; Human Purity Front creed</p>
       <p>The hijacked freighter <b>Atbarah</b> has rammed through the interstice. Two hundred thousand are dead
-      on the far side. Striver malware is buried in the fleet network, and four Arco warships &mdash; three
-      <b>Incisors</b> and an <b>Annihilator</b> &mdash; have just emerged from the wormhole mouth.</p>
-      <p>You command Union&rsquo;s <b>First Fleet</b>: ten destroyer battlegroups, each screened by nine unmanned
-      corvettes. History records that 97 of your 100 ships were destroyed, and that the USV <b>Isidore</b>&rsquo;s
-      thirty-gee suicide charge claimed a single Incisor. That is the standard you are measured against.</p>
+      on the far side, Striver malware is buried in the fleet network, and Arco warships are coming through
+      the wormhole mouth. You command Union&rsquo;s <b>First Fleet</b>: ten destroyer battlegroups, each
+      screened by nine unmanned corvettes, holding a cordon 17,000 km out from the interstice.</p>
       <div class="ov-rule"></div>
+      <div class="sub" style="margin-bottom:8px">SELECT OPPOSING FORCE</div>
+      <div class="scn-grid" id="scn-grid"></div>
+      <div class="ov-rule"></div>
+      <table class="spec-tbl">
+        <tr><td>BASTION-CLASS DESTROYER</td><td>240 m &middot; 28,000 t &middot; fusion torch 10 G mil / 30 G destruct &middot; 6&times; 300 mm railguns (20 kps) &middot; 36 torpedoes (50 G, &Delta;v 250 kps) &middot; 24&times; PDC</td></tr>
+        <tr><td>INCISOR-CLASS INTERDICTOR</td><td>120 m &middot; 1,600 t &middot; ABC drive 12 G / 28 G burst &middot; 500 mm spinal Diamond Duster (2,000 kps) &middot; 100 GW X-ray laser &middot; UV laser grid</td></tr>
+        <tr><td>ANNIHILATOR-CLASS IPAV</td><td>200 m &middot; 4,000 t &middot; ABC drive 5 G cmb / 20 G pk &middot; Neutraliser proton beam (1 TJ) &middot; 4&times; 100 GW X-ray &middot; F-AM micromissiles (250 G)</td></tr>
+      </table>
       <div class="ctl">
-        <b>SELECT</b> click / drag-box &middot; number keys 1&ndash;0 &middot; A = all<br>
-        <b>MOVE / ATTACK</b> right-click space / right-click enemy<br>
-        <b>TORPEDO VOLLEY [T]</b> then click target &mdash; lasers intercept torps at range: <i>mass volleys, fire close</i><br>
-        <b>PLAY DEAD [D]</b> go cold &mdash; the enemy ignores dark hulks unless nearly aboard them<br>
-        <b>30G CHARGE [X]</b> irreversible ramming burn &mdash; the crew will not survive &mdash; launched from playing
-        dead at close range, it strikes without warning<br>
-        <b>CAMERA</b> wheel zoom &middot; middle-drag / arrows pan &middot; F = fit &middot; SPACE = pause
+        <b>RAILGUNS [R]</b> designate a target &mdash; 20 kps rounds rarely hit a 28 G dart, but ships dodging
+        your fire cannot aim their dusters. <i>&ldquo;Keep them dodging.&rdquo;</i><br>
+        <b>TORPEDOES [T]</b> lasers intercept across 20,000 km &mdash; mass your volleys and fire close<br>
+        <b>PLAY DEAD [D]</b> drives cold; dark hulks are ignored beyond ~2,500 km<br>
+        <b>30G CHARGE [X]</b> irreversible &mdash; the crew will not survive &mdash; launched from cold it strikes unawares<br>
+        <b>TIME</b> 1&times; / 4&times; / 16&times; / 64&times; compression &mdash; real space is slow; use it
       </div>
-      <div class="ov-rule"></div>
-      <p style="font-size:10px;">Their X-ray lasers kill torpedoes across tens of thousands of kilometres.
-      Their spinal dusters fire streams of hyperdiamond dust your radar cannot see &mdash; until someone in your
-      fleet works out what is killing you. Watch the log.</p>
       <button class="big-btn" id="btn-start">ASSUME COMMAND</button>
     </div>
   </div>
@@ -193,27 +227,35 @@ body { overflow: hidden; }
   <div class="overlay" id="helpov" style="display:none">
     <div class="ov-panel">
       <h1>COMMAND REFERENCE</h1>
-      <div class="sub">FIRST FLEET TACTICAL DOCTRINE</div>
+      <div class="sub">FIRST FLEET TACTICAL DOCTRINE &middot; ALL FIGURES REAL</div>
       <div class="ctl">
-        <b>SELECT</b> left-click ship / drag selection box / shift-click to add<br>
-        <b>GROUPS 1&ndash;0</b> select battlegroup by number &middot; <b>A</b> select all<br>
-        <b>RIGHT-CLICK</b> move order &middot; on an enemy: attack order (railguns engage inside 1,000 km)<br>
-        <b>T</b> torpedo volley &mdash; 6 torps per group per volley, 36 carried. Enemy lasers intercept roughly
-        three torps per second per ship: saturate them with simultaneous volleys from multiple groups at close range.<br>
-        <b>D</b> play dead &mdash; drive and weapons cold. Enemies will not target a dark ship unless within ~350 km.
-        Any order other than a charge wakes the ship.<br>
-        <b>X</b> 30G charge &mdash; the drive is redlined far beyond crew tolerance. The ship homes on its target,
-        empties every remaining torpedo tube at point-blank range, and rams. Launched from cold within ~1,100 km,
-        the enemy is caught unawares and cannot defend for six seconds.<br>
-        <b>H</b> analyse sensor logs (when available)<br>
-        <b>SPACE</b> pause &middot; <b>F</b> fit camera &middot; <b>ESC</b> cancel order mode<br>
+        <b>SELECT</b> left-click / drag box / shift-click add &middot; 1&ndash;0 groups &middot; A all<br>
+        <b>RIGHT-CLICK</b> move order &middot; on enemy: close to 2,500 km and designate railguns<br>
+        <b>R RAILGUNS</b> persistent target designation. Muzzle 20 kps: a round takes 100 s to cross
+        2,000 km, and a 28 G Incisor side-steps it &mdash; but a ship under fire must keep dodging,
+        and a dodging ship cannot hold its spinal duster on target. Suppression is the point; hits are a bonus.<br>
+        <b>T TORPEDOES</b> 50 G drives, &Delta;v 250 kps, releasing kinetic buckshot 600 km out. Laser
+        point-defence kills any torpedo it has tracked for over ~150 s &mdash; <i>flight time is everything.</i>
+        Never fire at a receding ship: at 50 G you cannot stern-chase a 28 G dart. Volley ships on their
+        <b>inbound leg</b> from under ~6,000 km, so closure keeps the flight short and the torps arrive jinking.<br>
+        <b>D PLAY DEAD</b> drives and weapons cold, ballistic drift. Ignored beyond ~2,500 km.<br>
+        <b>X 30G CHARGE</b> drive redlined to 30 G &mdash; crew dies in the burn. Homes on target, empties every
+        tube at 2,500 km, attempts ram. At 30 G you can only deviate ~1,500 km in 100 s: a charge connects
+        against a ship coming <b>at</b> you, not one crossing or fleeing. The battlegroup being dived on is the
+        one that can make the Isidore&rsquo;s choice &mdash; go cold first and the killing blow lands unawares.<br>
+        <b>H</b> analyse sensor logs &middot; <b>O</b> range rings &middot; <b>F</b> fit &middot; <b>SPACE</b> pause &middot; <b>+/&minus;</b> time compression<br>
       </div>
       <div class="ov-rule"></div>
       <div class="ctl">
-        <b>INCISOR</b> X-ray laser emitters, spinal diamond duster. Fast, evasive.<br>
-        <b>ANNIHILATOR</b> heavy laser grid, antimatter smart-missile swarms from beyond PDC range.<br>
-        <b>CORVETTES</b> your screen. They absorb laser fire and add point-defence against missiles.<br>
-        <b>DUSTERS</b> invisible to radar. When ships start dying without cause, analyse the logs.<br>
+        <b>DUSTER</b> 500 mm spinal, micron hyperdiamond dust at 2,000 kps. Invisible to radar. Effective
+        to ~25,000 km. When ships start dying without cause &mdash; analyse the logs.<br>
+        <b>X-RAY LASERS</b> 100 GW bursts, damaging to ~30,000 km, brutal inside 8,000 km.<br>
+        <b>F-AM MISSILES</b> 250 G, 0.5 Kt antimatter, detonating 600 km out &mdash; beyond effective PDC range.
+        Spread your groups: the gamma flood splashes 1,500 km.<br>
+        <b>NEUTRALISER</b> Annihilator spinal proton beam, 1 TJ per shot. You will know it when it fires.<br>
+        <b>ENEMY DOCTRINE</b> They hold standoff outside your reach, designate a priority target, and
+        bombard. Every few minutes the Incisors run coordinated strikes from divergent vectors, timed
+        with missile waves. They are herding you off the interstice. Wounded ships break off.<br>
       </div>
       <button class="big-btn" id="btn-helpclose">RETURN TO CIC</button>
     </div>
@@ -225,56 +267,125 @@ body { overflow: hidden; }
 'use strict';
 
 /* ════════════════════════════════════════════════════════════════════
-   THRESHOLD: FIRST FLEET — real-time tactics, Battle of Threshold, 2909 CE
+   THRESHOLD: FIRST FLEET — Battle of Threshold, 2909 CE
+   Real units throughout: positions km, velocity km/s, acceleration km/s².
+   1 G = 0.00981 km/s². Fixed-timestep sim with time compression.
    ════════════════════════════════════════════════════════════════════ */
 
 const canvas = document.getElementById('gc');
 const ctx = canvas.getContext('2d');
 let vw = 100, vh = 100, dpr = 1;
 
-const WORLD = { w: 5200, h: 3200 };
-const INTERSTICE = { x: 4650, y: 1600 };
+const G = 0.00981;                              // km/s² per gee
+const H = 0.2;                                  // sim timestep, seconds
+const WORLD = { w: 90000, h: 60000 };           // km
+const INTERSTICE = { x: 78000, y: 30000 };
 
-const cam = { x: WORLD.w/2, y: WORLD.h/2, z: 0.3 };
+const cam = { x: WORLD.w/2, y: WORLD.h/2, z: 0.008 };   // z = px per km
+
+const SCENARIOS = {
+  recon:      { label: 'RECON IN FORCE',      desc: '1 Incisor. A probe, not a punishment. Learn the systems.', inc: 1, ann: false },
+  squadron:   { label: 'PUNITIVE SQUADRON',   desc: '2 Incisors. Coordinated strike runs begin.', inc: 2, ann: false },
+  historical: { label: 'HISTORICAL — 2909 CE', desc: '3 Incisors + Annihilator. The battle as the record shows it. 97 of 100 ships died.', inc: 3, ann: true },
+  retribution:{ label: 'RETRIBUTION',         desc: '4 Incisors + Annihilator. Worse than history.', inc: 4, ann: true }
+};
+let scnKey = 'historical';
+try { scnKey = localStorage.getItem('tff-scn') || 'historical'; } catch(e){}
+if (!SCENARIOS[scnKey]) scnKey = 'historical';
 
 const game = {
   running: false, paused: false, over: false,
-  t: 0, speed: 1, weaponsFree: false, submm: false,
-  dustHits: 0, analyse: 0, analyseT: 0,    // analyse: 0 hidden 1 avail 2 running 3 done
-  withdrawing: false, endTimer: -1, shake: 0
+  t: 0, timeScale: 4, weaponsFree: false, submm: false,
+  dustHits: 0, analyse: 0, analyseT: 0,
+  withdrawing: false, endTimer: -1, rings: true
 };
+const stats = { destroyersLost: 0, corvLost: 0, incisors: 0, annihilators: 0,
+                torpsFired: 0, salvosFired: 0, dustFired: 0, strikes: 0,
+                torpIntercepted: 0, torpHit: 0, torpMissTerm: 0, torpExpired: 0,
+                ramHit: 0, ramMiss: 0 };
 
-const stats = { destroyersLost: 0, corvLost: 0, incisors: 0, annihilators: 0, torpsFired: 0, dustFired: 0 };
-
-const groups = [], arco = [], torps = [], rounds = [], missiles = [], dusts = [], beams = [], fx = [];
+const groups = [], arco = [], torps = [], salvos = [], missiles = [], dusts = [], beams = [], fx = [];
 
 const GNAMES = ['ISIDORE','JAYAPAL','ACHERON','KEPLER','NOVGOROD','TENACITY','HYPERION','CASTELLAN','RIGA','AMUNDSEN'];
+
+/* ── class data (real / canon figures) ───────────────────────────── */
+const CLS = {
+  destroyer: {
+    label: 'BASTION-CLASS FLEET DESTROYER',
+    len: '240 m', mass: '28,000 t', drive: 'D-T fusion torch, hydrocarbon afterburner',
+    accMil: 10*G, accDestruct: 30*G, vmax: 120,
+    hull: 100,
+    railMuzzle: 20,            // kps
+    railCycle: 8,              // s between salvos (6 turrets)
+    railDesigRange: 6000,      // km, designated fire allowed
+    railAutoRange: 1200,       // km, defensive auto
+    torpCount: 36,
+    pdcRange: 1000             // km vs missiles
+  },
+  incisor: {
+    label: 'INCISOR-CLASS IP INTERDICTOR',
+    len: '120 m', mass: '1,600 t (wet)', drive: 'External-matrix ABC antimatter, Δv 5,200 kps',
+    acc: 12*G, accBurst: 28*G, vmax: 200,
+    hull: 115,
+    weapons: ['1× 500 mm spinal Diamond Duster (2,000 kps)', '1× 100 GW burst X-ray laser', '12× 5 GW UV laser grid', 'CIWS'],
+    beamCycle: 36, beamRanges: [[8000,8],[16000,4],[30000,2]],
+    interceptRate: 12, interceptRange: 5000,
+    dusterCharge: 8, dusterCool: 38, dusterRange: 25000
+  },
+  annihilator: {
+    label: 'ANNIHILATOR-CLASS IP ASSAULT VEHICLE',
+    len: '200 m', mass: '4,000 t (wet)', drive: '2740-model ABC, Δv 6,931 kps cruise / 347 kps at 20 G peak',
+    acc: 5*G, accBurst: 20*G, vmax: 90,
+    hull: 340,
+    weapons: ['1× Neutraliser burst proton beam (1 TJ/shot)', '4× 100 GW burst X-ray laser', '32× 5 GW UV laser grid', '16× 30 mm rails — 0.5 Kt F-AM micromissiles', '750 mm hyperdiamond fore armour'],
+    beamCycle: 20, beamRanges: [[8000,9],[16000,5],[30000,3]],
+    neutCycle: 120, neutRange: 20000, neutDmg: 25,
+    interceptRate: 6, interceptRange: 5000,
+    missileWave: 8, missileCool: 200
+  },
+  torpedo:  { acc: 50*G, dv: 250, vmax: 400, releaseRange: 600, dmg: 9 },
+  missile:  { acc: 250*G, dv: 600, vmax: 600, detRange: 500, dmg: 8, splash: 1500, splashDmg: 3 },
+  salvo:    { muzzle: 20, dmg: 7 },
+  /* dust stream disperses with range: [maxRange, dmgBase, dmgRand, corvettesKilled] */
+  duster:   { speed: 2000, tiers: [[8000,30,15,3],[16000,10,5,2],[26000,6,4,1]] }
+};
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 const rnd = Math.random;
 function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
 function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
-
-function steerTo(e, tx, ty, accel, maxV, dt, arrive){
-  const dx = tx-e.x, dy = ty-e.y, d = Math.hypot(dx,dy) || 1e-6;
-  let sp = maxV;
-  if (arrive) sp = Math.min(maxV, d*1.1);
-  const dvx = dx/d*sp - e.vx, dvy = dy/d*sp - e.vy;
-  const dm = Math.hypot(dvx,dvy) || 1e-6;
-  const am = Math.min(accel*dt, dm);
-  e.vx += dvx/dm*am; e.vy += dvy/dm*am;
-}
-function damp(e, dt){ const f = Math.pow(0.5, dt); e.vx *= f; e.vy *= f; }
+function fmt(n){ return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function distToSeg(px, py, x1, y1, x2, y2){
   const dx = x2-x1, dy = y2-y1;
   const L2 = dx*dx + dy*dy;
   const t = L2 ? clamp(((px-x1)*dx + (py-y1)*dy)/L2, 0, 1) : 0;
   return Math.hypot(px - (x1 + t*dx), py - (y1 + t*dy));
 }
-function lead(sx, sy, t, ps){
+/* accelerate e's velocity toward a desired velocity; record applied accel */
+function thrustToward(e, dvx, dvy, acc, dt){
+  const dm = Math.hypot(dvx, dvy) || 1e-9;
+  const am = Math.min(acc*dt, dm);
+  e.vx += dvx/dm*am; e.vy += dvy/dm*am;
+  e.curAcc = am/dt;
+}
+/* flip-and-burn arrival: braking-curve speed limit */
+function arrive(e, tx, ty, acc, dt, vmax){
+  const dx = tx-e.x, dy = ty-e.y, d = Math.hypot(dx,dy) || 1e-9;
+  const sp = Math.min(vmax, Math.sqrt(2*acc*Math.max(d-50,0))*0.85);
+  thrustToward(e, dx/d*sp - e.vx, dy/d*sp - e.vy, acc, dt);
+}
+function pursue(e, tx, ty, acc, dt, vmax){
+  const dx = tx-e.x, dy = ty-e.y, d = Math.hypot(dx,dy) || 1e-9;
+  thrustToward(e, dx/d*vmax - e.vx, dy/d*vmax - e.vy, acc, dt);
+}
+function brake(e, acc, dt){
+  thrustToward(e, -e.vx, -e.vy, acc, dt);
+  if (Math.hypot(e.vx, e.vy) < 0.05){ e.vx = 0; e.vy = 0; e.curAcc = 0; }
+}
+function lead(sx, sy, t, ps, maxT){
   let tx = t.x, ty = t.y;
-  for (let i=0;i<2;i++){
-    const tt = Math.hypot(tx-sx, ty-sy)/ps;
+  for (let i=0;i<3;i++){
+    const tt = Math.min(Math.hypot(tx-sx, ty-sy)/ps, maxT || 1e9);
     tx = t.x + t.vx*tt; ty = t.y + t.vy*tt;
   }
   return { x: tx, y: ty };
@@ -282,61 +393,69 @@ function lead(sx, sy, t, ps){
 
 /* ── setup ───────────────────────────────────────────────────────── */
 function makeGroup(i){
-  const ang = (-50 + 100*i/9) * Math.PI/180;
-  const x = INTERSTICE.x - Math.cos(ang)*1900;
-  const y = INTERSTICE.y + Math.sin(ang)*1850*0.82;
-  const offs = [];
-  for (let k=0;k<9;k++){ const a = k/9*Math.PI*2; const r = 30 + (k%3)*9; offs.push({a, r}); }
+  const ang = (-52 + 104*i/9) * Math.PI/180;
+  const x = INTERSTICE.x - Math.cos(ang)*17000;
+  const y = INTERSTICE.y + Math.sin(ang)*17000;
+  const c = CLS.destroyer;
   return {
-    kind:'union', id:i+1, name:'USV '+GNAMES[i], x, y, vx:0, vy:0,
-    hp:100, maxHp:100, radius:13, angle:0,
-    dest:null, attackTarget:null, torps:36, corvettes:9, corvOff:offs,
-    railCd: rnd()*2, pdcAcc:0, playingDead:false,
+    kind:'union', id:i+1, name:'USV '+GNAMES[i], x, y, vx:0, vy:0, curAcc:0,
+    hp:c.hull, maxHp:c.hull, angle:0,
+    dest:null, attackTarget:null, railTarget:null,
+    torps:c.torpCount, corvettes:9,
+    railCd: rnd()*c.railCycle, pdcAcc:0, playingDead:false,
     charging:false, chargeTarget:null, chargeFired:false, chargeT:0,
-    derelict:false, dead:false, surprise:0, flash:0, spin: (rnd()-0.5)*0.6
+    derelict:false, dead:false, surprise:0, flash:0, threat:0
   };
 }
-function makeArco(cls, name, hy){
-  const inc = cls === 'incisor';
+function makeArco(cls, name, holdAng){
+  const c = CLS[cls];
   return {
-    kind:'arco', cls, name, x: INTERSTICE.x, y: INTERSTICE.y, vx:-70, vy:0,
-    hp: inc?115:340, maxHp: inc?115:340, radius: inc?15:26, angle: Math.PI,
-    holdX: 4150, holdY: hy, state:'emerge',
-    target:null, retargetT: rnd()*2, jukeT:0, jvx:0, jvy:0,
-    beamCd: 1+rnd()*2, interceptCd: 0,
-    dusterCd: 6+rnd()*6, dusterState: null,
-    missileCd: 14, dead:false, escaped:false, flash:0,
-    evadeT: 0, evadeCd: 0, evx: 0, evy: 0,
-    run: null, runT: 20 + rnd()*15
+    kind:'arco', cls, name, x: INTERSTICE.x, y: INTERSTICE.y, vx:-4, vy:0, curAcc:0,
+    hp:c.hull, maxHp:c.hull, angle: Math.PI,
+    holdAng, state:'emerge',
+    target:null, beamCd: 5+rnd()*10, neutCd: 30, interceptCd: 0,
+    dusterCd: 10+rnd()*10, dusterState: null,
+    missileCd: 60, dead:false, escaped:false, flash:0,
+    suppress:0, evadeT:0, evadeSign:1, strikeRole:null
   };
 }
 
 const schedule = [];
 function initGame(){
+  const scn = SCENARIOS[scnKey];
   groups.length = 0; arco.length = 0;
   for (let i=0;i<10;i++) groups.push(makeGroup(i));
+  schedule.length = 0;
+  schedule.push({ t: 10, fn(){ log('Contacts emerging from the interstice — velocity a scant few kilometres per second. Elongated pyramids, spinal weapon mounts.', 'warn'); } });
+  const incAngles = [-0.9, 0.9, 0, -1.6, 1.6];
+  for (let i=0;i<scn.inc;i++){
+    const k = i;
+    schedule.push({ t: 30 + i*25, fn(){ spawnArco('incisor', 'INCISOR-'+(k+1), incAngles[k]); } });
+  }
+  if (scn.ann){
+    schedule.push({ t: 30 + scn.inc*25 + 15, fn(){
+      spawnArco('annihilator', 'ANNIHILATOR', 0.45);
+      log('Capital-class contact. Antimatter drive signature, 200 m hull. Designating ANNIHILATOR.', 'warn');
+    } });
+  }
   schedule.push(
-    { t: 0.5, fn(){ log('Four contacts emerging from the interstice. Elongated pyramids — spinal weapon mounts.', 'warn'); } },
-    { t: 2,   fn(){ spawnArco('incisor','INCISOR-1',1050); } },
-    { t: 4,   fn(){ spawnArco('incisor','INCISOR-2',1600); } },
-    { t: 6,   fn(){ spawnArco('incisor','INCISOR-3',2150); } },
-    { t: 7,   fn(){ log('Ngoni: ‘Hold position with the interstice. Charge eCell banks. Prep for high-G maneuvers.’', 'quote'); } },
-    { t: 10,  fn(){ spawnArco('annihilator','ANNIHILATOR',1600); log('Fourth contact: capital-class. Designating ANNIHILATOR.', 'warn'); } },
-    { t: 12,  fn(){ log('Comm handshake failing. Software trouble on our end — Striver worms suspected in the network.'); } },
-    { t: 15,  fn(){ malwareLaunch(); } },
-    { t: 18,  fn(){ log('Ngoni: ‘Go manual. Pull the data lines if you have to.’', 'quote'); } },
-    { t: 22,  fn(){
+    { t: 110, fn(){ log('Ngoni: ‘Hold position with the interstice. Charge eCell banks. Prep for high-G maneuvers.’', 'quote'); } },
+    { t: 130, fn(){ log('Comm handshake failing. Software trouble on our end — Striver worms suspected in the network.'); } },
+    { t: 150, fn(){ malwareLaunch(); } },
+    { t: 175, fn(){ log('Ngoni: ‘Go manual. Pull the data lines if you have to.’', 'quote'); } },
+    { t: 210, fn(){
         game.weaponsFree = true;
-        for (const a of arco) a.state = 'engage';
+        for (const a of arco) if (a.state === 'hold' || a.state === 'emerge') a.state = 'engage';
+        cmdr.phase = 'bombard';
         log('ARCO FORCES ENGAGING. WEAPONS FREE.', 'warn');
-        log('Their drives outshine the entire fleet. Accelerations no crew could survive.');
+        log('Their drive plumes outshine the entire fleet. Lateral burst accelerations no crew could survive.');
     } }
   );
 }
-function spawnArco(cls, name, hy){
-  const a = makeArco(cls, name, hy);
+function spawnArco(cls, name, holdAng){
+  const a = makeArco(cls, name, holdAng);
   arco.push(a);
-  fx.push({ type:'ring', x: INTERSTICE.x, y: INTERSTICE.y, t:0, dur:1.2, maxR:140, color:'rgba(160,200,255,0.8)' });
+  fx.push({ type:'ring', x: INTERSTICE.x, y: INTERSTICE.y, t:0, dur:1.2, maxR:2500, color:'rgba(160,200,255,0.8)' });
   refreshArcoStrip();
 }
 function malwareLaunch(){
@@ -353,11 +472,15 @@ function malwareLaunch(){
 
 /* ── event log ───────────────────────────────────────────────────── */
 const logEl = document.getElementById('event-log');
+function logTime(){
+  const t = game.t, hh = Math.floor(t/3600), m = Math.floor(t/60)%60, s = Math.floor(t%60);
+  const p = n => String(n).padStart(2,'0');
+  return (hh? hh+':' : '') + p(m) + ':' + p(s);
+}
 function log(msg, cls){
   const d = document.createElement('div');
   d.className = 'ev' + (cls ? ' '+cls : '');
-  const m = Math.floor(game.t/60), s = Math.floor(game.t%60);
-  d.innerHTML = '<span class="ts">'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'</span>' + msg;
+  d.innerHTML = '<span class="ts">'+logTime()+'</span>' + msg;
   logEl.insertBefore(d, logEl.firstChild);
   while (logEl.children.length > 9) logEl.removeChild(logEl.lastChild);
 }
@@ -367,7 +490,7 @@ function hitGroup(g, dmg, type){
   if (g.dead) return;
   if (type === 'laser' && g.corvettes > 0 && rnd() < 0.55){
     g.corvettes--; stats.corvLost++;
-    fx.push({ type:'boom', x: g.x+(rnd()-0.5)*60, y: g.y+(rnd()-0.5)*60, t:0, dur:0.5, maxR:16, color:'rgba(180,220,255,0.9)' });
+    fx.push({ type:'boom', x: g.x+(rnd()-0.5)*120, y: g.y+(rnd()-0.5)*120, t:0, dur:0.5, maxR:200, color:'rgba(180,220,255,0.9)' });
     return;
   }
   g.hp -= dmg; g.flash = 0.25;
@@ -379,13 +502,11 @@ function destroyGroup(g){
   stats.destroyersLost++;
   stats.corvLost += g.corvettes; g.corvettes = 0;
   selected.delete(g.id);
-  fx.push({ type:'boom', x:g.x, y:g.y, t:0, dur:1.4, maxR:90, color:'rgba(255,200,140,1)' });
-  for (let i=0;i<14;i++) fx.push({ type:'spark', x:g.x, y:g.y, vx:(rnd()-0.5)*220, vy:(rnd()-0.5)*220, t:0, dur:1+rnd(), color:'rgba(255,170,90,0.9)' });
-  game.shake = Math.max(game.shake, 6);
+  fx.push({ type:'boom', x:g.x, y:g.y, t:0, dur:1.4, maxR:900, color:'rgba(255,200,140,1)' });
   log(g.name + ' destroyed.', 'warn');
   refreshFleetStrip();
 }
-function wreckGroup(g){       // crew dead, hulk drifting
+function wreckGroup(g){
   if (g.dead || g.derelict) return;
   g.derelict = true; g.charging = false; g.playingDead = false;
   stats.destroyersLost++;
@@ -398,13 +519,12 @@ function hitArco(a, dmg){
   if (a.hp <= 0){
     a.dead = true;
     if (a.cls === 'incisor') stats.incisors++; else stats.annihilators++;
-    fx.push({ type:'boom', x:a.x, y:a.y, t:0, dur:2, maxR:150, color:'rgba(255,235,210,1)' });
-    for (let i=0;i<22;i++) fx.push({ type:'spark', x:a.x, y:a.y, vx:(rnd()-0.5)*320, vy:(rnd()-0.5)*320, t:0, dur:1.4+rnd(), color:'rgba(255,140,80,0.9)' });
-    game.shake = Math.max(game.shake, 10);
+    fx.push({ type:'boom', x:a.x, y:a.y, t:0, dur:2, maxR:1400, color:'rgba(255,235,210,1)' });
     if (stats.incisors + stats.annihilators === 1)
       log(a.name + ' DESTROYED — broken in half, consumed in nuclear light. Every hull camera in the fleet recorded it.', 'good');
     else
       log(a.name + ' DESTROYED.', 'good');
+    if (intelTarget === a) setIntel(null);
     refreshArcoStrip();
   }
 }
@@ -414,20 +534,31 @@ function fireVolley(g, target, n, uncommanded){
   if (g.dead || g.derelict || g.torps <= 0 || !target || target.dead) return;
   n = Math.min(n || 6, g.torps);
   g.torps -= n; stats.torpsFired += n;
-  if (!uncommanded) g.playingDead = false;
+  if (!uncommanded){ g.playingDead = false; g.threat = 60; }
   for (let i=0;i<n;i++){
-    const a = rnd()*Math.PI*2;
     torps.push({
-      x: g.x + Math.cos(a)*16, y: g.y + Math.sin(a)*16,
-      vx: g.vx + (rnd()-0.5)*60, vy: g.vy + (rnd()-0.5)*60,
-      target, life: 26, dead: false, sneak: g.surprise > 0
+      x: g.x + (rnd()-0.5)*60, y: g.y + (rnd()-0.5)*60,
+      vx: g.vx + (rnd()-0.5)*2, vy: g.vy + (rnd()-0.5)*2,
+      fuel: CLS.torpedo.dv, target, life: 1200, dead: false, sneak: g.surprise > 0, age: 0
     });
   }
   g.flash = 0.15;
 }
+function fireSalvo(g, target){
+  const L = lead(g.x, g.y, target, CLS.salvo.muzzle);
+  const d = Math.hypot(L.x-g.x, L.y-g.y) || 1;
+  salvos.push({
+    x: g.x, y: g.y,
+    vx: (L.x-g.x)/d*CLS.salvo.muzzle + g.vx, vy: (L.y-g.y)/d*CLS.salvo.muzzle + g.vy,
+    target, age: 0, life: 500, dead: false
+  });
+  stats.salvosFired++;
+  g.flash = Math.max(g.flash, 0.08);
+  g.threat = Math.max(g.threat, 30);
+}
 function orderCharge(g, target){
   if (g.dead || g.derelict || g.charging) return;
-  const sneak = g.playingDead && dist(g, target) < 1100;
+  const sneak = g.playingDead && dist(g, target) < 8000;
   g.charging = true; g.chargeTarget = target; g.chargeFired = false; g.chargeT = 0;
   g.playingDead = false; g.dest = null; g.attackTarget = null;
   if (sneak){ g.surprise = 6; log(g.name + ' — cold hull igniting at point-blank range. They never saw it coming.', 'good'); }
@@ -441,10 +572,12 @@ function updateGroup(g, dt){
   if (g.dead) return;
   g.flash = Math.max(0, g.flash - dt);
   g.surprise = Math.max(0, g.surprise - dt);
+  g.threat = Math.max(0, g.threat - dt);
+  const c = CLS.destroyer;
 
   if (g.derelict){
     g.x += g.vx*dt; g.y += g.vy*dt;
-    damp(g, dt*0.1);
+    g.curAcc = 0;
     return;
   }
 
@@ -453,194 +586,289 @@ function updateGroup(g, dt){
     const t = g.chargeTarget;
     g.chargeT += dt;
     if (!t || t.dead){
-      wreckGroup(g);   // burn already redlined the drive
+      wreckGroup(g);
     } else {
-      steerTo(g, t.x, t.y, 95, 430, dt, false);
+      /* pure pursuit: optimal against a closing target, and nothing catches a receding one anyway */
+      pursue(g, t.x, t.y, c.accDestruct, dt, 350);
       const d = dist(g, t);
-      if (!g.chargeFired && d < 420){
+      if (!g.chargeFired && d < 2500){
         fireVolley(g, t, g.torps, true);
         g.chargeFired = true;
       }
-      if (d < t.radius + 20){
-        hitArco(t, 70);
-        fx.push({ type:'boom', x:g.x, y:g.y, t:0, dur:1.6, maxR:120, color:'rgba(255,255,230,1)' });
+      /* segment test in relative coordinates: at 100+ kps closing speed the
+         contact window is far smaller than one integration step */
+      if (distToSeg(t.x, t.y, g.x, g.y, g.x + (g.vx-t.vx)*dt, g.y + (g.vy-t.vy)*dt) < 120){
+        const p = (t.suppress > 0 || g.surprise > 0) ? 0.85 : 0.3;
+        if (rnd() < p){
+          stats.ramHit++;
+          hitArco(t, 85);
+          fx.push({ type:'boom', x:g.x, y:g.y, t:0, dur:1.6, maxR:1200, color:'rgba(255,255,230,1)' });
+        } else {
+          stats.ramMiss++;
+          log(g.name + ' — ram attempt evaded. The hulk tumbles past.', 'warn');
+        }
         wreckGroup(g);
-      } else if (g.chargeFired && g.chargeT > 0 && d > 600){
-        wreckGroup(g);   // overshot; drive slagged, crew gone
-      } else if (g.chargeT > 22){
+      } else if (g.chargeFired && d > 6000){
+        wreckGroup(g);
+      } else if (g.chargeT > 900){
         wreckGroup(g);
       }
     }
   } else if (g.playingDead){
-    damp(g, dt);
-  } else if (g.attackTarget && !g.attackTarget.dead){
+    g.curAcc = 0;        // ballistic drift — that's the point
+  } else if (g.attackTarget && !g.attackTarget.dead && !g.attackTarget.escaped){
     const t = g.attackTarget;
     const d = dist(g, t);
-    if (d > 720) steerTo(g, t.x, t.y, 26, 105, dt, false);
-    else damp(g, dt);
+    if (d > 2500) pursue(g, t.x, t.y, c.accMil, dt, c.vmax);
+    else brake(g, c.accMil, dt);
   } else if (g.dest){
-    steerTo(g, g.dest.x, g.dest.y, 26, 105, dt, true);
-    if (dist(g, g.dest) < 18) g.dest = null;
+    arrive(g, g.dest.x, g.dest.y, c.accMil, dt, c.vmax);
+    if (dist(g, g.dest) < 100 && Math.hypot(g.vx,g.vy) < 0.5){ g.dest = null; g.vx = 0; g.vy = 0; }
   } else {
-    damp(g, dt);
+    brake(g, c.accMil, dt);
   }
-  g.x = clamp(g.x + g.vx*dt, 30, WORLD.w-30);
-  g.y = clamp(g.y + g.vy*dt, 30, WORLD.h-30);
+  g.x = clamp(g.x + g.vx*dt, 300, WORLD.w-300);
+  g.y = clamp(g.y + g.vy*dt, 300, WORLD.h-300);
   const sp = Math.hypot(g.vx, g.vy);
-  if (sp > 12) g.angle = Math.atan2(g.vy, g.vx);
+  if (sp > 0.5) g.angle = Math.atan2(g.vy, g.vx);
 
-  /* railgun */
+  /* railguns */
   if (!g.playingDead && !g.charging && game.weaponsFree){
     g.railCd -= dt;
     if (g.railCd <= 0){
-      /* ordered targets engaged at full range; otherwise defensive fire only at close quarters */
-      let tgt = (g.attackTarget && !g.attackTarget.dead && dist(g,g.attackTarget) < 1050) ? g.attackTarget : null;
+      let tgt = null;
+      if (g.railTarget && !g.railTarget.dead && !g.railTarget.escaped && dist(g, g.railTarget) < c.railDesigRange)
+        tgt = g.railTarget;
       if (!tgt){
-        let bd = 450;
+        let bd = c.railAutoRange;
         for (const a of arco){ if (a.dead || a.escaped) continue; const d = dist(g,a); if (d < bd){ bd = d; tgt = a; } }
       }
-      if (tgt){
-        const L = lead(g.x, g.y, tgt, 620);
-        /* dispersion grows with range — railguns are close-quarters weapons */
-        const err = 0.012 + dist(g, tgt)/1050*0.085;
-        const a = Math.atan2(L.y-g.y, L.x-g.x) + (rnd()-0.5)*2*err;
-        rounds.push({ x:g.x, y:g.y, vx: Math.cos(a)*620 + g.vx*0.3, vy: Math.sin(a)*620 + g.vy*0.3, life: 3.2 });
-        g.railCd = 2.4;
-        g.flash = Math.max(g.flash, 0.08);
-      }
+      if (tgt){ fireSalvo(g, tgt); g.railCd = c.railCycle; }
     }
   }
 
   /* PDC vs missiles */
   if (!g.playingDead && game.weaponsFree){
-    g.pdcAcc += dt * (0.8 + g.corvettes*0.18);
+    g.pdcAcc += dt * (0.5 + g.corvettes*0.1);
     while (g.pdcAcc >= 1){
       g.pdcAcc -= 1;
-      let tgt = null, bd = 290;
+      let tgt = null, bd = c.pdcRange;
       for (const m of missiles){ if (m.dead) continue; const d = dist(g,m); if (d < bd){ bd = d; tgt = m; } }
       if (tgt){
         beams.push({ x1:g.x, y1:g.y, x2:tgt.x, y2:tgt.y, life:0.1, color:'rgba(160,255,200,0.7)', w:1 });
-        if (rnd() < 0.6){
+        if (rnd() < 0.5){
           tgt.dead = true;
-          fx.push({ type:'boom', x:tgt.x, y:tgt.y, t:0, dur:0.4, maxR:14, color:'rgba(200,255,220,0.9)' });
+          fx.push({ type:'boom', x:tgt.x, y:tgt.y, t:0, dur:0.4, maxR:150, color:'rgba(200,255,220,0.9)' });
         }
       } else { g.pdcAcc = 0; break; }
     }
   }
 }
 
-/* ── update: arco ────────────────────────────────────────────────── */
-function pickUnionTarget(a, range){
-  let best = null, bs = Infinity;
+/* ── enemy fleet commander ───────────────────────────────────────── */
+const cmdr = { phase:'posture', priority:null, evalT:0, strikeT:60, strike:null, herdLogged:false };
+
+function unionScore(g){
+  /* higher = more attractive target */
+  let isolation = 1e9;
+  for (const o of groups){
+    if (o === g || o.dead || o.derelict) continue;
+    isolation = Math.min(isolation, dist(g, o));
+  }
+  if (isolation > 1e8) isolation = 30000;
+  let s = (1 - g.hp/g.maxHp)*2.5 + isolation/15000 + (g.threat > 0 ? 1.2 : 0);
+  const di = dist(g, INTERSTICE);
+  if (di < 11000) s += 3;          // herding: nobody approaches the interstice
+  return s;
+}
+function targetable(a, g, range){
+  if (g.dead || g.derelict || g.surprise > 0) return false;
+  const d = dist(a, g);
+  if (d > range) return false;
+  if (g.playingDead && d > 2500) return false;
+  return true;
+}
+function pickLocalTarget(a, range){
+  let best = null, bs = -1;
   for (const g of groups){
-    if (g.dead || g.derelict || g.surprise > 0) continue;
-    const d = dist(a, g);
-    if (d > range) continue;
-    if (g.playingDead && d > 350) continue;
-    const score = d * (g.playingDead ? 4 : 1);
-    if (score < bs){ bs = score; best = g; }
+    if (!targetable(a, g, range)) continue;
+    if (cmdr.strike && cmdr.strike.target === g) continue;   // strikers own that one
+    const s = unionScore(g) - dist(a,g)/30000;
+    if (s > bs){ bs = s; best = g; }
   }
   return best;
 }
+function priOk(a, range){
+  return cmdr.priority && targetable(a, cmdr.priority, range) &&
+         !(cmdr.strike && cmdr.strike.target === cmdr.priority);
+}
+function nearestStrikeTarget(ships){
+  let cx = 0, cy = 0, n = 0;
+  for (const a of ships){ if (!a.dead && !a.escaped){ cx += a.x; cy += a.y; n++; } }
+  if (!n) return null;
+  cx /= n; cy /= n;
+  let best = null, bd = Infinity;
+  for (const g of groups){
+    if (g.dead || g.derelict || g.playingDead) continue;
+    const d = Math.hypot(g.x-cx, g.y-cy);
+    if (d < bd){ bd = d; best = g; }
+  }
+  return best;
+}
+function updateCommander(dt){
+  if (cmdr.phase !== 'bombard' && cmdr.phase !== 'strike') return;
+  cmdr.evalT -= dt;
+  if (cmdr.evalT <= 0){
+    cmdr.evalT = 15;
+    let best = null, bs = -1;
+    for (const g of groups){
+      if (g.dead || g.derelict) continue;
+      if (g.playingDead){
+        let near = false;
+        for (const a of arco) if (!a.dead && !a.escaped && dist(a,g) < 2500) near = true;
+        if (!near) continue;
+      }
+      const s = unionScore(g);
+      if (s > bs){ bs = s; best = g; }
+    }
+    cmdr.priority = best;
+    if (best && dist(best, INTERSTICE) < 11000 && !cmdr.herdLogged){
+      cmdr.herdLogged = true;
+      log('Arco forces converging on ships nearest the interstice. They are herding the fleet, pushing us back. Establishing a perimeter.', 'warn');
+    }
+  }
+  /* coordinated strikes */
+  cmdr.strikeT -= dt;
+  if (!cmdr.strike && cmdr.strikeT <= 0 && cmdr.priority){
+    const fit = arco.filter(a => a.cls === 'incisor' && !a.dead && !a.escaped && a.hp > 50 && a.state === 'engage');
+    const st = nearestStrikeTarget(fit);
+    if (fit.length >= 1 && st){
+      stats.strikes++;
+      cmdr.strike = { target: st, phase: 'inbound', t: 0, ships: fit };
+      fit.forEach((a, i) => { a.strikeRole = { bearing: (i - (fit.length-1)/2) * 0.9 }; });
+      const ann = arco.find(a => a.cls === 'annihilator' && !a.dead && !a.escaped);
+      if (ann && ann.state === 'engage') ann.missileCd = Math.min(ann.missileCd, 2);
+      log('Incisors committing to an attack run — divergent vectors, converging on one battlegroup. Missile wave inbound with them.', 'warn');
+    } else cmdr.strikeT = 60;
+  }
+  if (cmdr.strike){
+    const s = cmdr.strike;
+    s.t += dt;
+    /* commander redesignates mid-run if the strike target dies */
+    if (!s.target || s.target.dead || s.target.derelict){
+      const nt = nearestStrikeTarget(s.ships);
+      if (nt) s.target = nt; else { endStrike(); return; }
+    }
+    if (s.t > 450){ endStrike(); return; }
+    if (!s.warned && s.ships.some(a => !a.dead && !a.escaped && dist(a, s.target) < 8000)){
+      s.warned = true;
+      log('Strike runs entering torpedo envelope — fresh-geometry window open. Volley the inbound ships NOW.', 'good');
+    }
+    /* slashing pass: ships flag themselves 'through' individually; strike ends when all are clear */
+    const allDone = s.ships.every(a => a.dead || a.escaped || (a.strikeRole && a.strikeRole.through && dist(a, s.target) > 7000));
+    if (allDone) endStrike();
+  }
+}
+function endStrike(){
+  if (!cmdr.strike) return;
+  for (const a of cmdr.strike.ships) a.strikeRole = null;
+  cmdr.strike = null;
+  cmdr.strikeT = 90 + rnd()*60;
+}
+
+/* ── update: arco ships ──────────────────────────────────────────── */
 function updateArco(a, dt){
   if (a.dead || a.escaped) return;
   a.flash = Math.max(0, a.flash - dt);
+  a.suppress = Math.max(0, a.suppress - dt);
+  const c = CLS[a.cls];
   const inc = a.cls === 'incisor';
 
-  /* movement */
-  if (a.state === 'emerge'){
-    steerTo(a, a.holdX, a.holdY, 40, 160, dt, true);
-    if (dist(a, {x:a.holdX, y:a.holdY}) < 60) a.state = 'hold';
-  } else if (a.state === 'hold'){
-    damp(a, dt);
-  } else if (a.state === 'withdraw'){
-    steerTo(a, INTERSTICE.x, INTERSTICE.y, inc?70:16, (inc?175:80)*1.2, dt, false);
-    if (dist(a, INTERSTICE) < 130){
-      a.escaped = true;
-      fx.push({ type:'ring', x:INTERSTICE.x, y:INTERSTICE.y, t:0, dur:1, maxR:120, color:'rgba(160,200,255,0.7)' });
-      refreshArcoStrip();
-      return;
-    }
-  } else if (a.state === 'engage'){
-    a.retargetT -= dt;
-    if (a.retargetT <= 0 || !a.target || a.target.dead || a.target.derelict){
-      a.target = pickUnionTarget(a, 99999);
-      a.retargetT = 4 + rnd()*2;
-    }
-    if (inc){
-      if (a.target){
-        const t = a.target, d = dist(a,t);
-        const hurt = a.hp < 45;          // wounded: break off, fight from standoff
-        a.runT -= dt;
-        if (hurt && a.run) a.run = null;
-        if (!a.run && a.runT <= 0 && !hurt){
-          /* attack run: dive through the formation at full burn */
-          a.run = { phase: 'in' };
-        }
-        if (a.run){
-          if (a.run.phase === 'in'){
-            steerTo(a, t.x, t.y, 90, 200, dt, false);
-            if (d < 300){
-              const ang = Math.atan2(a.vy, a.vx);
-              a.run = { phase: 'out', x: a.x + Math.cos(ang)*1400, y: a.y + Math.sin(ang)*1400 };
-            }
-          } else {
-            steerTo(a, a.run.x, a.run.y, 90, 200, dt, false);
-            if (dist(a, a.run) < 120){ a.run = null; a.runT = 24 + rnd()*14; }
-          }
-        } else {
-          /* standoff orbit at ~1150 — outside railgun envelope, inside laser/duster range */
-          a.jukeT -= dt;
-          if (a.jukeT <= 0){
-            const ang = Math.atan2(t.y-a.y, t.x-a.x) + Math.PI/2;
-            const s = rnd() < 0.5 ? 1 : -1;
-            a.jvx = Math.cos(ang)*s*140; a.jvy = Math.sin(ang)*s*140;
-            a.jukeT = 1 + rnd()*1.2;
-          }
-          const ang2 = Math.atan2(a.y-t.y, a.x-t.x);
-          const so = hurt ? 1650 : 1150;
-          const px = t.x + Math.cos(ang2+0.4)*so + a.jvx;
-          const py = t.y + Math.sin(ang2+0.4)*so + a.jvy;
-          steerTo(a, px, py, 70, 175, dt, false);
-        }
-      } else damp(a, dt);
-    } else {
-      /* annihilator: creep toward fleet centroid, keep range */
-      let cx=0, cy=0, n=0;
-      for (const g of groups){ if (!g.dead && !g.derelict){ cx+=g.x; cy+=g.y; n++; } }
-      if (n){
-        cx/=n; cy/=n;
-        const d = Math.hypot(cx-a.x, cy-a.y);
-        if (d > 1500) steerTo(a, cx, cy, 16, 80, dt, false);
-        else damp(a, dt);
-      } else damp(a, dt);
-    }
-  }
-  /* active evasion vs railgun rounds — long shots get dodged, point-blank
-     and multi-angle saturation gets through */
+  /* threat awareness: incoming salvos within ~25 s of arrival force evasion */
   a.evadeT = Math.max(0, a.evadeT - dt);
-  a.evadeCd = Math.max(0, a.evadeCd - dt);
-  if (a.evadeCd <= 0 && (a.state === 'engage' || a.state === 'withdraw')){
-    for (const r of rounds){
-      if (r.dead) continue;
-      const dx = a.x-r.x, dy = a.y-r.y;
-      const rs = Math.hypot(r.vx, r.vy) || 1;
-      const ux = r.vx/rs, uy = r.vy/rs;
-      const along = dx*ux + dy*uy;
-      if (along < 0) continue;
-      const off = dy*ux - dx*uy;
-      const tti = along/rs;
-      if (Math.abs(off) < a.radius + 26 && tti > 0.18 && tti < 0.85){
-        const s = off >= 0 ? 1 : -1;
-        const pw = inc ? 200 : 55;
-        a.evx = -uy*s*pw; a.evy = ux*s*pw;
-        a.evadeT = 0.4;
-        a.evadeCd = 0.45 + rnd()*0.3;
+  if (a.state === 'engage' || a.state === 'withdraw'){
+    for (const r of salvos){
+      if (r.dead || r.target !== a) continue;
+      const tof = dist(r, a) / (Math.hypot(r.vx - a.vx, r.vy - a.vy) || 1);
+      if (tof < 25){
+        if (a.evadeT <= 0){ a.evadeT = 3; a.evadeSign = rnd() < 0.5 ? 1 : -1; }
+        a.suppress = Math.max(a.suppress, 8);
         break;
       }
     }
   }
-  if (a.evadeT > 0){ a.vx += a.evx*dt; a.vy += a.evy*dt; }
+  /* suppression aborts duster aim */
+  if (a.suppress > 0 && a.dusterState){ a.dusterState = null; a.dusterCd = Math.max(a.dusterCd, 4); }
+  /* a mass torpedo launch forces the whole squadron into evasive dispersal */
+  if (torps.length > 40 && (a.state === 'engage' || a.state === 'withdraw') && a.evadeT <= 0){
+    a.evadeT = 2; a.evadeSign = rnd() < 0.5 ? 1 : -1;
+  }
+
+  /* movement */
+  const hurt = inc && a.hp < 50;
+  if (a.state === 'emerge'){
+    const hx = INTERSTICE.x - Math.cos(a.holdAng)*6000;
+    const hy = INTERSTICE.y - Math.sin(a.holdAng)*6000;
+    arrive(a, hx, hy, c.acc, dt, c.vmax);
+    if (dist(a, {x:hx, y:hy}) < 400) a.state = 'hold';
+  } else if (a.state === 'hold'){
+    brake(a, c.acc, dt);
+  } else if (a.state === 'withdraw'){
+    arrive(a, INTERSTICE.x, INTERSTICE.y, c.accBurst, dt, c.vmax*1.3);
+    if (dist(a, INTERSTICE) < 800){
+      a.escaped = true;
+      fx.push({ type:'ring', x:INTERSTICE.x, y:INTERSTICE.y, t:0, dur:1, maxR:2200, color:'rgba(160,200,255,0.7)' });
+      if (intelTarget === a) setIntel(null);
+      refreshArcoStrip();
+      return;
+    }
+  } else if (a.state === 'engage'){
+    const pri = cmdr.priority;
+    if (inc && a.strikeRole && cmdr.strike && cmdr.strike.target && !hurt){
+      /* slashing pass: full burn through the formation, dusters cycling hot, then clear */
+      const t = cmdr.strike.target;
+      const d = dist(a, t);
+      a.target = t;
+      if (!a.strikeRole.through){
+        /* fixed approach waypoint (set once per target) gives divergent vectors;
+           inside 9,000 km switch to lead pursuit for the pass itself */
+        if (!a.strikeRole.wp || a.strikeRole.tgt !== t){
+          const base = Math.atan2(a.y - t.y, a.x - t.x);
+          a.strikeRole.wp = { x: t.x + Math.cos(base + a.strikeRole.bearing)*7000,
+                              y: t.y + Math.sin(base + a.strikeRole.bearing)*7000 };
+          a.strikeRole.tgt = t;
+        }
+        if (d < 9000 || dist(a, a.strikeRole.wp) < 2500){
+          const L = lead(a.x, a.y, t, Math.max(30, Math.hypot(a.vx, a.vy) + 10));
+          pursue(a, L.x, L.y, c.accBurst, dt, 60);
+        } else {
+          pursue(a, a.strikeRole.wp.x, a.strikeRole.wp.y, c.accBurst, dt, 60);
+        }
+        if (d < 2500) a.strikeRole.through = true;
+      } else {
+        /* through: keep burning straight out, decelerate once clear */
+        if (d < 7000) thrustToward(a, a.vx, a.vy, c.accBurst, dt);
+        else brake(a, c.accBurst, dt);
+      }
+    } else {
+      /* standoff bombardment ring around priority target */
+      const focus = pri && !pri.dead && !pri.derelict ? pri : pickLocalTarget(a, 1e9);
+      a.target = focus;
+      if (focus){
+        const standoff = hurt ? 32000 : (inc ? 11000 : 17000);
+        const ang = Math.atan2(a.y - focus.y, a.x - focus.x) + 0.04;
+        arrive(a, focus.x + Math.cos(ang)*standoff, focus.y + Math.sin(ang)*standoff, c.acc, dt, c.vmax);
+      } else brake(a, c.acc, dt);
+    }
+  }
+  /* evasive lateral bursts (28 G for incisors) */
+  if (a.evadeT > 0){
+    const sp = Math.hypot(a.vx, a.vy) || 1;
+    const px = -a.vy/sp*a.evadeSign, py = a.vx/sp*a.evadeSign;
+    const ea = inc ? CLS.incisor.accBurst : CLS.annihilator.accBurst;
+    a.vx += px*ea*dt; a.vy += py*ea*dt;
+    a.curAcc = ea;
+  }
 
   a.x += a.vx*dt; a.y += a.vy*dt;
   const sp = Math.hypot(a.vx, a.vy);
@@ -648,127 +876,187 @@ function updateArco(a, dt){
     a.angle = Math.atan2(a.dusterState.target.y-a.y, a.dusterState.target.x-a.x);
   else if (a.target && !a.target.dead && a.state==='engage')
     a.angle = Math.atan2(a.target.y-a.y, a.target.x-a.x);
-  else if (sp > 10) a.angle = Math.atan2(a.vy, a.vx);
+  else if (sp > 1) a.angle = Math.atan2(a.vy, a.vx);
 
   if (a.state !== 'engage' && a.state !== 'withdraw') return;
 
-  /* laser torpedo interception */
+  /* laser interception of torpedoes — dwell wasted on misses; terminal jink survives */
   a.interceptCd -= dt;
-  let guard = 8;
+  let guard = 4;
   while (a.interceptCd <= 0 && guard-- > 0){
-    let tgt = null, bd = 1500;
+    let tgt = null, bd = c.interceptRange;
     for (const t of torps){
       if (t.dead) continue;
       const d = dist(a, t);
-      if (t.sneak && d > 500) continue;
+      if (t.sneak && d > 3000) continue;
       if (d < bd){ bd = d; tgt = t; }
     }
     if (tgt){
-      tgt.dead = true;
-      beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.12, color:'rgba(220,240,255,0.85)', w:1.2 });
-      fx.push({ type:'boom', x:tgt.x, y:tgt.y, t:0, dur:0.35, maxR:10, color:'rgba(220,240,255,0.8)' });
-      a.interceptCd += inc ? 0.38 : 0.2;
+      /* kill probability per laser dwell: telegraphed torps (tracked >90 s) die easily;
+         fresh terminal-jinking torps often survive; cold-launch sneak torps barely register */
+      const termD = tgt.target ? dist(tgt, tgt.target) : 1e9;
+      let pk = 0.9;
+      if (tgt.age > 150) pk = 0.95;
+      else if (termD < 1500) pk = 0.4;
+      if (tgt.sneak) pk = 0.25;
+      beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.15, color:'rgba(220,240,255,0.85)', w:1.2 });
+      if (rnd() < pk){
+        tgt.dead = true;
+        stats.torpIntercepted++;
+        fx.push({ type:'boom', x:tgt.x, y:tgt.y, t:0, dur:0.35, maxR:90, color:'rgba(220,240,255,0.8)' });
+      }
+      a.interceptCd += c.interceptRate * (a.suppress > 0 ? 1.4 : 1);
     } else { a.interceptCd = 0; break; }
   }
 
   if (a.state === 'withdraw') return;   // defensive lasers only while leaving
 
-  /* offensive beam */
+  /* X-ray battery */
   a.beamCd -= dt;
   if (a.beamCd <= 0){
-    const tgt = pickUnionTarget(a, inc ? 1250 : 1500);
+    const tgt = priOk(a, 30000) ? cmdr.priority : pickLocalTarget(a, 30000);
     if (tgt){
-      beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.2, color:'rgba(255,235,255,0.95)', w:2.2 });
-      hitGroup(tgt, inc ? 8 : 14, 'laser');
-      a.beamCd = inc ? 3.6 : 4.0;
-    } else a.beamCd = 0.5;
+      const d = dist(a, tgt);
+      let dmg = 0;
+      for (const [r, dm] of c.beamRanges){ if (d <= r){ dmg = dm; break; } }
+      if (dmg){
+        beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.2, color:'rgba(255,235,255,0.95)', w:2.2 });
+        hitGroup(tgt, dmg, 'laser');
+        a.beamCd = c.beamCycle;
+      } else a.beamCd = 3;
+    } else a.beamCd = 3;
   }
 
-  /* duster (incisors) */
+  /* Neutraliser proton beam (annihilator spinal) */
+  if (!inc){
+    a.neutCd -= dt;
+    if (a.neutCd <= 0){
+      const tgt = priOk(a, c.neutRange) ? cmdr.priority : pickLocalTarget(a, c.neutRange);
+      if (tgt){
+        beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.5, color:'rgba(200,255,255,1)', w:5 });
+        fx.push({ type:'boom', x:tgt.x, y:tgt.y, t:0, dur:1, maxR:500, color:'rgba(220,255,255,1)' });
+        hitGroup(tgt, c.neutDmg, 'blast');
+        log('NEUTRALISER DISCHARGE — 1 TJ proton burst. ' + tgt.name + ' hull sublimating, kinetic barriers overwhelmed.', 'warn');
+        a.neutCd = c.neutCycle;
+      } else a.neutCd = 10;
+    }
+  }
+
+  /* spinal duster (incisors) — cannot aim while suppressed */
   if (inc){
     a.dusterCd -= dt;
-    if (!a.dusterState && a.dusterCd <= 0){
-      const tgt = pickUnionTarget(a, 1900);
-      if (tgt) a.dusterState = { t: 2.6, target: tgt };
+    if (!a.dusterState && a.dusterCd <= 0 && a.suppress <= 0){
+      const tgt = priOk(a, c.dusterRange) ? cmdr.priority : pickLocalTarget(a, c.dusterRange);
+      if (tgt) a.dusterState = { t: c.dusterCharge, target: tgt };
     }
     if (a.dusterState){
       a.dusterState.t -= dt;
       const tgt = a.dusterState.target;
-      if (!tgt || tgt.dead || tgt.derelict){ a.dusterState = null; a.dusterCd = 3; }
+      if (!tgt || tgt.dead){ a.dusterState = null; a.dusterCd = 5; }
       else if (a.dusterState.t <= 0){
-        const L = lead(a.x, a.y, tgt, 1200);
-        const ang = Math.atan2(L.y-a.y, L.x-a.x);
+        const L = lead(a.x, a.y, tgt, CLS.duster.speed);
+        const ang2 = Math.atan2(L.y-a.y, L.x-a.x);
         stats.dustFired++;
         dusts.push({
-          x: a.x, y: a.y, vx: Math.cos(ang)*1200, vy: Math.sin(ang)*1200,
-          target: tgt, life: 3.5, resolved: false
+          x: a.x, y: a.y, ox: a.x, oy: a.y,
+          vx: Math.cos(ang2)*CLS.duster.speed, vy: Math.sin(ang2)*CLS.duster.speed,
+          target: tgt, life: 20, resolved: false
         });
+        const hot = a.strikeRole && cmdr.strike && cmdr.strike.target && dist(a, cmdr.strike.target) < 8000;
         a.dusterState = null;
-        a.dusterCd = 8 + rnd()*4;
+        a.dusterCd = (hot ? 0.35 : 1) * (CLS.incisor.dusterCool * (0.8 + rnd()*0.5));
       }
     }
   }
 
-  /* missiles (annihilator) */
+  /* F-AM micromissile waves (annihilator) */
   if (!inc){
     a.missileCd -= dt;
     if (a.missileCd <= 0){
-      const live = groups.filter(g => !g.dead && !g.derelict && (!g.playingDead || dist(a,g) < 350));
-      if (live.length){
-        for (let i=0;i<7;i++){
-          const tgt = live[Math.floor(rnd()*live.length)];
+      const pri = priOk(a, 1e9) ? cmdr.priority : pickLocalTarget(a, 1e9);
+      if (pri){
+        /* wave split: half the priority target, rest its two nearest neighbours */
+        const others = groups.filter(g => g !== pri && targetable(a, g, 1e9))
+          .sort((u,v) => dist(pri,u) - dist(pri,v)).slice(0, 2);
+        for (let i=0;i<c.missileWave;i++){
+          const tgt = (others.length && i % 2 === 1) ? others[i % others.length] : pri;
           missiles.push({
-            x: a.x + (rnd()-0.5)*40, y: a.y + (rnd()-0.5)*40,
-            vx: a.vx + (rnd()-0.5)*120, vy: a.vy + (rnd()-0.5)*120,
-            target: tgt, life: 30, dead: false
+            x: a.x + (rnd()-0.5)*100, y: a.y + (rnd()-0.5)*100,
+            vx: a.vx + (rnd()-0.5)*3, vy: a.vy + (rnd()-0.5)*3,
+            fuel: CLS.missile.dv, target: tgt, life: 900, dead: false
           });
         }
-        log('Annihilator launching smart missiles — 200G acceleration and climbing.', 'warn');
-        a.missileCd = 26;
-      } else a.missileCd = 4;
+        log('Annihilator launching F-AM micromissiles — 250 G and climbing. Saturation wave on ' + pri.name + '.', 'warn');
+        a.missileCd = c.missileCool;
+      } else a.missileCd = 20;
     }
   }
 }
 
 /* ── projectiles ─────────────────────────────────────────────────── */
 function updateProjectiles(dt){
-  /* torpedoes */
+  /* torpedoes: 50 G while fuel lasts, buckshot release at 600 km */
   for (const t of torps){
     if (t.dead) continue;
-    t.life -= dt;
-    if (t.life <= 0){ t.dead = true; continue; }
-    if (!t.target || t.target.dead){
+    t.life -= dt; t.age += dt;
+    if (t.life <= 0){ t.dead = true; stats.torpExpired++; continue; }
+    if (!t.target || t.target.dead || t.target.escaped){
       let bd = Infinity, nt = null;
       for (const a of arco){ if (a.dead || a.escaped) continue; const d = dist(t,a); if (d < bd){ bd = d; nt = a; } }
       t.target = nt;
       if (!nt){ t.dead = true; continue; }
     }
-    const L = lead(t.x, t.y, t.target, Math.max(200, Math.hypot(t.vx,t.vy)));
-    steerTo(t, L.x, L.y, 150, 400, dt, false);
-    t.x += t.vx*dt; t.y += t.vy*dt;
-    if (dist(t, t.target) < t.target.radius + 9){
-      t.dead = true;
-      hitArco(t.target, 9);
-      fx.push({ type:'boom', x:t.x, y:t.y, t:0, dur:0.6, maxR:30, color:'rgba(255,220,160,0.95)' });
+    if (t.fuel > 0){
+      const L = lead(t.x, t.y, t.target, Math.max(40, Math.hypot(t.vx,t.vy)), 60);
+      const before = { vx: t.vx, vy: t.vy };
+      pursue(t, L.x, L.y, CLS.torpedo.acc, dt, CLS.torpedo.vmax);
+      t.fuel -= Math.hypot(t.vx-before.vx, t.vy-before.vy);
     }
-  }
-  /* railgun rounds */
-  for (const r of rounds){
-    if (r.dead) continue;
-    r.life -= dt;
-    if (r.life <= 0){ r.dead = true; continue; }
-    r.x += r.vx*dt; r.y += r.vy*dt;
-    for (const a of arco){
-      if (a.dead || a.escaped) continue;
-      if (dist(r, a) < a.radius + 5){
-        r.dead = true;
-        hitArco(a, 7);
-        fx.push({ type:'boom', x:r.x, y:r.y, t:0, dur:0.4, maxR:16, color:'rgba(255,200,160,0.9)' });
-        break;
+    t.x += t.vx*dt; t.y += t.vy*dt;
+    const tt = t.target;
+    if (dist(t, tt) < CLS.torpedo.releaseRange ||
+        distToSeg(tt.x, tt.y, t.x, t.y, t.x + (t.vx-tt.vx)*dt, t.y + (t.vy-tt.vy)*dt) < CLS.torpedo.releaseRange){
+      t.dead = true;
+      const a = t.target;
+      let p = 0.7;
+      if (a.suppress > 0 || a.evadeT > 0) p = 0.45;
+      if (t.age > 150) p *= 0.4;       // telegraphed: the target has had minutes to prepare
+      if (t.sneak) p = 0.9;
+      if (rnd() < p){
+        stats.torpHit++;
+        hitArco(a, CLS.torpedo.dmg);
+        fx.push({ type:'boom', x:a.x, y:a.y, t:0, dur:0.6, maxR:300, color:'rgba(255,220,160,0.95)' });
+      } else {
+        stats.torpMissTerm++;
+        fx.push({ type:'ring', x:a.x, y:a.y, t:0, dur:0.4, maxR:400, color:'rgba(255,220,160,0.4)' });
       }
     }
   }
-  /* missiles */
+  /* railgun salvos: probabilistic terminal resolution; their real job is suppression */
+  for (const r of salvos){
+    if (r.dead) continue;
+    r.age += dt; r.life -= dt;
+    if (r.life <= 0){ r.dead = true; continue; }
+    r.x += r.vx*dt; r.y += r.vy*dt;
+    const a = r.target;
+    if (!a || a.dead || a.escaped){ r.dead = true; continue; }
+    if (dist(r, a) < 300){
+      r.dead = true;
+      let p = 0.32 * Math.exp(-r.age/150);
+      if (a.evadeT > 0 || a.suppress > 0) p *= 0.35;
+      if (a.dusterState) p *= 2.5;                        // caught mid-aim
+      if (a.strikeRole) p *= 1.8;                         // boxed in on a straight pass
+      if (a.state === 'hold' || a.state === 'emerge') p = 0.7;
+      p = clamp(p, 0.02, 0.85);
+      if (rnd() < p){
+        hitArco(a, CLS.salvo.dmg);
+        fx.push({ type:'boom', x:r.x, y:r.y, t:0, dur:0.4, maxR:160, color:'rgba(255,200,160,0.9)' });
+      } else {
+        fx.push({ type:'ring', x:r.x, y:r.y, t:0, dur:0.3, maxR:200, color:'rgba(255,200,160,0.3)' });
+      }
+    }
+  }
+  /* F-AM micromissiles: 250 G, standoff detonation at 600 km */
   for (const m of missiles){
     if (m.dead) continue;
     m.life -= dt;
@@ -779,23 +1067,27 @@ function updateProjectiles(dt){
       m.target = nt;
       if (!nt){ m.dead = true; continue; }
     }
-    const L = lead(m.x, m.y, m.target, Math.max(220, Math.hypot(m.vx,m.vy)));
-    steerTo(m, L.x, L.y, 220, 540, dt, false);
+    if (m.fuel > 0){
+      const L = lead(m.x, m.y, m.target, Math.max(60, Math.hypot(m.vx,m.vy)), 40);
+      const before = { vx: m.vx, vy: m.vy };
+      pursue(m, L.x, L.y, CLS.missile.acc, dt, CLS.missile.vmax);
+      m.fuel -= Math.hypot(m.vx-before.vx, m.vy-before.vy);
+    }
     m.x += m.vx*dt; m.y += m.vy*dt;
-    if (dist(m, m.target) < 230){
+    const mt = m.target;
+    if (dist(m, mt) < CLS.missile.detRange ||
+        distToSeg(mt.x, mt.y, m.x, m.y, m.x + (m.vx-mt.vx)*dt, m.y + (m.vy-mt.vy)*dt) < CLS.missile.detRange){
       m.dead = true;
-      /* antimatter standoff detonation: gamma burst */
-      fx.push({ type:'gamma', x:m.x, y:m.y, t:0, dur:0.8, maxR:230, color:'rgba(220,180,255,0.9)' });
-      hitGroup(m.target, 13, 'blast');
+      fx.push({ type:'gamma', x:m.x, y:m.y, t:0, dur:0.8, maxR:CLS.missile.splash, color:'rgba(220,180,255,0.9)' });
+      hitGroup(m.target, CLS.missile.dmg, 'blast');
       if (m.target.corvettes > 0){ const k = Math.min(m.target.corvettes, 2); m.target.corvettes -= k; stats.corvLost += k; }
       for (const g of groups){
         if (g === m.target || g.dead) continue;
-        if (dist(m, g) < 280) hitGroup(g, 6, 'blast');
+        if (dist(m, g) < CLS.missile.splash) hitGroup(g, CLS.missile.splashDmg, 'blast');
       }
-      game.shake = Math.max(game.shake, 3);
     }
   }
-  /* duster streams */
+  /* duster streams: 2,000 kps, invisible without submillimetre radar */
   for (const d of dusts){
     if (d.resolved && d.life < -1) continue;
     d.life -= dt;
@@ -805,15 +1097,21 @@ function updateProjectiles(dt){
     if (!d.resolved){
       for (const g of groups){
         if (g.dead) continue;
-        if (distToSeg(g.x, g.y, px, py, d.x, d.y) < 60){
+        if (distToSeg(g.x, g.y, px, py, d.x, d.y) < 250){
           d.resolved = true;
-          const hitChance = game.submm ? 0.3 : 0.92;
+          let hitChance;
+          if (g.derelict || g.playingDead) hitChance = 0.85;
+          else if (game.submm) hitChance = 0.3;
+          else hitChance = 0.92;
           if (rnd() < hitChance){
-            const k = Math.min(g.corvettes, 3);
+            /* stream dispersion: damage falls off with distance travelled */
+            const travelled = Math.hypot(g.x - d.ox, g.y - d.oy);
+            let tier = CLS.duster.tiers[CLS.duster.tiers.length-1];
+            for (const tr of CLS.duster.tiers){ if (travelled <= tr[0]){ tier = tr; break; } }
+            const k = Math.min(g.corvettes, tier[3]);
             g.corvettes -= k; stats.corvLost += k;
-            g.hp -= 26 + rnd()*14; g.flash = 0.3;
-            fx.push({ type:'boom', x:g.x, y:g.y, t:0, dur:1, maxR:60, color:'rgba(255,160,120,1)' });
-            game.shake = Math.max(game.shake, 5);
+            g.hp -= tier[1] + rnd()*tier[2]; g.flash = 0.3;
+            fx.push({ type:'boom', x:g.x, y:g.y, t:0, dur:1, maxR:600, color:'rgba(255,160,120,1)' });
             game.dustHits++;
             if (g.hp <= 0) destroyGroup(g);
             else if (!game.submm) log(g.name + ' — multiple hull breaches, milliseconds apart. No incoming fire detected.', 'warn');
@@ -823,14 +1121,13 @@ function updateProjectiles(dt){
               log('Ships are dying with no apparent cause. Someone needs to go through the raw sensor logs. [H]', 'warn');
             }
           } else if (game.submm){
-            fx.push({ type:'ring', x:g.x, y:g.y, t:0, dur:0.5, maxR:50, color:'rgba(255,120,90,0.5)' });
+            fx.push({ type:'ring', x:g.x, y:g.y, t:0, dur:0.5, maxR:500, color:'rgba(255,120,90,0.5)' });
           }
           break;
         }
       }
     }
   }
-  /* beams + fx decay */
   for (const b of beams) b.life -= dt;
   for (const f of fx) f.t += dt;
 }
@@ -838,14 +1135,14 @@ function updateProjectiles(dt){
 /* ── analyse / submm unlock ──────────────────────────────────────── */
 function startAnalyse(){
   if (game.analyse !== 1) return;
-  game.analyse = 2; game.analyseT = 4;
+  game.analyse = 2; game.analyseT = 30;
   log('Pulling the Jayapal’s full sensor log — anti-collision radar, non-tactical channels, everything.');
 }
 function finishAnalyse(){
   game.analyse = 3; game.submm = true;
   document.getElementById('analyse-btn').style.display = 'none';
   log('Hansun: ‘They’re using dusters. Spinal mounts are hypervelocity micron-particle accelerators — projectiles too small for radar.’', 'quote');
-  log('Radar switched to submillimetre band. Incoming dust streams now visible. Evasion solutions loaded.', 'good');
+  log('Radar switched to submillimetre band. Incoming dust streams now visible at 2,000 kps. Evasion solutions loaded.', 'good');
 }
 
 /* ── end conditions ──────────────────────────────────────────────── */
@@ -853,17 +1150,17 @@ function activeUnion(){ return groups.filter(g => !g.dead && !g.derelict).length
 function checkEnd(dt){
   if (game.over) return;
   const arcoLeft = arco.filter(a => !a.dead && !a.escaped);
-  const arcoKilled = stats.incisors + stats.annihilators;
-
   if (!game.withdrawing && game.weaponsFree && arcoLeft.length &&
-      (game.t > 480 || activeUnion() <= 2)){
+      (game.t > 3600 || activeUnion() <= 2)){
     game.withdrawing = true;
+    endStrike();
     for (const a of arcoLeft) a.state = 'withdraw';
     log('Arco forces vectoring back toward the interstice, like nothing had happened.', 'warn');
   }
+  const totalArco = SCENARIOS[scnKey].inc + (SCENARIOS[scnKey].ann ? 1 : 0);
   const unionGone = activeUnion() === 0;
-  const arcoGone = arcoLeft.length === 0 && arco.length === 4;
-  if ((unionGone || arcoGone) && game.endTimer < 0) game.endTimer = 2.5;
+  const arcoGone = arcoLeft.length === 0 && arco.length === totalArco;
+  if ((unionGone || arcoGone) && game.endTimer < 0) game.endTimer = 4;
   if (game.endTimer >= 0){
     game.endTimer -= dt;
     if (game.endTimer <= 0) endGame();
@@ -872,21 +1169,21 @@ function checkEnd(dt){
 function endGame(){
   if (game.over) return;
   game.over = true; game.running = false;
+  const scn = SCENARIOS[scnKey];
+  const totalArco = scn.inc + (scn.ann ? 1 : 0);
   const kills = stats.incisors + stats.annihilators;
   const survivors = activeUnion();
   let title, sub, quote;
-  if (kills >= 4){
-    title = 'IMPOSSIBLE VICTORY'; sub = 'ALL FOUR ARCO WARSHIPS DESTROYED';
+  if (kills >= totalArco && totalArco > 0){
+    title = totalArco >= 4 ? 'IMPOSSIBLE VICTORY' : 'TOTAL VICTORY';
+    sub = 'ALL ' + totalArco + ' ARCO WARSHIPS DESTROYED';
     quote = 'No fleet in Union history has done what you just did. The interstice is yours — and so is whatever comes through it next.';
-  } else if (kills === 3){
-    title = 'THE FLEET HOLDS'; sub = 'THREE ARCO WARSHIPS DESTROYED';
-    quote = 'Three pyramids broken. The survivors limp home through a sky full of wreckage, and the recruiters will never want for volunteers again.';
-  } else if (kills === 2){
-    title = 'BEYOND THE ISIDORE'; sub = 'TWO ARCO WARSHIPS DESTROYED';
-    quote = 'Twice the toll history recorded. The clips will be plastered everywhere — licenced and unlicenced feeds, graffiti prints, posters.';
+  } else if (kills >= 2){
+    title = 'BEYOND THE ISIDORE'; sub = kills + ' ARCO WARSHIPS DESTROYED';
+    quote = 'More than history recorded. The clips will be plastered everywhere — licenced and unlicenced feeds, graffiti prints, posters.';
   } else if (kills === 1){
-    title = 'HISTORY REPEATS'; sub = 'ONE INCISOR DESTROYED';
-    quote = 'Three ships returned through the interstice, not four. Exactly as the record shows. Somewhere in the wreckage, an ensign is waking up alone.';
+    title = 'HISTORY REPEATS'; sub = 'ONE ARCO WARSHIP DESTROYED';
+    quote = 'Their squadron returned through the interstice one ship short. Exactly as the record shows. Somewhere in the wreckage, an ensign is waking up alone.';
   } else if (survivors > 0){
     title = 'WITHDRAWAL'; sub = 'NO ARCO LOSSES';
     quote = 'The invaders vectored right around and headed back into the interstice like nothing had happened. Nobody cheered.';
@@ -896,16 +1193,16 @@ function endGame(){
   }
   document.getElementById('aftermath-title').textContent = title;
   document.getElementById('aftermath-title').style.color = kills > 0 ? 'var(--accent)' : '#ff6b50';
-  document.getElementById('aftermath-sub').textContent = sub;
-  const shipsLost = stats.destroyersLost*1 + stats.corvLost;
+  document.getElementById('aftermath-sub').textContent = scn.label + ' — ' + sub;
+  const shipsLost = stats.destroyersLost + stats.corvLost;
   document.getElementById('aftermath-stats').innerHTML =
-    '<div class="stat-row"><span>ENGAGEMENT DURATION</span><span>' + Math.floor(game.t/60)+'m '+Math.floor(game.t%60)+'s</span></div>' +
+    '<div class="stat-row"><span>ENGAGEMENT DURATION</span><span>' + logTime() + '</span></div>' +
     '<div class="stat-row"><span>DESTROYERS LOST</span><span>' + stats.destroyersLost + ' / 10</span></div>' +
     '<div class="stat-row"><span>CORVETTES LOST</span><span>' + stats.corvLost + ' / 90</span></div>' +
     '<div class="stat-row"><span>TOTAL SHIPS LOST</span><span>' + shipsLost + ' / 100</span></div>' +
     '<div class="stat-row"><span>TORPEDOES EXPENDED</span><span>' + stats.torpsFired + '</span></div>' +
-    '<div class="stat-row"><span>INCISORS DESTROYED</span><span>' + stats.incisors + ' / 3</span></div>' +
-    '<div class="stat-row"><span>ANNIHILATOR DESTROYED</span><span>' + (stats.annihilators ? 'YES' : 'NO') + '</span></div>';
+    '<div class="stat-row"><span>RAILGUN SALVOS FIRED</span><span>' + stats.salvosFired + '</span></div>' +
+    '<div class="stat-row"><span>ARCO SHIPS DESTROYED</span><span>' + kills + ' / ' + totalArco + '</span></div>';
   document.getElementById('aftermath-quote').textContent = quote;
   document.getElementById('aftermath-canon').innerHTML =
     'HISTORICAL RECORD &mdash; 2909 CE: 97 of 100 Union ships lost. One Incisor destroyed, by the USV Isidore&rsquo;s ' +
@@ -915,7 +1212,8 @@ function endGame(){
 
 /* ── selection & input ───────────────────────────────────────────── */
 const selected = new Set();
-let mode = null;          // null | 'volley' | 'charge'
+let mode = null;          // null | 'volley' | 'charge' | 'rail'
+let intelTarget = null;
 let dragStart = null, dragNow = null, panning = false, panLast = null;
 
 function setMode(m){
@@ -923,12 +1221,16 @@ function setMode(m){
   const b = document.getElementById('mode-banner');
   if (m === 'volley'){
     b.style.display = 'block'; b.className = '';
-    b.textContent = 'DESIGNATE TORPEDO VOLLEY TARGET — ESC TO CANCEL';
+    b.textContent = 'DESIGNATE TORPEDO VOLLEY TARGET — EFFECTIVE INSIDE ~4,000 KM — ESC TO CANCEL';
+  } else if (m === 'rail'){
+    b.style.display = 'block'; b.className = '';
+    b.textContent = 'DESIGNATE RAILGUN TARGET — SUPPRESSION FIRE, MAX 6,000 KM — ESC TO CANCEL';
   } else if (m === 'charge'){
     b.style.display = 'block'; b.className = 'danger';
     b.textContent = 'DESIGNATE 30G CHARGE TARGET — THE CREW WILL NOT SURVIVE — ESC TO CANCEL';
   } else b.style.display = 'none';
   document.getElementById('btn-volley').classList.toggle('armed', m==='volley');
+  document.getElementById('btn-rail').classList.toggle('armed', m==='rail');
   document.getElementById('btn-charge').classList.toggle('armed', m==='charge');
 }
 function selectedGroups(){ return groups.filter(g => selected.has(g.id) && !g.dead && !g.derelict); }
@@ -944,14 +1246,14 @@ function worldToScreen(x, y){ return { x: (x - cam.x)*cam.z + vw/2, y: (y - cam.
 function arcoAt(wp){
   for (const a of arco){
     if (a.dead || a.escaped) continue;
-    if (Math.hypot(a.x-wp.x, a.y-wp.y) < Math.max(a.radius+10, 26/cam.z)) return a;
+    if (Math.hypot(a.x-wp.x, a.y-wp.y)*cam.z < 18) return a;
   }
   return null;
 }
 function groupAt(wp){
   for (const g of groups){
     if (g.dead) continue;
-    if (Math.hypot(g.x-wp.x, g.y-wp.y) < Math.max(g.radius+12, 26/cam.z)) return g;
+    if (Math.hypot(g.x-wp.x, g.y-wp.y)*cam.z < 18) return g;
   }
   return null;
 }
@@ -963,19 +1265,23 @@ function handlePrimary(px, py, additive){
     if (a){
       const sel = selectedGroups();
       if (!sel.length){ log('No battlegroups selected.'); setMode(null); return; }
+      if (!game.weaponsFree){ log('WEAPONS HOLD — Admiral’s orders. Projectile fire may be read as hostile action.', 'warn'); setMode(null); return; }
       if (mode === 'volley'){
-        if (!game.weaponsFree){ log('WEAPONS HOLD — Admiral’s orders. Projectile fire may be read as hostile action.', 'warn'); setMode(null); return; }
         let fired = 0;
         for (const g of sel){ if (g.torps > 0){ fireVolley(g, a, 6, false); fired++; } }
         if (!fired) log('Torpedo magazines empty.');
+      } else if (mode === 'rail'){
+        for (const g of sel) g.railTarget = a;
+        log('Railguns designated on ' + a.name + ' — sustained suppression fire.', 'good');
       } else if (mode === 'charge'){
-        if (!game.weaponsFree){ log('WEAPONS HOLD — Admiral’s orders.', 'warn'); setMode(null); return; }
         for (const g of sel) orderCharge(g, a);
       }
       setMode(null);
     } else setMode(null);
     return;
   }
+  const a = arcoAt(wp);
+  if (a){ setIntel(a); return; }
   const g = groupAt(wp);
   if (g && !g.derelict){
     if (!additive) selected.clear();
@@ -991,16 +1297,16 @@ function handleOrder(px, py){
   if (!sel.length) return;
   const a = arcoAt(wp);
   if (a){
-    for (const g of sel){ g.attackTarget = a; g.dest = null; g.playingDead = false; }
-    fx.push({ type:'ring', x:a.x, y:a.y, t:0, dur:0.5, maxR:34, color:'rgba(255,120,90,0.8)' });
+    for (const g of sel){ g.attackTarget = a; g.railTarget = a; g.dest = null; g.playingDead = false; }
+    fx.push({ type:'ring', x:a.x, y:a.y, t:0, dur:0.5, maxR:600, color:'rgba(255,120,90,0.8)' });
   } else {
     const n = sel.length;
     sel.forEach((g, i) => {
-      const ang = i/n*Math.PI*2, r = n > 1 ? 70 : 0;
-      g.dest = { x: clamp(wp.x + Math.cos(ang)*r, 30, WORLD.w-30), y: clamp(wp.y + Math.sin(ang)*r, 30, WORLD.h-30) };
+      const ang = i/n*Math.PI*2, r = n > 1 ? 1200 : 0;
+      g.dest = { x: clamp(wp.x + Math.cos(ang)*r, 300, WORLD.w-300), y: clamp(wp.y + Math.sin(ang)*r, 300, WORLD.h-300) };
       g.attackTarget = null; g.playingDead = false;
     });
-    fx.push({ type:'ring', x:wp.x, y:wp.y, t:0, dur:0.5, maxR:30, color:'rgba(0,229,255,0.7)' });
+    fx.push({ type:'ring', x:wp.x, y:wp.y, t:0, dur:0.5, maxR:500, color:'rgba(0,229,255,0.7)' });
   }
 }
 
@@ -1049,17 +1355,16 @@ canvas.addEventListener('wheel', e => {
   const px = e.clientX - r.left, py = e.clientY - r.top;
   const before = screenToWorld(px, py);
   const fit = Math.min(vw/WORLD.w, vh/WORLD.h);
-  cam.z = clamp(cam.z * (e.deltaY < 0 ? 1.15 : 0.87), fit*0.85, fit*6);
+  cam.z = clamp(cam.z * (e.deltaY < 0 ? 1.18 : 0.85), fit*0.8, fit*50);
   const after = screenToWorld(px, py);
   cam.x += before.x - after.x; cam.y += before.y - after.y;
 }, { passive: false });
 
-/* touch: tap = select / order */
 let touchStart = null;
 canvas.addEventListener('touchstart', e => {
   if (e.touches.length === 1){
     const r = canvas.getBoundingClientRect();
-    touchStart = { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top, t: Date.now() };
+    touchStart = { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
   }
 }, { passive: true });
 canvas.addEventListener('touchend', e => {
@@ -1067,10 +1372,10 @@ canvas.addEventListener('touchend', e => {
   const px = touchStart.x, py = touchStart.y;
   const wp = screenToWorld(px, py);
   const g = groupAt(wp), a = arcoAt(wp);
-  if (mode){ handlePrimary(px, py, false); }
-  else if (g && !g.derelict){ handlePrimary(px, py, false); }
-  else if (a && selectedGroups().length){ handleOrder(px, py); }
-  else if (selectedGroups().length){ handleOrder(px, py); }
+  if (mode) handlePrimary(px, py, false);
+  else if (g && !g.derelict) handlePrimary(px, py, false);
+  else if (a && selectedGroups().length) handleOrder(px, py);
+  else if (selectedGroups().length && !a && !g) handleOrder(px, py);
   else handlePrimary(px, py, false);
   touchStart = null;
 }, { passive: true });
@@ -1079,13 +1384,17 @@ window.addEventListener('keydown', e => {
   if (e.repeat) return;
   const k = e.key.toLowerCase();
   if (k === ' '){ e.preventDefault(); togglePause(); return; }
-  if (k === 'escape'){ setMode(null); return; }
+  if (k === 'escape'){ setMode(null); setIntel(null); return; }
   if (k === 'a'){ selectAll(); return; }
   if (k === 't'){ setMode(mode === 'volley' ? null : 'volley'); return; }
+  if (k === 'r'){ setMode(mode === 'rail' ? null : 'rail'); return; }
   if (k === 'x'){ setMode(mode === 'charge' ? null : 'charge'); return; }
   if (k === 'd'){ togglePlayDead(); return; }
   if (k === 'h'){ startAnalyse(); return; }
   if (k === 'f'){ fitCamera(); return; }
+  if (k === 'o'){ game.rings = !game.rings; document.getElementById('btn-rings').classList.toggle('armed', game.rings); return; }
+  if (k === '+' || k === '='){ stepSpeed(1); return; }
+  if (k === '-' || k === '_'){ stepSpeed(-1); return; }
   if (k === 'arrowleft') cam.x -= 120/cam.z;
   if (k === 'arrowright') cam.x += 120/cam.z;
   if (k === 'arrowup') cam.y -= 120/cam.z;
@@ -1107,10 +1416,24 @@ function togglePlayDead(){
   for (const g of sel){
     if (g.charging) continue;
     g.playingDead = anyLive;
-    if (anyLive){ g.dest = null; g.attackTarget = null; }
+    if (anyLive){ g.dest = null; g.attackTarget = null; g.railTarget = null; }
   }
-  if (anyLive) log('Going dark — drives cold, weapons stowed, signature down.');
+  if (anyLive) log('Going dark — drives cold, weapons stowed, ballistic drift. Signature down.');
 }
+
+/* ── time compression ────────────────────────────────────────────── */
+const SPEEDS = [1, 4, 16, 64];
+function stepSpeed(d){
+  let i = SPEEDS.indexOf(game.timeScale) + d;
+  i = clamp(i, 0, SPEEDS.length-1);
+  game.timeScale = SPEEDS[i];
+  document.getElementById('btn-speed').textContent = game.timeScale + '×';
+}
+document.getElementById('btn-speed').addEventListener('click', () => {
+  const i = (SPEEDS.indexOf(game.timeScale) + 1) % SPEEDS.length;
+  game.timeScale = SPEEDS[i];
+  document.getElementById('btn-speed').textContent = game.timeScale + '×';
+});
 
 /* ── camera / canvas ─────────────────────────────────────────────── */
 function fitCamera(){
@@ -1126,7 +1449,7 @@ function resize(){
 }
 window.addEventListener('resize', () => { resize(); fitCamera(); });
 
-/* ── HUD strips ──────────────────────────────────────────────────── */
+/* ── HUD ─────────────────────────────────────────────────────────── */
 const fleetEl = document.getElementById('fleet-strip');
 const arcoEl = document.getElementById('arco-strip');
 function refreshFleetStrip(){
@@ -1153,34 +1476,79 @@ function refreshArcoStrip(){
   arcoEl.innerHTML = '';
   arco.forEach(a => {
     const c = document.createElement('div');
-    c.className = 'as-cell' + ((a.dead || a.escaped) ? ' lost' : '');
+    c.className = 'as-cell' + ((a.dead || a.escaped) ? ' lost' : '') + (intelTarget === a ? ' intel' : '');
     c.textContent = a.name + (a.escaped ? ' [WITHDREW]' : '');
     const b = document.createElement('span'); b.className = 'bar';
     b.style.width = a.dead ? '0%' : Math.round(a.hp/a.maxHp*100) + '%';
     c.appendChild(b);
+    c.addEventListener('click', () => { if (!a.dead && !a.escaped) setIntel(a); });
     arcoEl.appendChild(c);
   });
 }
 
-/* bottom selection panel — rebuilt on a timer */
+/* intel panel */
+const intelEl = document.getElementById('intel');
+function setIntel(a){
+  intelTarget = a;
+  refreshArcoStrip();
+  if (!a){ intelEl.style.display = 'none'; return; }
+  intelEl.style.display = 'block';
+}
+function arcoStateLabel(a){
+  if (a.state === 'emerge') return 'EMERGING';
+  if (a.state === 'hold') return 'HOLDING — NOT YET HOSTILE';
+  if (a.state === 'withdraw') return 'WITHDRAWING TO INTERSTICE';
+  if (a.strikeRole && cmdr.strike) return cmdr.strike.phase === 'inbound' ? 'STRIKE RUN — INBOUND' : 'STRIKE RUN — ATTACKING';
+  if (a.suppress > 0) return 'EVADING SUPPRESSION FIRE';
+  if (a.cls === 'incisor' && a.hp < 50) return 'DAMAGED — BREAKING OFF';
+  if (a.dusterState) return 'SPINAL MOUNT CHARGING';
+  return 'STANDOFF BOMBARDMENT';
+}
+function refreshIntel(){
+  const a = intelTarget;
+  if (!a || a.dead || a.escaped){ if (a) setIntel(null); return; }
+  const c = CLS[a.cls];
+  let h = '<div class="ttl">' + a.name + ' — ' + c.label + '</div>';
+  h += '<div class="row"><span>EST. HULL</span><span>' + Math.max(0, Math.round(a.hp/a.maxHp*100)) + '%</span></div>';
+  h += '<div class="row"><span>BEHAVIOUR</span><span class="state">' + arcoStateLabel(a) + '</span></div>';
+  h += '<div class="row"><span>VELOCITY</span><span>' + Math.hypot(a.vx,a.vy).toFixed(1) + ' KPS</span></div>';
+  h += '<div class="row"><span>ACCEL</span><span>' + (a.curAcc/G).toFixed(1) + ' G (rated ' + Math.round(c.acc/G) + ' / ' + Math.round(c.accBurst/G) + ' burst)</span></div>';
+  h += '<div class="row"><span>HULL / MASS</span><span>' + c.len + ' / ' + c.mass + '</span></div>';
+  h += '<div class="row"><span>DRIVE</span><span>' + c.drive + '</span></div>';
+  for (const w of c.weapons) h += '<div class="row"><span>WPN</span><span>' + w + '</span></div>';
+  intelEl.innerHTML = h;
+}
+
+/* bottom selection panel */
 const selPanel = document.getElementById('sel-panel');
 setInterval(() => {
   if (game.over) return;
   const sel = groups.filter(g => selected.has(g.id));
-  selPanel.innerHTML = sel.slice(0, 6).map(g =>
-    '<div class="sel-card' + (g.playingDead ? ' cold' : '') + '">' +
-    '<div class="nm">' + g.name + (g.playingDead ? ' · COLD' : g.charging ? ' · 30G BURN' : '') + '</div>' +
-    '<div class="hpb"><i style="width:' + Math.round(g.hp/g.maxHp*100) + '%' + (g.hp<35?';background:#ff5040':'') + '"></i></div>' +
-    'TORPS ' + g.torps + ' · SCREEN ' + g.corvettes + '/9' +
-    '</div>'
-  ).join('') + (sel.length > 6 ? '<div class="sel-card">+' + (sel.length-6) + ' MORE</div>' : '');
+  selPanel.innerHTML = sel.slice(0, 5).map(g => {
+    const v = Math.hypot(g.vx, g.vy);
+    const tag = g.playingDead ? ' · COLD' : g.charging ? ' · 30G BURN' : g.derelict ? ' · DERELICT' : '';
+    const rail = g.railTarget && !g.railTarget.dead ? g.railTarget.name : 'AUTO';
+    return '<div class="sel-card' + (g.playingDead ? ' cold' : '') + '">' +
+      '<div class="nm">' + g.name + tag + '</div>' +
+      '<div class="hpb"><i style="width:' + Math.round(g.hp/g.maxHp*100) + '%' + (g.hp<35?';background:#ff5040':'') + '"></i></div>' +
+      'TORPS ' + g.torps + ' · SCREEN ' + g.corvettes + '/9<br>' +
+      'VEL ' + v.toFixed(1) + ' KPS · ACC ' + (g.curAcc/G).toFixed(1) + ' G<br>' +
+      'RAIL → ' + rail +
+      '</div>';
+  }).join('') + (sel.length > 5 ? '<div class="sel-card">+' + (sel.length-5) + ' MORE</div>' : '');
   refreshFleetStrip();
   if (arco.some(a => !a.dead && !a.escaped)) refreshArcoStrip();
+  refreshIntel();
 }, 400);
 
 /* ── render ──────────────────────────────────────────────────────── */
 const stars = [];
 for (let i=0;i<240;i++) stars.push({ x: rnd()*WORLD.w, y: rnd()*WORLD.h, s: rnd()*1.4 + 0.3, a: rnd()*0.5 + 0.15 });
+
+/* draw at constant screen size inside the world transform */
+function icon(x, y, fn){
+  ctx.save(); ctx.translate(x, y); ctx.scale(1/cam.z, 1/cam.z); fn(); ctx.restore();
+}
 
 function draw(){
   ctx.clearRect(0, 0, vw, vh);
@@ -1188,28 +1556,25 @@ function draw(){
   ctx.fillRect(0, 0, vw, vh);
 
   ctx.save();
-  if (game.shake > 0.2){
-    ctx.translate((rnd()-0.5)*game.shake, (rnd()-0.5)*game.shake);
-  }
   ctx.translate(vw/2, vh/2);
   ctx.scale(cam.z, cam.z);
   ctx.translate(-cam.x, -cam.y);
 
-  /* stars */
+  /* stars (decor) */
   for (const s of stars){
     ctx.globalAlpha = s.a;
     ctx.fillStyle = '#cfe8f0';
-    ctx.fillRect(s.x, s.y, s.s/cam.z + 0.5, s.s/cam.z + 0.5);
+    ctx.fillRect(s.x, s.y, s.s/cam.z, s.s/cam.z);
   }
   ctx.globalAlpha = 1;
 
-  /* world bounds + grid */
+  /* 10,000 km grid */
   ctx.strokeStyle = 'rgba(0,229,255,0.06)';
   ctx.lineWidth = 1/cam.z;
-  for (let gx = 0; gx <= WORLD.w; gx += 400){
+  for (let gx = 0; gx <= WORLD.w; gx += 10000){
     ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, WORLD.h); ctx.stroke();
   }
-  for (let gy = 0; gy <= WORLD.h; gy += 400){
+  for (let gy = 0; gy <= WORLD.h; gy += 10000){
     ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(WORLD.w, gy); ctx.stroke();
   }
   ctx.strokeStyle = 'rgba(0,229,255,0.18)';
@@ -1219,61 +1584,95 @@ function draw(){
   const it = performance.now()/1000;
   ctx.save();
   ctx.translate(INTERSTICE.x, INTERSTICE.y);
-  const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, 220);
+  const grad = ctx.createRadialGradient(0, 0, 100, 0, 0, 3500);
   grad.addColorStop(0, 'rgba(150,200,255,0.25)');
   grad.addColorStop(1, 'rgba(150,200,255,0)');
   ctx.fillStyle = grad;
-  ctx.beginPath(); ctx.arc(0, 0, 220, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, 0, 3500, 0, Math.PI*2); ctx.fill();
   for (let ring = 0; ring < 3; ring++){
     ctx.save();
     ctx.rotate(it*0.15*(ring%2?1:-1) + ring);
     ctx.strokeStyle = 'rgba(160,210,255,' + (0.5 - ring*0.13) + ')';
     ctx.lineWidth = 2/cam.z;
     ctx.beginPath();
-    const R = 90 + ring*34;
+    const R = 1300 + ring*520;
     for (let i=0;i<=12;i++){
       const a = i/12*Math.PI*2;
-      const px = Math.cos(a)*R, py = Math.sin(a)*R;
-      if (i===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      if (i===0) ctx.moveTo(Math.cos(a)*R, Math.sin(a)*R); else ctx.lineTo(Math.cos(a)*R, Math.sin(a)*R);
     }
     ctx.stroke();
     ctx.restore();
   }
   ctx.fillStyle = 'rgba(200,230,255,0.7)';
-  ctx.beginPath(); ctx.arc(0, 0, 26 + Math.sin(it*2)*4, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0, 0, 380 + Math.sin(it*2)*60, 0, Math.PI*2); ctx.fill();
   ctx.restore();
 
-  /* duster streams (only when submm radar is up) */
+  /* range rings */
+  if (game.rings){
+    const sel = selectedGroups();
+    if (sel.length){
+      const g = sel[0];
+      ctx.setLineDash([2000, 1500]);
+      ctx.lineWidth = 1/cam.z;
+      ctx.strokeStyle = 'rgba(0,229,255,0.22)';
+      ctx.beginPath(); ctx.arc(g.x, g.y, CLS.destroyer.railDesigRange, 0, Math.PI*2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,229,255,0.12)';
+      ctx.beginPath(); ctx.arc(g.x, g.y, 4000, 0, Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+      icon(g.x + CLS.destroyer.railDesigRange, g.y, () => {
+        ctx.fillStyle = 'rgba(0,229,255,0.5)'; ctx.font = '8px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('RAIL 6,000 KM', 4, 3);
+      });
+      icon(g.x + 4000, g.y, () => {
+        ctx.fillStyle = 'rgba(0,229,255,0.35)'; ctx.font = '8px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('TORP EFF 4,000 KM', 4, 3);
+      });
+    }
+    if (intelTarget && !intelTarget.dead && !intelTarget.escaped){
+      const a = intelTarget, c = CLS[a.cls];
+      ctx.setLineDash([2500, 2000]);
+      ctx.lineWidth = 1/cam.z;
+      if (a.cls === 'incisor'){
+        ctx.strokeStyle = 'rgba(255,107,53,0.25)';
+        ctx.beginPath(); ctx.arc(a.x, a.y, c.dusterRange, 0, Math.PI*2); ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(255,107,53,0.15)';
+      ctx.beginPath(); ctx.arc(a.x, a.y, 30000, 0, Math.PI*2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  /* duster streams (visible only with submm radar) */
   if (game.submm){
     for (const d of dusts){
       if (d.resolved || d.life <= 0) continue;
-      const L = 260;
+      const L = 2500;
       const m = Math.hypot(d.vx, d.vy) || 1;
       const ux = d.vx/m, uy = d.vy/m;
       const gr = ctx.createLinearGradient(d.x - ux*L, d.y - uy*L, d.x, d.y);
       gr.addColorStop(0, 'rgba(255,80,50,0)');
       gr.addColorStop(1, 'rgba(255,110,70,0.85)');
       ctx.strokeStyle = gr;
-      ctx.lineWidth = 5/cam.z;
+      ctx.lineWidth = 4/cam.z;
       ctx.beginPath(); ctx.moveTo(d.x - ux*L, d.y - uy*L); ctx.lineTo(d.x, d.y); ctx.stroke();
     }
   }
-
-  /* duster charge telegraph */
+  /* duster aim telegraph */
   for (const a of arco){
     if (a.dead || a.escaped || !a.dusterState) continue;
-    if (!game.submm) {
-      /* pre-unlock: only a faint nose glow, easy to miss — that's the point */
-      ctx.fillStyle = 'rgba(255,120,80,0.25)';
-      ctx.beginPath(); ctx.arc(a.x + Math.cos(a.angle)*a.radius*1.4, a.y + Math.sin(a.angle)*a.radius*1.4, 5, 0, Math.PI*2); ctx.fill();
+    if (!game.submm){
+      icon(a.x, a.y, () => {
+        ctx.fillStyle = 'rgba(255,120,80,0.3)';
+        ctx.beginPath(); ctx.arc(Math.cos(a.angle)*14, Math.sin(a.angle)*14, 3, 0, Math.PI*2); ctx.fill();
+      });
       continue;
     }
     const t = a.dusterState.target;
     if (!t) continue;
     ctx.save();
-    ctx.strokeStyle = 'rgba(255,80,50,' + (0.25 + 0.25*Math.sin(it*12)) + ')';
+    ctx.strokeStyle = 'rgba(255,80,50,' + (0.2 + 0.2*Math.sin(it*12)) + ')';
     ctx.lineWidth = 1.5/cam.z;
-    ctx.setLineDash([14/cam.z, 10/cam.z]);
+    ctx.setLineDash([1200, 900]);
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(t.x, t.y); ctx.stroke();
     ctx.restore();
   }
@@ -1283,147 +1682,130 @@ function draw(){
     if (t.dead) continue;
     const m = Math.hypot(t.vx, t.vy) || 1;
     ctx.strokeStyle = 'rgba(0,229,255,0.5)';
-    ctx.lineWidth = 1.6/cam.z;
-    ctx.beginPath(); ctx.moveTo(t.x - t.vx/m*16, t.y - t.vy/m*16); ctx.lineTo(t.x, t.y); ctx.stroke();
-    ctx.fillStyle = '#bff4ff';
-    ctx.fillRect(t.x-2, t.y-2, 4, 4);
+    ctx.lineWidth = 1.4/cam.z;
+    const tr = Math.min(900, m*12);
+    ctx.beginPath(); ctx.moveTo(t.x - t.vx/m*tr, t.y - t.vy/m*tr); ctx.lineTo(t.x, t.y); ctx.stroke();
+    icon(t.x, t.y, () => { ctx.fillStyle = '#bff4ff'; ctx.fillRect(-1.5, -1.5, 3, 3); });
   }
-  /* railgun rounds */
-  for (const r of rounds){
+  /* railgun salvos */
+  for (const r of salvos){
     if (r.dead) continue;
     const m = Math.hypot(r.vx, r.vy) || 1;
-    ctx.strokeStyle = 'rgba(230,245,255,0.8)';
-    ctx.lineWidth = 1.4/cam.z;
-    ctx.beginPath(); ctx.moveTo(r.x - r.vx/m*22, r.y - r.vy/m*22); ctx.lineTo(r.x, r.y); ctx.stroke();
+    ctx.strokeStyle = 'rgba(230,245,255,0.75)';
+    ctx.lineWidth = 1.2/cam.z;
+    ctx.beginPath(); ctx.moveTo(r.x - r.vx/m*500, r.y - r.vy/m*500); ctx.lineTo(r.x, r.y); ctx.stroke();
   }
   /* missiles */
   for (const m of missiles){
     if (m.dead) continue;
     const s = Math.hypot(m.vx, m.vy) || 1;
     ctx.strokeStyle = 'rgba(255,140,60,0.6)';
-    ctx.lineWidth = 1.6/cam.z;
-    ctx.beginPath(); ctx.moveTo(m.x - m.vx/s*20, m.y - m.vy/s*20); ctx.lineTo(m.x, m.y); ctx.stroke();
-    ctx.fillStyle = '#ffb060';
-    ctx.fillRect(m.x-2.4, m.y-2.4, 4.8, 4.8);
+    ctx.lineWidth = 1.4/cam.z;
+    const tr = Math.min(1200, s*8);
+    ctx.beginPath(); ctx.moveTo(m.x - m.vx/s*tr, m.y - m.vy/s*tr); ctx.lineTo(m.x, m.y); ctx.stroke();
+    icon(m.x, m.y, () => { ctx.fillStyle = '#ffb060'; ctx.fillRect(-1.8, -1.8, 3.6, 3.6); });
   }
 
   /* union groups */
   for (const g of groups){
     if (g.dead) continue;
     const cold = g.playingDead || g.derelict;
-    /* corvette screen */
-    if (g.corvettes > 0){
-      ctx.fillStyle = cold ? 'rgba(110,140,150,0.5)' : 'rgba(0,229,255,0.75)';
-      for (let k=0;k<g.corvettes;k++){
-        const o = g.corvOff[k];
-        const a = o.a + it*0.4;
-        ctx.fillRect(g.x + Math.cos(a)*o.r - 1.5, g.y + Math.sin(a)*o.r - 1.5, 3, 3);
+    /* velocity projection: position in +120 s */
+    const v = Math.hypot(g.vx, g.vy);
+    if (v > 0.3 && !g.dead){
+      ctx.strokeStyle = cold ? 'rgba(110,140,150,0.25)' : 'rgba(0,229,255,0.25)';
+      ctx.lineWidth = 1/cam.z;
+      ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.x + g.vx*120, g.y + g.vy*120); ctx.stroke();
+    }
+    icon(g.x, g.y, () => {
+      /* corvette screen dots (symbolic) */
+      if (g.corvettes > 0){
+        ctx.fillStyle = cold ? 'rgba(110,140,150,0.5)' : 'rgba(0,229,255,0.75)';
+        for (let k=0;k<g.corvettes;k++){
+          const a = k/9*Math.PI*2 + it*0.4;
+          const r2 = 14 + (k%3)*3;
+          ctx.fillRect(Math.cos(a)*r2 - 1.2, Math.sin(a)*r2 - 1.2, 2.4, 2.4);
+        }
       }
-    }
-    ctx.save();
-    ctx.translate(g.x, g.y);
-    ctx.rotate(g.derelict ? it*g.spin : g.angle);
-    /* drive plume */
-    const thrusting = !cold && (Math.hypot(g.vx,g.vy) > 16 || g.charging);
-    if (thrusting){
-      const pl = g.charging ? 46 : 22;
-      const gr = ctx.createLinearGradient(-g.radius, 0, -g.radius-pl, 0);
-      gr.addColorStop(0, g.charging ? 'rgba(255,200,120,0.95)' : 'rgba(120,220,255,0.8)');
-      gr.addColorStop(1, 'rgba(120,220,255,0)');
-      ctx.fillStyle = gr;
-      ctx.beginPath();
-      ctx.moveTo(-g.radius, -4); ctx.lineTo(-g.radius-pl, 0); ctx.lineTo(-g.radius, 4);
-      ctx.closePath(); ctx.fill();
-    }
-    /* hull: boxy tower */
-    ctx.fillStyle = g.flash > 0 ? '#fff'
-      : g.derelict ? '#3c4850'
-      : cold ? '#51646e'
-      : '#9adfd0';
-    ctx.fillRect(-12, -5, 24, 10);
-    ctx.fillRect(-5, -8, 10, 16);
-    if (!cold){
-      ctx.fillStyle = 'rgba(0,229,255,0.9)';
-      ctx.fillRect(8, -2, 4, 4);
-    }
-    ctx.restore();
-    /* selection + labels */
-    if (selected.has(g.id)){
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1.2/cam.z;
-      const R = 24;
-      ctx.beginPath(); ctx.arc(g.x, g.y, R, 0, Math.PI*2); ctx.stroke();
-      if (g.dest){
-        ctx.strokeStyle = 'rgba(0,229,255,0.3)';
-        ctx.setLineDash([8/cam.z, 8/cam.z]);
-        ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.dest.x, g.dest.y); ctx.stroke();
-        ctx.setLineDash([]);
+      ctx.rotate(g.derelict ? it*0.3 : g.angle);
+      if (g.curAcc > 0.01 || g.charging){
+        const pl = g.charging ? 26 : 13;
+        const gr2 = ctx.createLinearGradient(-7, 0, -7-pl, 0);
+        gr2.addColorStop(0, g.charging ? 'rgba(255,200,120,0.95)' : 'rgba(120,220,255,0.8)');
+        gr2.addColorStop(1, 'rgba(120,220,255,0)');
+        ctx.fillStyle = gr2;
+        ctx.beginPath(); ctx.moveTo(-7, -2.5); ctx.lineTo(-7-pl, 0); ctx.lineTo(-7, 2.5); ctx.closePath(); ctx.fill();
       }
-    }
-    if (cam.z > 0.18 && !g.derelict){
-      ctx.fillStyle = cold ? 'rgba(120,150,160,0.7)' : 'rgba(0,229,255,0.75)';
-      ctx.font = (10/cam.z) + 'px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText((g.id===10?'0':g.id) + (g.playingDead ? ' COLD' : ''), g.x, g.y - 26);
-    }
-    if (g.hp < g.maxHp && !g.derelict){
-      ctx.fillStyle = 'rgba(255,255,255,0.15)';
-      ctx.fillRect(g.x-16, g.y+20, 32, 3);
-      ctx.fillStyle = g.hp < 35 ? '#ff5040' : '#00e5ff';
-      ctx.fillRect(g.x-16, g.y+20, 32*g.hp/g.maxHp, 3);
+      ctx.fillStyle = g.flash > 0 ? '#fff' : g.derelict ? '#3c4850' : cold ? '#51646e' : '#9adfd0';
+      ctx.fillRect(-7, -3, 14, 6);
+      ctx.fillRect(-3, -5, 6, 10);
+      if (!cold){ ctx.fillStyle = 'rgba(0,229,255,0.9)'; ctx.fillRect(4.5, -1.2, 2.5, 2.4); }
+      ctx.rotate(g.derelict ? -it*0.3 : -g.angle);
+      if (selected.has(g.id)){
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(0, 0, 14, 0, Math.PI*2); ctx.stroke();
+      }
+      if (!g.derelict){
+        ctx.fillStyle = cold ? 'rgba(120,150,160,0.7)' : 'rgba(0,229,255,0.75)';
+        ctx.font = '9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText((g.id===10?'0':g.id) + (g.playingDead ? ' COLD' : ''), 0, -18);
+        if (g.hp < g.maxHp){
+          ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(-10, 13, 20, 2.4);
+          ctx.fillStyle = g.hp < 35 ? '#ff5040' : '#00e5ff';
+          ctx.fillRect(-10, 13, 20*g.hp/g.maxHp, 2.4);
+        }
+      }
+    });
+    if (selected.has(g.id) && g.dest){
+      ctx.strokeStyle = 'rgba(0,229,255,0.3)';
+      ctx.setLineDash([800, 800]);
+      ctx.lineWidth = 1/cam.z;
+      ctx.beginPath(); ctx.moveTo(g.x, g.y); ctx.lineTo(g.dest.x, g.dest.y); ctx.stroke();
+      ctx.setLineDash([]);
     }
   }
 
   /* arco ships */
   for (const a of arco){
     if (a.dead || a.escaped) continue;
-    ctx.save();
-    ctx.translate(a.x, a.y);
-    ctx.rotate(a.angle);
-    const sc = a.cls === 'incisor' ? 1 : 1.8;
-    /* antimatter plume */
-    if (Math.hypot(a.vx,a.vy) > 14){
-      const pl = 40*sc;
-      const gr = ctx.createLinearGradient(-14*sc, 0, -14*sc-pl, 0);
-      gr.addColorStop(0, 'rgba(255,255,255,0.95)');
-      gr.addColorStop(0.3, 'rgba(180,200,255,0.7)');
-      gr.addColorStop(1, 'rgba(180,200,255,0)');
-      ctx.fillStyle = gr;
+    const v = Math.hypot(a.vx, a.vy);
+    if (v > 0.3){
+      ctx.strokeStyle = 'rgba(255,107,53,0.25)';
+      ctx.lineWidth = 1/cam.z;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(a.x + a.vx*120, a.y + a.vy*120); ctx.stroke();
+    }
+    icon(a.x, a.y, () => {
+      ctx.rotate(a.angle);
+      const sc = a.cls === 'incisor' ? 1 : 1.7;
+      if (a.curAcc > 0.01){
+        const pl = 22*sc;
+        const gr2 = ctx.createLinearGradient(-8*sc, 0, -8*sc-pl, 0);
+        gr2.addColorStop(0, 'rgba(255,255,255,0.95)');
+        gr2.addColorStop(0.3, 'rgba(180,200,255,0.7)');
+        gr2.addColorStop(1, 'rgba(180,200,255,0)');
+        ctx.fillStyle = gr2;
+        ctx.beginPath(); ctx.moveTo(-8*sc, -2*sc); ctx.lineTo(-8*sc-pl, 0); ctx.lineTo(-8*sc, 2*sc); ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = a.flash > 0 ? '#fff' : '#e8543a';
       ctx.beginPath();
-      ctx.moveTo(-14*sc, -3*sc); ctx.lineTo(-14*sc-pl, 0); ctx.lineTo(-14*sc, 3*sc);
+      ctx.moveTo(12*sc, 0); ctx.lineTo(-8*sc, 5*sc); ctx.lineTo(-5*sc, 0); ctx.lineTo(-8*sc, -5*sc);
       ctx.closePath(); ctx.fill();
-    }
-    /* elongated pyramid dart */
-    ctx.fillStyle = a.flash > 0 ? '#fff' : '#e8543a';
-    ctx.beginPath();
-    ctx.moveTo(20*sc, 0);
-    ctx.lineTo(-13*sc, 8*sc);
-    ctx.lineTo(-8*sc, 0);
-    ctx.lineTo(-13*sc, -8*sc);
-    ctx.closePath(); ctx.fill();
-    /* spinal bore */
-    ctx.fillStyle = a.dusterState ? 'rgba(255,230,180,0.95)' : 'rgba(40,8,4,0.9)';
-    ctx.beginPath(); ctx.arc(13*sc, 0, 2.4*sc, 0, Math.PI*2); ctx.fill();
-    /* radiator strakes */
-    ctx.strokeStyle = 'rgba(255,235,220,0.85)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath(); ctx.moveTo(14*sc, 2.5*sc); ctx.lineTo(-9*sc, 6.5*sc); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(14*sc, -2.5*sc); ctx.lineTo(-9*sc, -6.5*sc); ctx.stroke();
-    ctx.restore();
-    /* label + hp */
-    if (cam.z > 0.14){
+      ctx.fillStyle = a.dusterState ? 'rgba(255,230,180,0.95)' : 'rgba(40,8,4,0.9)';
+      ctx.beginPath(); ctx.arc(8*sc, 0, 1.6*sc, 0, Math.PI*2); ctx.fill();
+      ctx.rotate(-a.angle);
       ctx.fillStyle = 'rgba(255,107,53,0.85)';
-      ctx.font = (10/cam.z) + 'px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(a.name, a.x, a.y - (a.cls==='incisor'?30:46));
-    }
-    if (a.hp < a.maxHp){
-      const w = a.cls === 'incisor' ? 36 : 56;
-      ctx.fillStyle = 'rgba(255,255,255,0.15)';
-      ctx.fillRect(a.x-w/2, a.y + (a.cls==='incisor'?26:40), w, 3);
-      ctx.fillStyle = '#ff6b35';
-      ctx.fillRect(a.x-w/2, a.y + (a.cls==='incisor'?26:40), w*a.hp/a.maxHp, 3);
-    }
+      ctx.font = '9px monospace'; ctx.textAlign = 'center';
+      ctx.fillText(a.name, 0, a.cls==='incisor' ? -16 : -24);
+      if (a.hp < a.maxHp){
+        const w = a.cls === 'incisor' ? 22 : 34;
+        ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(-w/2, 14, w, 2.4);
+        ctx.fillStyle = '#ff6b35'; ctx.fillRect(-w/2, 14, w*a.hp/a.maxHp, 2.4);
+      }
+      if (intelTarget === a){
+        ctx.strokeStyle = 'rgba(255,107,53,0.9)'; ctx.lineWidth = 1.2;
+        ctx.strokeRect(-16, -12, 32, 24);
+      }
+    });
   }
 
   /* beams */
@@ -1440,27 +1822,21 @@ function draw(){
   for (const f of fx){
     const p = f.t/f.dur;
     if (p >= 1) continue;
-    if (f.type === 'boom' || f.type === 'ring' || f.type === 'gamma'){
-      ctx.globalAlpha = 1 - p;
-      ctx.strokeStyle = f.color;
-      ctx.lineWidth = (f.type === 'gamma' ? 3 : 2)/cam.z;
-      ctx.beginPath(); ctx.arc(f.x, f.y, f.maxR*p, 0, Math.PI*2); ctx.stroke();
-      if (f.type === 'boom' && p < 0.4){
-        ctx.fillStyle = f.color;
-        ctx.globalAlpha = (1 - p/0.4)*0.9;
-        ctx.beginPath(); ctx.arc(f.x, f.y, f.maxR*0.3*(1-p), 0, Math.PI*2); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    } else if (f.type === 'spark'){
-      ctx.globalAlpha = 1 - p;
+    ctx.globalAlpha = 1 - p;
+    ctx.strokeStyle = f.color;
+    ctx.lineWidth = (f.type === 'gamma' ? 3 : 2)/cam.z;
+    ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(f.maxR*p, 1), 0, Math.PI*2); ctx.stroke();
+    if (f.type === 'boom' && p < 0.4){
       ctx.fillStyle = f.color;
-      ctx.fillRect(f.x + f.vx*f.t - 1.5, f.y + f.vy*f.t - 1.5, 3, 3);
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = (1 - p/0.4)*0.9;
+      ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(f.maxR*0.3*(1-p), 1), 0, Math.PI*2); ctx.fill();
     }
+    ctx.globalAlpha = 1;
   }
 
-  /* selection box */
   ctx.restore();
+
+  /* selection box */
   if (dragStart && dragNow && Math.hypot(dragNow.x-dragStart.x, dragNow.y-dragStart.y) > 7){
     ctx.strokeStyle = 'rgba(0,229,255,0.7)';
     ctx.fillStyle = 'rgba(0,229,255,0.06)';
@@ -1470,49 +1846,53 @@ function draw(){
     ctx.fillRect(x, y, w, h);
     ctx.strokeRect(x, y, w, h);
   }
+
+  /* scale bar */
+  const segPx = 10000*cam.z;
+  document.getElementById('scaleseg').style.width = segPx + 'px';
+  document.getElementById('scalelbl').textContent = '10,000 KM';
 }
 
-/* ── main loop ───────────────────────────────────────────────────── */
+/* ── main loop (fixed timestep + compression) ────────────────────── */
 let scheduleIdx = 0;
 function update(dt){
   game.t += dt;
-  game.shake = Math.max(0, game.shake - dt*14);
-
   while (scheduleIdx < schedule.length && schedule[scheduleIdx].t <= game.t){
     schedule[scheduleIdx].fn();
     scheduleIdx++;
   }
   if (game.analyse === 2){
     game.analyseT -= dt;
-    const btn = document.getElementById('analyse-btn');
-    btn.textContent = 'ANALYSING… ' + Math.ceil(game.analyseT) + 's';
+    document.getElementById('analyse-btn').textContent = 'ANALYSING… ' + Math.ceil(game.analyseT) + 's';
     if (game.analyseT <= 0) finishAnalyse();
   }
-
+  updateCommander(dt);
   for (const g of groups) updateGroup(g, dt);
   for (const a of arco) updateArco(a, dt);
   updateProjectiles(dt);
 
-  /* prune dead projectiles/fx */
   for (let i=torps.length-1;i>=0;i--) if (torps[i].dead) torps.splice(i,1);
-  for (let i=rounds.length-1;i>=0;i--) if (rounds[i].dead || rounds[i].life<=0) rounds.splice(i,1);
+  for (let i=salvos.length-1;i>=0;i--) if (salvos[i].dead) salvos.splice(i,1);
   for (let i=missiles.length-1;i>=0;i--) if (missiles[i].dead) missiles.splice(i,1);
   for (let i=dusts.length-1;i>=0;i--) if (dusts[i].life <= -1) dusts.splice(i,1);
   for (let i=beams.length-1;i>=0;i--) if (beams[i].life <= 0) beams.splice(i,1);
   for (let i=fx.length-1;i>=0;i--) if (fx[i].t >= fx[i].dur) fx.splice(i,1);
 
   checkEnd(dt);
-
-  const m = Math.floor(game.t/60), s = Math.floor(game.t%60);
-  document.getElementById('clock').textContent = 'T+' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  document.getElementById('clock').textContent = 'T+' + logTime();
 }
 
-let last = 0;
+let last = 0, simAcc = 0;
 function loop(now){
   requestAnimationFrame(loop);
-  const dt = Math.min((now - last)/1000, 0.05) * game.speed;
+  const fdt = Math.min((now - last)/1000, 0.1);
   last = now;
-  if (game.running && !game.paused && !game.over) update(dt);
+  if (game.running && !game.paused && !game.over){
+    simAcc += fdt * game.timeScale;
+    let n = 0;
+    while (simAcc >= H && n < 600){ update(H); simAcc -= H; n++; }
+    if (n >= 600) simAcc = 0;
+  }
   draw();
 }
 
@@ -1524,13 +1904,14 @@ function togglePause(){
   document.getElementById('btn-pause').classList.toggle('armed', game.paused);
 }
 document.getElementById('btn-pause').addEventListener('click', togglePause);
-document.getElementById('btn-speed').addEventListener('click', function(){
-  game.speed = game.speed === 1 ? 2 : 1;
-  this.textContent = game.speed + '×';
-});
 document.getElementById('btn-fit').addEventListener('click', fitCamera);
+document.getElementById('btn-rings').addEventListener('click', () => {
+  game.rings = !game.rings;
+  document.getElementById('btn-rings').classList.toggle('armed', game.rings);
+});
 document.getElementById('btn-all').addEventListener('click', selectAll);
 document.getElementById('btn-volley').addEventListener('click', () => setMode(mode === 'volley' ? null : 'volley'));
+document.getElementById('btn-rail').addEventListener('click', () => setMode(mode === 'rail' ? null : 'rail'));
 document.getElementById('btn-charge').addEventListener('click', () => setMode(mode === 'charge' ? null : 'charge'));
 document.getElementById('btn-dead').addEventListener('click', togglePlayDead);
 document.getElementById('analyse-btn').addEventListener('click', startAnalyse);
@@ -1547,9 +1928,32 @@ document.getElementById('btn-helpclose').addEventListener('click', () => {
 document.getElementById('btn-start').addEventListener('click', () => {
   document.getElementById('briefing').style.display = 'none';
   game.running = true;
-  log('First Fleet on station. Ten battlegroups, ninety corvettes, a hundred thousand kilometres of cordon.');
+  document.getElementById('btn-rings').classList.add('armed');
+  log('First Fleet on station — ten battlegroups, ninety corvettes, a cordon 17,000 km out from the interstice.');
+  log('Time compression available: 1× / 4× / 16× / 64×. Space is big. Use it.');
 });
 document.getElementById('btn-restart').addEventListener('click', () => location.reload());
+
+/* scenario picker */
+const scnGrid = document.getElementById('scn-grid');
+Object.keys(SCENARIOS).forEach(k => {
+  const s = SCENARIOS[k];
+  const b = document.createElement('button');
+  b.className = 'scn-btn' + (k === scnKey ? ' sel' : '');
+  b.innerHTML = '<div class="sn">' + s.label + '</div><div class="sd">' + s.desc + '</div>';
+  b.addEventListener('click', () => {
+    scnKey = k;
+    try { localStorage.setItem('tff-scn', k); } catch(e){}
+    scnGrid.querySelectorAll('.scn-btn').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    document.getElementById('scn-tag').textContent = s.label;
+    initGame();
+    scheduleIdx = 0;
+    refreshFleetStrip(); refreshArcoStrip();
+  });
+  scnGrid.appendChild(b);
+});
+document.getElementById('scn-tag').textContent = SCENARIOS[scnKey].label;
 
 /* ── boot ────────────────────────────────────────────────────────── */
 initGame();
@@ -1557,10 +1961,13 @@ resize();
 fitCamera();
 refreshFleetStrip();
 refreshArcoStrip();
+document.getElementById('btn-speed').textContent = game.timeScale + '×';
 requestAnimationFrame(loop);
 
-/* test hooks (harmless in production) */
-window.__threshold = { game, groups, arco, torps, update, draw, fireVolley, orderCharge, selectAll, stats };
+/* test hooks */
+window.__threshold = { game, groups, arco, torps, salvos, missiles, dusts, update, draw,
+                       fireVolley, fireSalvo, orderCharge, selectAll, stats, cmdr, CLS, SCENARIOS,
+                       setScenario(k){ scnKey = k; initGame(); scheduleIdx = 0; } };
 
 })();
 </script>

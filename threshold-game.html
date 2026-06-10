@@ -627,6 +627,9 @@ function updateGroup(g, dt){
   } else if (g.dest){
     arrive(g, g.dest.x, g.dest.y, c.accMil, dt, c.vmax);
     if (dist(g, g.dest) < 100 && Math.hypot(g.vx,g.vy) < 0.5){ g.dest = null; g.vx = 0; g.vy = 0; }
+  } else if (g.railTarget && !g.railTarget.dead && !g.railTarget.escaped && dist(g, g.railTarget) > c.railDesigRange*0.9){
+    /* designated fire beyond effective range: close to the firing envelope */
+    pursue(g, g.railTarget.x, g.railTarget.y, c.accMil, dt, c.vmax);
   } else {
     brake(g, c.accMil, dt);
   }
@@ -658,7 +661,7 @@ function updateGroup(g, dt){
       let tgt = null, bd = c.pdcRange;
       for (const m of missiles){ if (m.dead) continue; const d = dist(g,m); if (d < bd){ bd = d; tgt = m; } }
       if (tgt){
-        beams.push({ x1:g.x, y1:g.y, x2:tgt.x, y2:tgt.y, life:0.1, color:'rgba(160,255,200,0.7)', w:1 });
+        beams.push({ x1:g.x, y1:g.y, x2:tgt.x, y2:tgt.y, life:0.25, color:'rgba(160,255,200,0.7)', w:1 });
         if (rnd() < 0.5){
           tgt.dead = true;
           fx.push({ type:'boom', x:tgt.x, y:tgt.y, t:0, dur:0.4, maxR:150, color:'rgba(200,255,220,0.9)' });
@@ -902,7 +905,7 @@ function updateArco(a, dt){
       if (tgt.age > 150) pk = 0.95;
       else if (termD < 1500) pk = 0.4;
       if (tgt.sneak) pk = 0.25;
-      beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.15, color:'rgba(220,240,255,0.85)', w:1.2 });
+      beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.35, color:'rgba(220,240,255,0.85)', w:1.4 });
       if (rnd() < pk){
         tgt.dead = true;
         stats.torpIntercepted++;
@@ -1131,8 +1134,7 @@ function updateProjectiles(dt){
       }
     }
   }
-  for (const b of beams) b.life -= dt;
-  for (const f of fx) f.t += dt;
+  /* beams & fx decay in REAL time (in loop) so they stay visible at 16×/64× compression */
 }
 
 /* ── analyse / submm unlock ──────────────────────────────────────── */
@@ -1297,40 +1299,57 @@ function screenToWorld(px, py){ return { x: (px - vw/2)/cam.z + cam.x, y: (py - 
 function worldToScreen(x, y){ return { x: (x - cam.x)*cam.z + vw/2, y: (y - cam.y)*cam.z + vh/2 }; }
 
 function arcoAt(wp){
+  let best = null, bd = 26;
   for (const a of arco){
     if (a.dead || a.escaped) continue;
-    if (Math.hypot(a.x-wp.x, a.y-wp.y)*cam.z < 18) return a;
+    const d = Math.hypot(a.x-wp.x, a.y-wp.y)*cam.z;
+    if (d < bd){ bd = d; best = a; }
   }
-  return null;
+  return best;
+}
+function nearestArco(wp){
+  let best = null, bd = Infinity;
+  for (const a of arco){
+    if (a.dead || a.escaped) continue;
+    const d = Math.hypot(a.x-wp.x, a.y-wp.y)*cam.z;
+    if (d < bd){ bd = d; best = a; }
+  }
+  return best;
 }
 function groupAt(wp){
+  let best = null, bd = 26;
   for (const g of groups){
     if (g.dead) continue;
-    if (Math.hypot(g.x-wp.x, g.y-wp.y)*cam.z < 18) return g;
+    const d = Math.hypot(g.x-wp.x, g.y-wp.y)*cam.z;
+    if (d < bd){ bd = d; best = g; }
   }
-  return null;
+  return best;
 }
 
 function handlePrimary(px, py, additive){
   const wp = screenToWorld(px, py);
   if (mode){
-    const a = arcoAt(wp);
+    /* weapon mode: snap to the nearest living contact — a click always acts */
+    const a = nearestArco(wp);
     if (a){
       const sel = selectedGroups();
-      if (!sel.length){ log('No battlegroups selected.'); setMode(null); return; }
+      if (!sel.length){ log('No battlegroups selected.', 'warn'); setMode(null); return; }
       if (!game.weaponsFree){ log('Firing before weapons free — Admiral has not authorised engagement.', 'warn'); game.weaponsFree = true; }
       if (mode === 'volley'){
-        let fired = 0;
-        for (const g of sel){ if (g.torps > 0){ fireVolley(g, a, 6, false); fired++; } }
-        if (!fired) log('Torpedo magazines empty.');
+        let fired = 0, birds = 0;
+        for (const g of sel){ if (g.torps > 0){ const n = Math.min(6, g.torps); fireVolley(g, a, n, false); fired++; birds += n; } }
+        if (!fired) log('Torpedo magazines empty.', 'warn');
+        else log(birds + ' torpedoes away — tracking ' + a.name + '.', 'good');
       } else if (mode === 'rail'){
-        for (const g of sel) g.railTarget = a;
-        log('Railguns designated on ' + a.name + ' — sustained suppression fire.', 'good');
+        let far = 0;
+        for (const g of sel){ g.railTarget = a; if (dist(g, a) > CLS.destroyer.railDesigRange) far++; }
+        if (far) log('Railguns designated on ' + a.name + ' — beyond 6,000 km effective range, ' + far + ' group(s) closing to engage.', 'warn');
+        else log('Railguns designated on ' + a.name + ' — sustained suppression fire.', 'good');
       } else if (mode === 'charge'){
         for (const g of sel) orderCharge(g, a);
       }
       setMode(null);
-    } else setMode(null);
+    } else { log('No enemy contacts remain.', 'warn'); setMode(null); }
     return;
   }
   const a = arcoAt(wp);
@@ -1734,15 +1753,15 @@ function draw(){
   for (const t of torps){
     if (t.dead) continue;
     const m = Math.hypot(t.vx, t.vy) || 1;
-    /* engine trail */
-    ctx.strokeStyle = t.fuel > 0 ? 'rgba(0,229,255,0.5)' : 'rgba(0,229,255,0.2)';
-    ctx.lineWidth = 1.4/cam.z;
-    const tr = Math.min(900, m*12);
+    /* engine trail — kept faint: volleys overlap dozens of trails on one bearing */
+    ctx.strokeStyle = t.fuel > 0 ? 'rgba(0,229,255,0.28)' : 'rgba(0,229,255,0.12)';
+    ctx.lineWidth = 1.1/cam.z;
+    const tr = Math.min(700, m*10);
     ctx.beginPath(); ctx.moveTo(t.x - t.vx/m*tr, t.y - t.vy/m*tr); ctx.lineTo(t.x, t.y); ctx.stroke();
     /* velocity projection: where the torpedo will be in 30s */
     if (t.fuel > 0 && t.target && !t.target.dead){
-      ctx.strokeStyle = 'rgba(0,229,255,0.12)';
-      ctx.lineWidth = 0.8/cam.z;
+      ctx.strokeStyle = 'rgba(0,229,255,0.05)';
+      ctx.lineWidth = 0.6/cam.z;
       ctx.beginPath(); ctx.moveTo(t.x, t.y); ctx.lineTo(t.x + t.vx*30, t.y + t.vy*30); ctx.stroke();
     }
     icon(t.x, t.y, () => {
@@ -1949,8 +1968,8 @@ function draw(){
       if (p < 0.4){
         icon(f.x, f.y, () => {
           ctx.globalAlpha = 1-p/0.4;
-          ctx.fillStyle = '#bff4ff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
-          ctx.fillText(f.n + ' TORPS', 0, -18);
+          ctx.fillStyle = '#9adfee'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
+          ctx.fillText(f.n + ' TORPS', 0, -16);
         });
       }
       ctx.globalAlpha = 1;
@@ -2010,9 +2029,6 @@ function update(dt){
   for (let i=salvos.length-1;i>=0;i--) if (salvos[i].dead) salvos.splice(i,1);
   for (let i=missiles.length-1;i>=0;i--) if (missiles[i].dead) missiles.splice(i,1);
   for (let i=dusts.length-1;i>=0;i--) if (dusts[i].life <= -1) dusts.splice(i,1);
-  for (let i=beams.length-1;i>=0;i--) if (beams[i].life <= 0) beams.splice(i,1);
-  for (let i=fx.length-1;i>=0;i--) if (fx[i].t >= fx[i].dur) fx.splice(i,1);
-
   checkEnd(dt);
   document.getElementById('clock').textContent = 'T+' + logTime();
 }
@@ -2028,6 +2044,12 @@ function loop(now){
     while (simAcc >= H && n < 600){ update(H); simAcc -= H; n++; }
     if (n >= 600) simAcc = 0;
   }
+  /* fx decay in real time so beams and blasts read at any compression */
+  for (const b of beams) b.life -= fdt;
+  for (const f of fx) f.t += fdt;
+  for (let i=beams.length-1;i>=0;i--) if (beams[i].life <= 0) beams.splice(i,1);
+  for (let i=fx.length-1;i>=0;i--) if (fx[i].t >= fx[i].dur) fx.splice(i,1);
+  if (beams.length > 80) beams.splice(0, beams.length - 80);   // high compression floods otherwise
   draw();
 }
 

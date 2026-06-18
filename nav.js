@@ -1,6 +1,8 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   Shared Navigation — injected into all pages
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ============================================================================
+   Ascent Universe — Shared Navigation
+   Injected into every page. Brand: Dragon's Tooth mark + lowercase "ascent"
+   wordmark with chromatic-aberration text-shadow, acid-green accent, bone text.
+   ============================================================================ */
 (function() {
   const pages = [
     { href: 'index.html', label: 'HOME' },
@@ -45,17 +47,49 @@
   ];
 
   const current = location.pathname.split('/').pop() || 'index.html';
-  const storyPages = ['reader.html','story.html','seeker-story.html','worlds-within-story.html','headhunted-story.html','inheritor-story.html','oblivion-story.html','sixty-percent-story.html','starwhisp-story.html','director-story.html','facilitator-story.html','bows-arrows-story.html','war-of-all-wars-story.html','other-moon-story.html','frameshift-story.html','utilitaria-story.html','last-duty-story.html'];
+  const storyPages = [
+    'reader.html','story.html','seeker-story.html','worlds-within-story.html',
+    'headhunted-story.html','inheritor-story.html','oblivion-story.html',
+    'sixty-percent-story.html','starwhisp-story.html','director-story.html',
+    'facilitator-story.html','bows-arrows-story.html','war-of-all-wars-story.html',
+    'other-moon-story.html','frameshift-story.html','utilitaria-story.html',
+    'last-duty-story.html',
+  ];
 
+  /* ── Nav element ──────────────────────────────────────────────────────── */
   const nav = document.createElement('nav');
   nav.id = 'site-nav';
 
-  const brand = document.createElement('span');
+  /* Brand: Dragon's Tooth + "ascent" wordmark */
+  const brand = document.createElement('a');
   brand.className = 'nav-brand';
-  brand.innerHTML = '<span class="diamond"></span>ASCENT UNIVERSE';
+  brand.href = 'index.html';
+
+  const img = document.createElement('img');
+  img.src = 'assets/brand/dragons-tooth.png';
+  img.alt = '';
+  img.className = 'nav-brand-img';
+  img.onerror = function() {
+    this.style.display = 'none';
+    const d = document.createElement('span');
+    d.className = 'diamond';
+    brand.insertBefore(d, brand.firstChild);
+  };
+
+  const wordmark = document.createElement('span');
+  wordmark.className = 'nav-brand-text';
+  wordmark.textContent = 'ascent';
+
+  brand.appendChild(img);
+  brand.appendChild(wordmark);
   nav.appendChild(brand);
 
-  // Theme toggle
+  /* Thin separator */
+  const sepEl = document.createElement('span');
+  sepEl.className = 'nav-sep';
+  nav.appendChild(sepEl);
+
+  /* Theme toggle */
   const themeBtn = document.createElement('button');
   themeBtn.className = 'theme-toggle';
   themeBtn.setAttribute('aria-label', 'Toggle light/dark mode');
@@ -78,15 +112,15 @@
   });
   nav.appendChild(themeBtn);
 
+  /* Hamburger */
   const hamburger = document.createElement('button');
   hamburger.className = 'hamburger';
   hamburger.textContent = '≡';
   hamburger.setAttribute('aria-label', 'Menu');
-  hamburger.addEventListener('click', () => {
-    links.classList.toggle('open');
-  });
+  hamburger.addEventListener('click', () => links.classList.toggle('open'));
   nav.appendChild(hamburger);
 
+  /* Links */
   const links = document.createElement('div');
   links.className = 'nav-links';
   pages.forEach(p => {
@@ -99,8 +133,11 @@
     const a = document.createElement('a');
     a.href = p.href;
     a.textContent = p.label;
-    if (current === p.href || (current === '' && p.href === 'index.html') ||
-        (p.href === 'stories.html' && storyPages.includes(current))) {
+    if (
+      current === p.href ||
+      (current === '' && p.href === 'index.html') ||
+      (p.href === 'stories.html' && storyPages.includes(current))
+    ) {
       a.className = 'active';
     }
     a.addEventListener('click', () => links.classList.remove('open'));
@@ -108,16 +145,17 @@
   });
   nav.appendChild(links);
 
-  // Inject scanlines
+  /* ── Injected elements ────────────────────────────────────────────────── */
   const scan = document.createElement('div');
   scan.className = 'scanlines';
 
-  // Inject status bar
   const bar = document.createElement('div');
   bar.className = 'status-bar';
-  bar.innerHTML = '<span class="dim">ARCO INTERSTELLAR AGENCY</span><span class="bright" id="nav-clock"></span><span class="dim">CLEARANCE: DELTA</span>';
+  bar.innerHTML =
+    '<span class="dim">ARCO INTERSTELLAR AGENCY</span>' +
+    '<span class="bright" id="nav-clock"></span>' +
+    '<span class="dim">CLEARANCE: DELTA</span>';
 
-  // Back to top button
   const btt = document.createElement('button');
   btt.className = 'back-to-top';
   btt.setAttribute('aria-label', 'Back to top');
@@ -130,19 +168,19 @@
     document.body.appendChild(bar);
     document.body.appendChild(btt);
 
-    // Show/hide back-to-top on scroll
     window.addEventListener('scroll', () => {
       btt.classList.toggle('visible', window.scrollY > 400);
     }, { passive: true });
 
-    // Clock
     function tick() {
       const el = document.getElementById('nav-clock');
       if (!el) return;
       const now = new Date();
       const yr = now.getFullYear() + 750;
       const p = n => String(n).padStart(2, '0');
-      el.textContent = `${yr}.${p(now.getMonth()+1)}.${p(now.getDate())} ${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())} UST`;
+      el.textContent =
+        `${yr}.${p(now.getMonth()+1)}.${p(now.getDate())} ` +
+        `${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())} UST`;
     }
     tick();
     setInterval(tick, 1000);

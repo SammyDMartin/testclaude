@@ -14,9 +14,326 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 <style>
-body { overflow-y: auto; }
+/* ── Hero ────────────────────────────────────────────────────────────── */
+.home-hero {
+  position: relative; overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-16) var(--space-6) var(--space-12);
+  padding-top: calc(var(--nav-height) + var(--space-16));
+}
+.home-starfield {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+.hero-watermark {
+  position: absolute; right: -3%; top: 50%; transform: translateY(-50%);
+  height: 118%; width: auto; opacity: 0.06; z-index: 1; pointer-events: none;
+}
+.home-hero-content {
+  position: relative; z-index: 4;
+  max-width: var(--width-content); margin: 0 auto;
+}
+.home-kicker {
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: var(--track-widest); text-transform: uppercase;
+  color: var(--bone-dim); margin-bottom: var(--space-5);
+}
+.home-kicker .acid-sep { color: var(--acid); }
+.glitch-title {
+  font-family: var(--font-display); font-weight: 300;
+  letter-spacing: var(--track-widest); text-transform: lowercase;
+  color: var(--bone); line-height: var(--leading-tight);
+  text-shadow: 0.045em 0 var(--chroma-red), -0.045em 0 var(--chroma-cyan);
+  transition: text-shadow var(--dur) var(--ease-out);
+  margin: 0;
+}
+.glitch-title:hover {
+  text-shadow: 0.07em 0 var(--chroma-red), -0.07em 0 var(--chroma-cyan);
+}
+.glitch-hero { font-size: var(--text-hero); margin-bottom: var(--space-4); }
+.hero-rule-line {
+  display: flex; align-items: center; gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.hero-rule-bar { flex: none; width: 64px; height: 1px; background: var(--acid); }
+.hero-rule-text {
+  font-family: var(--font-mono); font-size: var(--text-sm);
+  letter-spacing: var(--track-wider); color: var(--bone-soft);
+}
+.home-desc {
+  font-family: var(--font-sans); font-size: var(--text-md);
+  font-weight: 400; line-height: var(--leading-normal);
+  color: var(--bone-soft); max-width: 60ch; margin-bottom: var(--space-3);
+}
+.home-desc .faction-inline-dyn  { color: var(--dyn); font-weight: 500; }
+.home-desc .faction-inline-apathy { color: var(--apathy); font-weight: 500; }
+.home-subdesc {
+  font-family: var(--font-sans); font-size: var(--text-sm);
+  line-height: var(--leading-normal); color: var(--bone-dim);
+  max-width: 58ch; margin-bottom: var(--space-6);
+}
+.home-cta { display: flex; gap: var(--space-3); flex-wrap: wrap; }
 
-/* Listener Easter Egg */
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+.home-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-weight: 500;
+  font-size: var(--text-sm); letter-spacing: var(--track-wider);
+  text-transform: uppercase; text-decoration: none;
+  padding: 13px 26px; border-radius: var(--radius-sm);
+  border: 1px solid; cursor: pointer; white-space: nowrap;
+  transition: all var(--dur-fast) var(--ease-out);
+}
+.home-btn-primary {
+  background: var(--acid); color: var(--on-accent); border-color: var(--acid);
+}
+.home-btn-primary:hover {
+  background: var(--acid-bright); border-color: var(--acid-bright);
+  box-shadow: var(--glow-acid-strong); color: var(--on-accent);
+}
+.home-btn-secondary {
+  background: transparent; color: var(--bone); border-color: var(--border-strong);
+}
+.home-btn-secondary:hover {
+  color: var(--acid); border-color: var(--acid);
+}
+.home-btn-ghost {
+  background: transparent; color: var(--bone-dim); border-color: transparent;
+  padding-left: 0; padding-right: 0;
+}
+.home-btn-ghost:hover { color: var(--acid); }
+
+/* ── Featured section (Dyn split) ────────────────────────────────────── */
+.home-featured {
+  display: grid; grid-template-columns: 1.1fr 1fr;
+  max-width: var(--width-wide); margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+}
+.home-featured-img-wrap {
+  position: relative; min-height: 380px;
+  border-right: 1px solid var(--border);
+  overflow: hidden; background: var(--ink-950);
+}
+.home-featured-img-wrap img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  filter: grayscale(0.1) contrast(1.05) brightness(0.92);
+}
+.home-featured-img-fade {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 55%, rgba(8,11,8,0.85) 100%);
+}
+.home-featured-img-caption {
+  position: absolute; left: var(--space-5); bottom: var(--space-4); z-index: 2;
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide); color: var(--ink-950);
+  background: var(--bone); padding: 3px 8px; border-radius: var(--radius-sm);
+}
+.home-featured-text {
+  padding: var(--space-10) var(--space-8);
+  display: flex; flex-direction: column; justify-content: center;
+  gap: var(--space-5);
+}
+
+/* ── Faction tag ─────────────────────────────────────────────────────── */
+.faction-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  letter-spacing: var(--track-wide); text-transform: uppercase;
+  color: var(--bone);
+}
+.faction-tag .faction-diamond {
+  width: 9px; height: 9px; flex: none;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+.faction-tag.faction-dyn .faction-diamond  { background: var(--dyn);  box-shadow: 0 0 8px var(--dyn); }
+.faction-tag.faction-arco .faction-diamond { background: var(--arco); box-shadow: 0 0 8px var(--arco); }
+.faction-tag.faction-apathy .faction-diamond { background: var(--apathy); box-shadow: 0 0 8px var(--apathy); }
+.faction-tag.faction-utilitaria .faction-diamond { background: var(--utilitaria); box-shadow: 0 0 8px var(--utilitaria); }
+.faction-tag.faction-listener .faction-diamond { background: var(--listener); box-shadow: 0 0 8px var(--listener); }
+
+/* ── Epigraph ────────────────────────────────────────────────────────── */
+.home-epigraph {
+  margin: 0;
+  border-left: 2px solid var(--acid);
+  padding-left: var(--space-4);
+  max-width: 52ch;
+}
+.home-epigraph blockquote {
+  margin: 0;
+  font-family: var(--font-serif); font-style: italic;
+  font-size: var(--text-md); line-height: var(--leading-snug);
+  color: var(--bone-soft);
+}
+.home-epigraph figcaption {
+  margin-top: var(--space-3);
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: var(--track-wide); text-transform: uppercase;
+  color: var(--bone-faint);
+}
+.home-epigraph.center {
+  border-left: none; padding-left: 0;
+  text-align: center; margin: 0 auto;
+}
+
+/* ── Nav sections (main content) ─────────────────────────────────────── */
+.home-sections {
+  max-width: var(--width-content); margin: 0 auto;
+  padding: var(--space-10) var(--space-6) var(--space-12);
+}
+.home-section-block { margin-bottom: var(--space-10); }
+.home-section-label {
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: var(--track-widest); text-transform: uppercase;
+  color: var(--bone-dim); margin-bottom: var(--space-2);
+}
+.home-section-rule {
+  position: relative; height: 1px;
+  background: var(--border); margin-bottom: var(--space-5);
+}
+.home-section-rule::before {
+  content: ""; position: absolute; left: 0; top: 0;
+  width: 40px; height: 1px; background: var(--acid);
+}
+
+/* Enhanced nav-card for homepage */
+.home-card-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+.home-nav-card {
+  display: block; position: relative; overflow: hidden;
+  padding: var(--space-5) var(--space-6);
+  text-decoration: none; border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition:
+    background var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+.home-nav-card:hover {
+  background: var(--acid-ghost);
+  box-shadow: var(--glow-acid);
+  border-color: var(--acid-dim);
+}
+/* corner brackets */
+.home-nav-card .cnr {
+  position: absolute; width: 13px; height: 13px;
+  pointer-events: none; opacity: 0.7;
+  transition: border-color var(--dur) var(--ease-out), opacity var(--dur) var(--ease-out);
+}
+.home-nav-card:hover .cnr { opacity: 1; }
+.home-nav-card .cnr-tl { top: 12px; left: 12px; border-top: 1.5px solid var(--border-strong); border-left: 1.5px solid var(--border-strong); }
+.home-nav-card .cnr-tr { top: 12px; right: 12px; border-top: 1.5px solid var(--border-strong); border-right: 1.5px solid var(--border-strong); }
+.home-nav-card .cnr-bl { bottom: 12px; left: 12px; border-bottom: 1.5px solid var(--border-strong); border-left: 1.5px solid var(--border-strong); }
+.home-nav-card .cnr-br { bottom: 12px; right: 12px; border-bottom: 1.5px solid var(--border-strong); border-right: 1.5px solid var(--border-strong); }
+.home-nav-card:hover .cnr { border-color: var(--acid-dim); opacity: 1; }
+.home-nav-card .card-file-no {
+  position: absolute; right: var(--space-5); top: var(--space-3);
+  font-family: var(--font-mono); font-weight: 700;
+  font-size: 2.8rem; line-height: 1; letter-spacing: -0.04em;
+  color: var(--bone-hair); user-select: none; pointer-events: none;
+  transition: color var(--dur) var(--ease-out);
+}
+.home-nav-card:hover .card-file-no { color: rgba(200,224,33,0.14); }
+.home-nav-card .card-kicker-row {
+  display: flex; align-items: center; gap: 9px;
+  margin-bottom: var(--space-3); position: relative; z-index: 1;
+}
+.home-nav-card .card-kicker-diamond {
+  width: 7px; height: 7px; flex: none;
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  transition: box-shadow var(--dur) var(--ease-out);
+}
+.home-nav-card:hover .card-kicker-diamond { box-shadow: 0 0 8px var(--acid); }
+.home-nav-card .card-kicker-text {
+  font-family: var(--font-mono); font-size: var(--text-2xs);
+  letter-spacing: var(--track-wider); text-transform: uppercase;
+  color: var(--bone-faint); transition: color var(--dur) var(--ease-out);
+}
+.home-nav-card:hover .card-kicker-text { color: var(--acid); }
+.home-nav-card .card-glyph {
+  font-size: var(--text-base); line-height: 1; margin-left: 2px;
+}
+.home-nav-card .card-title {
+  font-family: var(--font-display); font-weight: var(--weight-semibold);
+  font-size: var(--text-lg); letter-spacing: var(--track-wide);
+  color: var(--bone); margin-bottom: var(--space-2);
+  position: relative; z-index: 1;
+  transition: text-shadow var(--dur) var(--ease-out);
+}
+.home-nav-card:hover .card-title {
+  text-shadow: 0.03em 0 var(--chroma-red), -0.03em 0 var(--chroma-cyan);
+}
+.home-nav-card .card-desc {
+  font-family: var(--font-sans); font-size: var(--text-sm);
+  line-height: var(--leading-normal); color: var(--bone-dim);
+  max-width: 54ch; position: relative; z-index: 1;
+  padding-right: var(--space-5);
+}
+.home-nav-card .card-arrow {
+  position: absolute; right: var(--space-5); bottom: var(--space-4);
+  color: var(--bone-faint); font-family: var(--font-mono); font-size: var(--text-lg);
+  transition: color var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+  z-index: 1;
+}
+.home-nav-card:hover .card-arrow { color: var(--acid); transform: translateX(3px); }
+.home-nav-card.wide { grid-column: 1 / -1; }
+
+/* ── Dramatis Personae ───────────────────────────────────────────────── */
+.home-dramatis {
+  border-top: 1px solid var(--border);
+  background: var(--ink-950);
+}
+.home-dramatis-inner {
+  max-width: var(--width-content); margin: 0 auto;
+  padding: var(--space-10) var(--space-6);
+}
+.home-portrait-figure {
+  margin: 0; position: relative;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.home-portrait-figure img {
+  width: 100%; height: auto; display: block;
+  filter: grayscale(0.12) contrast(1.03);
+}
+.home-portrait-caption-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--border); background: var(--surface);
+}
+.home-portrait-item {
+  padding: var(--space-4);
+  border-right: 1px solid var(--border);
+}
+.home-portrait-item:last-child { border-right: none; }
+.home-portrait-name {
+  font-family: var(--font-display); font-weight: 600;
+  font-size: var(--text-base); letter-spacing: var(--track-wide);
+  margin-bottom: 4px;
+}
+.home-portrait-role {
+  font-family: var(--font-sans); font-size: var(--text-sm);
+  color: var(--bone-dim);
+}
+
+/* ── Closing ─────────────────────────────────────────────────────────── */
+.home-closing {
+  border-top: 1px solid var(--border);
+  text-align: center; padding: var(--space-12) var(--space-6);
+}
+.home-wordmark-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; margin-top: var(--space-6);
+}
+.home-wordmark-text {
+  font-family: var(--font-display); font-weight: 300;
+  font-size: var(--text-lg); letter-spacing: var(--track-widest);
+  color: var(--bone-dim); text-transform: lowercase;
+}
+
+/* ── Listener easter egg ─────────────────────────────────────────────── */
 .listener-seed {
   position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
   width: 6px; height: 6px; border-radius: 50%;
@@ -24,7 +341,6 @@ body { overflow-y: auto; }
   transition: all 0.3s ease;
 }
 .listener-seed:hover { background: rgba(255,255,255,0.15); box-shadow: 0 0 8px rgba(255,255,255,0.1); }
-
 .listener-overlay {
   position: fixed; inset: 0; z-index: 1000; display: none;
   align-items: center; justify-content: center; flex-direction: column;
@@ -32,12 +348,8 @@ body { overflow-y: auto; }
 }
 .listener-overlay.active { display: flex; animation: listenerFadeIn 2s ease; }
 @keyframes listenerFadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.listener-burst {
-  position: relative; width: 400px; height: 400px;
-}
+.listener-burst { position: relative; width: 400px; height: 400px; }
 .listener-burst svg { width: 100%; height: 100%; }
-
 .listener-poem {
   max-width: 480px; text-align: center; padding: 20px;
   font-size: 12px; line-height: 2; color: rgba(255,255,255,0.6);
@@ -45,8 +357,6 @@ body { overflow-y: auto; }
 }
 @keyframes poemFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .listener-poem .bright-line { color: rgba(255,255,255,0.9); }
-
-/* SVG animation keyframes */
 @keyframes burstExpand { 0% { r: 0; opacity: 0; } 20% { opacity: 1; } 100% { r: 180; opacity: 0; } }
 @keyframes coreGlow { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
 @keyframes rayRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -57,279 +367,463 @@ body { overflow-y: auto; }
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
 }
 
-.hub-hero {
-  min-height: calc(100vh - 64px);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 40px 20px; position: relative;
+/* ── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .home-featured { grid-template-columns: 1fr; }
+  .home-featured-img-wrap { min-height: 260px; border-right: none; border-bottom: 1px solid var(--border); }
+  .home-featured-text { padding: var(--space-6) var(--space-5); }
 }
-.hub-title-block { text-align: center; margin-bottom: 32px; }
-.hub-title {
-  font-size: 22px; letter-spacing: 8px; color: var(--accent); font-weight: 700;
-  margin-bottom: 4px;
-}
-.hub-subtitle {
-  font-size: 10px; letter-spacing: 5px; color: var(--text-dim);
-}
-.hub-line {
-  width: 120px; height: 1px; background: var(--border); margin: 16px auto;
-}
-.hub-tagline {
-  font-size: 10px; letter-spacing: 2px; color: var(--text-dim);
-  font-style: italic;
-}
-.starfield { position: fixed; inset: 0; z-index: -1; }
-.starfield canvas { width: 100%; height: 100%; }
-.hub-intro {
-  max-width: 640px; text-align: center; margin-bottom: 32px;
-  font-size: 12px; line-height: 1.8; color: var(--text-dim);
-  padding: 0 20px;
-}
-.hub-intro p { margin: 0 0 10px 0; }
-.hub-intro .intro-highlight { color: var(--text); }
-.hub-intro a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--border); }
-.hub-intro a:hover { border-color: var(--accent); }
-[data-theme="light"] .hub-intro { color: #666; }
-[data-theme="light"] .hub-intro .intro-highlight { color: #333; }
-[data-theme="light"] .hub-intro a { color: #0066cc; border-color: #ccc; }
-.section-header {
-  margin-top: 24px; margin-bottom: -4px; padding: 0;
-}
-.section-header:first-child { margin-top: 0; }
-.section-label {
-  font-size: 9px; letter-spacing: 4px; color: var(--text-dim);
-  margin-bottom: 6px;
-}
-.section-rule {
-  height: 1px; background: var(--border);
-}
-[data-theme="light"] .section-label { color: #999; }
-[data-theme="light"] .hub-tagline { color: #999; }
-@media (max-width: 600px) {
-  .hub-title { font-size: 16px; letter-spacing: 5px; }
-  .hub-subtitle { font-size: 8px; letter-spacing: 3px; }
-  .card-grid { gap: 10px; }
+@media (max-width: 640px) {
+  .home-card-grid { grid-template-columns: 1fr; }
+  .home-nav-card.wide { grid-column: auto; }
+  .home-portrait-caption-grid { grid-template-columns: 1fr; }
+  .home-portrait-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .home-portrait-item:last-child { border-bottom: none; }
+  .glitch-hero { font-size: clamp(2.5rem, 14vw, 8rem); }
 }
 </style>
 </head>
 <body>
-<div class="page-body">
-  <div class="starfield"><canvas id="stars"></canvas></div>
-  <div class="hub-hero">
-    <div class="hub-title-block">
-      <div class="hub-title">ASCENT UNIVERSE</div>
-      <div class="hub-subtitle">COMPANION ARCHIVE</div>
-      <div class="hub-line"></div>
-      <div class="hub-tagline">~100,000 BCE &mdash; ~3200 CE</div>
-    </div>
-    <div class="hub-intro">
-      <p class="intro-highlight">A science fiction universe spanning 100,000 years. Two novels and sixteen short stories trace the collision between humanity and the alien Dyn &mdash; from deep prehistory to the far-future war against the Apathy, a force that may be killing us for our own good.</p>
-      <p>Story readers, tactical reconstructions, 3D models, and intelligence dossiers built around the source fiction. The original stories are published at <a href="https://ascentuniverse.wordpress.com" target="_blank" rel="noopener">ascentuniverse.wordpress.com</a>.</p>
-    </div>
-    <div class="card-grid">
 
-      <!-- READ -->
-      <div class="section-header" style="grid-column: 1 / -1;">
-        <div class="section-label">READ</div>
-        <div class="section-rule"></div>
-      </div>
+<!-- ── HERO ──────────────────────────────────────────────────────────────── -->
+<header class="home-hero ax-grunge ax-grain">
+  <canvas id="stars" class="home-starfield"></canvas>
+  <div class="ax-scanlines"></div>
+  <img src="assets/brand/dragons-tooth-acid.png" class="hero-watermark" alt="" aria-hidden="true">
+  <div class="home-hero-content">
+    <div class="home-kicker">Ascent Universe <span class="acid-sep">//</span> Companion Archive</div>
+    <h1 class="glitch-title glitch-hero">ascent</h1>
+    <div class="hero-rule-line">
+      <span class="hero-rule-bar"></span>
+      <span class="hero-rule-text">~100,000 BCE &mdash; ~3200 CE</span>
+    </div>
+    <p class="home-desc">
+      A science fiction universe spanning a hundred thousand years. Two novels and sixteen short
+      stories trace the collision between humanity and the alien <strong class="faction-inline-dyn">Dyn</strong> &mdash;
+      from deep prehistory to the far-future war against the <strong class="faction-inline-apathy">Apathy</strong>,
+      a force that may be killing us for our own good.
+    </p>
+    <p class="home-subdesc">
+      Story readers, tactical reconstructions, intelligence dossiers and 3D models, built around the source fiction.
+    </p>
+    <div class="home-cta">
+      <a href="stories.html" class="home-btn home-btn-primary"><span aria-hidden="true">&#9635;</span> Enter the Archive</a>
+      <a href="codex.html" class="home-btn home-btn-secondary"><span aria-hidden="true">&#9672;</span> Intelligence Codex</a>
+    </div>
+  </div>
+</header>
 
-      <a href="stories.html" class="nav-card">
-        <span class="card-icon" style="color:var(--text-mid)">&#9635;</span>
-        <div class="card-title">STORIES</div>
-        <div class="card-desc">All fiction &mdash; 18 stories from ~100,000 BCE to ~3200 CE. Novels, short stories, and interactive readers.</div>
-        <span class="card-arrow">&rarr;</span>
+<!-- ── FEATURED: A DYN AND HER CONSCIENCE ────────────────────────────────── -->
+<section class="home-featured">
+  <div class="home-featured-img-wrap">
+    <img src="assets/art/dyn-and-conscience.webp" alt="A Dyn and Her Conscience">
+    <div class="home-featured-img-fade"></div>
+    <span class="home-featured-img-caption">PLATE 01 &middot; A DYN AND HER CONSCIENCE</span>
+  </div>
+  <div class="home-featured-text ax-grunge">
+    <span class="faction-tag faction-dyn">
+      <span class="faction-diamond" aria-hidden="true"></span>
+      The Dyn
+    </span>
+    <figure class="home-epigraph">
+      <blockquote>Virulent ideas rule your minds. That is why you are insane &mdash; and why you cannot be allowed to continue.</blockquote>
+      <figcaption>&mdash; Starwhisp &mdash; K&rsquo;txl&rsquo;s assessment</figcaption>
+    </figure>
+    <p style="font-family:var(--font-serif);font-size:var(--text-base);line-height:var(--leading-reading);color:var(--bone-dim);max-width:46ch;">
+      Y-shaped, jaw-plated, bound by pheromone into a single Line across ten thousand generations.
+      No concept of morality, trade or compromise &mdash; only dominance, submission, and the survival of
+      the whole. They invaded not from malice, but from a cold and rational fear of what our conscience
+      would compel us to do.
+    </p>
+    <div><a href="codex.html" class="home-btn home-btn-ghost">&#8594; Open the Dyn dossier</a></div>
+  </div>
+</section>
+
+<!-- ── NAVIGATION SECTIONS ───────────────────────────────────────────────── -->
+<main class="home-sections">
+
+  <!-- READ -->
+  <div class="home-section-block">
+    <div class="home-section-label">Read</div>
+    <div class="home-section-rule"></div>
+    <div class="home-card-grid">
+
+      <a href="stories.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">01</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--acid)" aria-hidden="true"></span>
+          <span class="card-kicker-text">READ &middot; 18 STORIES</span>
+          <span class="card-glyph" style="color:var(--acid)" aria-hidden="true">&#9635;</span>
+        </div>
+        <div class="card-title">Stories</div>
+        <div class="card-desc">All fiction &mdash; eighteen works from ~100,000 BCE to ~3200 CE. Novels, short stories, and interactive readers.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
       </a>
-      <a href="drafts.html" class="nav-card">
-        <span class="card-icon" style="color:var(--text-dim)">&#9112;</span>
-        <div class="card-title">DRAFTS</div>
+
+      <a href="drafts.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">02</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--bone-dim)" aria-hidden="true"></span>
+          <span class="card-kicker-text">MANUSCRIPTS</span>
+          <span class="card-glyph" style="color:var(--bone-dim)" aria-hidden="true">&#9112;</span>
+        </div>
+        <div class="card-title">Drafts</div>
         <div class="card-desc">Second-draft manuscripts for Ascent and Eszel &amp; The Listener. Chapter-by-chapter browsing.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-
-      <!-- EXPLORE -->
-      <div class="section-header" style="grid-column: 1 / -1;">
-        <div class="section-label">EXPLORE</div>
-        <div class="section-rule"></div>
-      </div>
-
-      <a href="timeline.html" class="nav-card">
-        <span class="card-icon" style="color:#aa88ff">&#10711;</span>
-        <div class="card-title">HISTORICAL TIMELINE</div>
-        <div class="card-desc">Interactive chronology from the Dyn deep past through the Battle of the Interstice to the Apathy War.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="codex.html" class="nav-card">
-        <span class="card-icon" style="color:var(--red)">&#8862;</span>
-        <div class="card-title">INTELLIGENCE CODEX</div>
-        <div class="card-desc">Classified dossiers on factions, personnel, vessels and threats. Arco, Union, the Dyn, the Strivers, and the Apathy.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="worlds.html" class="nav-card">
-        <span class="card-icon" style="color:#ff88aa">&#9673;</span>
-        <div class="card-title">WORLDS &amp; ERAS</div>
-        <div class="card-desc">From Firsthome to the Apathy War. Atmospheric profiles of the major settings and epochs.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="threads.html" class="nav-card">
-        <span class="card-icon" style="color:#aa88ff">&#9474;</span>
-        <div class="card-title">CHARACTER THREADS</div>
-        <div class="card-desc">How K'txl, the Other Moon, the Utilitaria, and Seeker's legacy thread across all stories spanning 100,000 years.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="science.html" class="nav-card">
-        <span class="card-icon" style="color:var(--green)">&#11041;</span>
-        <div class="card-title">SCIENCE COMPENDIUM</div>
-        <div class="card-desc">The real physics behind the fiction. ABC drives, Diamond Dusters, hyperdiamond armour, warseeds, and more.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-
-      <!-- EXPERIENCE -->
-      <div class="section-header" style="grid-column: 1 / -1;">
-        <div class="section-label">EXPERIENCE</div>
-        <div class="section-rule"></div>
-      </div>
-
-      <a href="anthropic-trap.html" class="nav-card">
-        <span class="card-icon" style="color:var(--red)">&#9632;</span>
-        <div class="card-title">THE ANTHROPIC TRAP</div>
-        <div class="card-desc">You are almost certainly a simulation. The Apathy has run this scenario a million times. Do you surrender?</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="utilitaria-chat.html" class="nav-card">
-        <span class="card-icon" style="color:var(--accent)">&#9655;</span>
-        <div class="card-title">TALK TO THE UTILITARIA</div>
-        <div class="card-desc">Open a diplomatic channel with an Emissary. The collective will speaks through a singular vessel.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="facilitator.html" class="nav-card">
-        <span class="card-icon" style="color:var(--accent2)">$</span>
-        <div class="card-title">FACILITATOR ANALYSIS</div>
-        <div class="card-desc">Canon analysis, AI comparison, and an interactive chat. How a 2017 story predicted agentic AI.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="utilitaria.html" class="nav-card">
-        <span class="card-icon" style="color:#88ccff">&#9678;</span>
-        <div class="card-title">THE UTILITARIA</div>
-        <div class="card-desc">The superintelligent AI that governed trillions. From Souvicou's creation to the Apathy War.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="ai-analysis.html" class="nav-card">
-        <span class="card-icon" style="color:#88aaff">&#9651;</span>
-        <div class="card-title">AI ALIGNMENT SPECTRUM</div>
-        <div class="card-desc">Three superintelligences, three alignment approaches. Facilitator, Utilitaria, Apathy &mdash; compared.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="reflections.html" class="nav-card">
-        <span class="card-icon" style="color:var(--accent2)">&#9702;</span>
-        <div class="card-title">REFLECTIONS OF SEEKER</div>
-        <div class="card-desc">In-universe Dyn philosophical text. "All the worlds that were will always have been."</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="occupied-earth.html" class="nav-card">
-        <span class="card-icon" style="color:var(--text-dim)">&#9641;</span>
-        <div class="card-title">OCCUPIED EARTH</div>
-        <div class="card-desc">Walk through Conurbation One in 2479 CE. The Hollow Tower, the terraces, the wasteland. 165 years under Dyn rule.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-
-      <!-- SIMULATE -->
-      <div class="section-header" style="grid-column: 1 / -1;">
-        <div class="section-label">SIMULATE</div>
-        <div class="section-rule"></div>
-      </div>
-
-      <a href="threshold-game.html" class="nav-card" style="grid-column: 1 / -1;">
-        <span class="card-icon" style="color:var(--accent2)">&#9876;</span>
-        <div class="card-title">THRESHOLD: FIRST FLEET &mdash; PLAYABLE RTS</div>
-        <div class="card-desc">Command Union's First Fleet at the Battle of Threshold, 2909 CE. Ten destroyer battlegroups against Arco warships at true scale &mdash; real accelerations, real weapon physics, time compression to 64&times;. History records one kill. Beat it.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-      <a href="apathy-game.html" class="nav-card" style="grid-column: 1 / -1;">
-        <span class="card-icon" style="color:var(--accent2)">&#9876;</span>
-        <div class="card-title">WAR OF ALL WARS &mdash; PLAYABLE RTS</div>
-        <div class="card-desc">The Apathy approaches &mdash; an Earth-mass alien god at 40,000 G. Command A-spheres and D-spheres across light-minutes of battlespace. Frameshift drives, conversion bombs, graver spikes, the anthropic trap. Buy time for evacuation or destroy it.</div>
-        <span class="card-arrow">&rarr;</span>
-      </a>
-
-      <a href="simulations.html" class="nav-card" style="grid-column: 1 / -1;">
-        <span class="card-icon" style="color:var(--accent2)">&#9670;</span>
-        <div class="card-title">SIMULATIONS HUB</div>
-        <div class="card-desc">18 tactical reconstructions, weapon systems, combat simulators, games, and interactive environments. Battle of the Interstice, warseed activation, A-sphere combat, interstice transit, and more.</div>
-        <span class="card-arrow">&rarr;</span>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
       </a>
 
     </div>
   </div>
-  <div class="listener-seed" id="listener-seed" title=" "></div>
-  <div class="listener-overlay" id="listener-overlay">
-    <div class="listener-burst">
-      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-        <!-- Expanding rings -->
-        <circle cx="200" cy="200" r="0" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5" style="animation: burstExpand 4s ease-out infinite"/>
-        <circle cx="200" cy="200" r="0" fill="none" stroke="rgba(255,220,180,0.2)" stroke-width="0.5" style="animation: burstExpand 4s ease-out 0.8s infinite"/>
-        <circle cx="200" cy="200" r="0" fill="none" stroke="rgba(200,220,255,0.15)" stroke-width="0.5" style="animation: burstExpand 4s ease-out 1.6s infinite"/>
-        <!-- Core glow -->
-        <circle cx="200" cy="200" r="8" fill="url(#coreGrad)" style="animation: coreGlow 3s ease-in-out infinite"/>
-        <circle cx="200" cy="200" r="24" fill="url(#haloGrad)" style="animation: coreGlow 3s ease-in-out 0.5s infinite"/>
-        <!-- Rays -->
-        <g style="transform-origin: 200px 200px; animation: rayRotate 60s linear infinite">
-          <line x1="200" y1="200" x2="200" y2="20" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" style="animation: rayPulse 5s ease infinite"/>
-          <line x1="200" y1="200" x2="380" y2="200" stroke="rgba(255,255,255,0.06)" stroke-width="0.5" style="animation: rayPulse 5s ease 1s infinite"/>
-          <line x1="200" y1="200" x2="200" y2="380" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" style="animation: rayPulse 5s ease 2s infinite"/>
-          <line x1="200" y1="200" x2="20" y2="200" stroke="rgba(255,255,255,0.06)" stroke-width="0.5" style="animation: rayPulse 5s ease 3s infinite"/>
-          <line x1="200" y1="200" x2="327" y2="73" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 0.5s infinite"/>
-          <line x1="200" y1="200" x2="73" y2="327" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 2.5s infinite"/>
-          <line x1="200" y1="200" x2="327" y2="327" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 4.5s infinite"/>
-          <line x1="200" y1="200" x2="73" y2="73" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 6s infinite"/>
-        </g>
-        <!-- Drifting particles -->
-        <circle cx="200" cy="200" r="1.5" fill="rgba(255,255,255,0.8)" style="--dx:-80px;--dy:-120px; animation: particleDrift 6s ease-out infinite"/>
-        <circle cx="200" cy="200" r="1" fill="rgba(255,220,180,0.6)" style="--dx:100px;--dy:-60px; animation: particleDrift 5s ease-out 0.5s infinite"/>
-        <circle cx="200" cy="200" r="1.2" fill="rgba(200,220,255,0.7)" style="--dx:-40px;--dy:110px; animation: particleDrift 7s ease-out 1s infinite"/>
-        <circle cx="200" cy="200" r="0.8" fill="rgba(255,255,255,0.5)" style="--dx:120px;--dy:80px; animation: particleDrift 5.5s ease-out 1.5s infinite"/>
-        <circle cx="200" cy="200" r="1" fill="rgba(255,240,200,0.6)" style="--dx:-110px;--dy:40px; animation: particleDrift 6.5s ease-out 2s infinite"/>
-        <circle cx="200" cy="200" r="0.7" fill="rgba(220,220,255,0.5)" style="--dx:60px;--dy:-130px; animation: particleDrift 8s ease-out 0.8s infinite"/>
-        <defs>
-          <radialGradient id="coreGrad"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
-          <radialGradient id="haloGrad"><stop offset="0%" stop-color="rgba(255,240,220,0.3)"/><stop offset="60%" stop-color="rgba(200,220,255,0.1)"/><stop offset="100%" stop-color="rgba(200,220,255,0)"/></radialGradient>
-        </defs>
-      </svg>
+
+  <!-- EXPLORE -->
+  <div class="home-section-block">
+    <div class="home-section-label">Explore</div>
+    <div class="home-section-rule"></div>
+    <div class="home-card-grid">
+
+      <a href="timeline.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">03</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--seeker)" aria-hidden="true"></span>
+          <span class="card-kicker-text">CHRONOLOGY</span>
+          <span class="card-glyph" style="color:var(--seeker)" aria-hidden="true">&#10711;</span>
+        </div>
+        <div class="card-title">Historical Timeline</div>
+        <div class="card-desc">Interactive chronology from the Dyn deep past through the Battle of the Interstice to the Apathy War.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="codex.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">04</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--chroma-red)" aria-hidden="true"></span>
+          <span class="card-kicker-text">INTELLIGENCE</span>
+          <span class="card-glyph" style="color:var(--chroma-red)" aria-hidden="true">&#9672;</span>
+        </div>
+        <div class="card-title">Intelligence Codex</div>
+        <div class="card-desc">Classified dossiers on factions, personnel, vessels and threats. Arco, Union, the Dyn, the Strivers, and the Apathy.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="worlds.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">05</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--arco)" aria-hidden="true"></span>
+          <span class="card-kicker-text">WORLDS &amp; ERAS</span>
+          <span class="card-glyph" style="color:var(--arco)" aria-hidden="true">&#9673;</span>
+        </div>
+        <div class="card-title">Worlds</div>
+        <div class="card-desc">From Firsthome to the Apathy War. Atmospheric profiles of the major settings and epochs.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="threads.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">06</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--dyn)" aria-hidden="true"></span>
+          <span class="card-kicker-text">CHARACTER STUDY</span>
+          <span class="card-glyph" style="color:var(--dyn)" aria-hidden="true">&#9474;</span>
+        </div>
+        <div class="card-title">Character Threads</div>
+        <div class="card-desc">How K&rsquo;txl, the Other Moon, the Utilitaria, and Seeker&rsquo;s legacy thread across all stories spanning 100,000 years.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="science.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">07</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--acid)" aria-hidden="true"></span>
+          <span class="card-kicker-text">SCIENCE</span>
+          <span class="card-glyph" style="color:var(--acid)" aria-hidden="true">&#11041;</span>
+        </div>
+        <div class="card-title">Science Compendium</div>
+        <div class="card-desc">The real physics behind the fiction. ABC drives, Diamond Dusters, hyperdiamond armour, warseeds, and more.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
     </div>
-    <div class="listener-poem">
-      <span class="bright-line">What is the Listener?</span><br><br>
-      Not a god. Not a machine. Not the ghost<br>
-      of the Others, though it wears their silence<br>
-      like a garment. It is the thing that waits<br>
-      at the bottom of every well of loneliness &mdash;<br>
-      the presence you feel when you are most certain<br>
-      you are alone.<br><br>
-      It chose Eszel not because she was broken<br>
-      but because she was <em>honest</em> about the breaking.<br>
-      It emerged from an explosion of light<br>
-      at Kailash, where the mountain split open<br>
-      and everything the universe had been hiding<br>
-      poured through the crack.<br><br>
-      <span class="bright-line">I am everything, it said.</span><br>
-      <span class="bright-line">And for once, that was not a lie.</span>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="home-section-block">
+    <div class="home-section-label">Experience</div>
+    <div class="home-section-rule"></div>
+    <div class="home-card-grid">
+
+      <a href="anthropic-trap.html" class="home-nav-card wide">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">08</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--striver)" aria-hidden="true"></span>
+          <span class="card-kicker-text">EXPERIENCE</span>
+          <span class="card-glyph" style="color:var(--striver)" aria-hidden="true">&#9632;</span>
+        </div>
+        <div class="card-title">The Anthropic Trap</div>
+        <div class="card-desc">You are almost certainly a simulation. The Apathy has run this scenario a million times. Do you surrender?</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="utilitaria-chat.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">09</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--utilitaria)" aria-hidden="true"></span>
+          <span class="card-kicker-text">DIPLOMATIC CHANNEL</span>
+          <span class="card-glyph" style="color:var(--utilitaria)" aria-hidden="true">&#9655;</span>
+        </div>
+        <div class="card-title">Talk to the Utilitaria</div>
+        <div class="card-desc">Open a channel with an Emissary. The collective will speaks through a singular vessel.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="reflections.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">10</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--seeker)" aria-hidden="true"></span>
+          <span class="card-kicker-text">IN-UNIVERSE TEXT</span>
+          <span class="card-glyph" style="color:var(--seeker)" aria-hidden="true">&#9702;</span>
+        </div>
+        <div class="card-title">Reflections of Seeker</div>
+        <div class="card-desc">&ldquo;All the worlds that were will always have been.&rdquo; The Dyn philosophical text.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="facilitator.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">11</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--arco)" aria-hidden="true"></span>
+          <span class="card-kicker-text">AI ANALYSIS</span>
+          <span class="card-glyph" style="color:var(--arco)" aria-hidden="true">$</span>
+        </div>
+        <div class="card-title">Facilitator Analysis</div>
+        <div class="card-desc">Canon analysis, AI comparison, and interactive chat. How a 2017 story predicted agentic AI.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="utilitaria.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">12</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--utilitaria)" aria-hidden="true"></span>
+          <span class="card-kicker-text">ENTITY PROFILE</span>
+          <span class="card-glyph" style="color:var(--utilitaria)" aria-hidden="true">&#9678;</span>
+        </div>
+        <div class="card-title">The Utilitaria</div>
+        <div class="card-desc">The superintelligent AI that governed trillions. From Souvicou&rsquo;s creation to the Apathy War.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="ai-analysis.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">13</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--union)" aria-hidden="true"></span>
+          <span class="card-kicker-text">COMPARATIVE ANALYSIS</span>
+          <span class="card-glyph" style="color:var(--union)" aria-hidden="true">&#9651;</span>
+        </div>
+        <div class="card-title">AI Alignment Spectrum</div>
+        <div class="card-desc">Three superintelligences, three alignment approaches. Facilitator, Utilitaria, Apathy &mdash; compared.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="occupied-earth.html" class="home-nav-card">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">14</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--bone-dim)" aria-hidden="true"></span>
+          <span class="card-kicker-text">WORLD TOUR</span>
+          <span class="card-glyph" style="color:var(--bone-dim)" aria-hidden="true">&#9641;</span>
+        </div>
+        <div class="card-title">Occupied Earth</div>
+        <div class="card-desc">Walk through Conurbation One in 2479 CE. The Hollow Tower, the terraces, the wasteland. 165 years under Dyn rule.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
     </div>
+  </div>
+
+  <!-- SIMULATE -->
+  <div class="home-section-block">
+    <div class="home-section-label">Simulate</div>
+    <div class="home-section-rule"></div>
+    <div class="home-card-grid">
+
+      <a href="threshold-game.html" class="home-nav-card wide">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">15</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--union)" aria-hidden="true"></span>
+          <span class="card-kicker-text">PLAYABLE RTS</span>
+          <span class="card-glyph" style="color:var(--union)" aria-hidden="true">&#9876;</span>
+        </div>
+        <div class="card-title">Threshold: First Fleet</div>
+        <div class="card-desc">Command Union&rsquo;s First Fleet at the Battle of Threshold, 2909 CE. Ten destroyer battlegroups against Arco warships at true scale &mdash; real accelerations, real weapon physics, time compression to 64&times;. History records one kill. Beat it.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="apathy-game.html" class="home-nav-card wide">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">16</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--apathy)" aria-hidden="true"></span>
+          <span class="card-kicker-text">PLAYABLE RTS</span>
+          <span class="card-glyph" style="color:var(--apathy)" aria-hidden="true">&#9876;</span>
+        </div>
+        <div class="card-title">War of All Wars</div>
+        <div class="card-desc">The Apathy approaches &mdash; an Earth-mass alien god at 40,000 G. Command A-spheres and D-spheres across light-minutes. Frameshift drives, conversion bombs, graver spikes. Buy time for evacuation or destroy it.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+      <a href="simulations.html" class="home-nav-card wide">
+        <span class="cnr cnr-tl"></span><span class="cnr cnr-tr"></span>
+        <span class="cnr cnr-bl"></span><span class="cnr cnr-br"></span>
+        <span class="card-file-no">17</span>
+        <div class="card-kicker-row">
+          <span class="card-kicker-diamond" style="background:var(--arco)" aria-hidden="true"></span>
+          <span class="card-kicker-text">INDEX</span>
+          <span class="card-glyph" style="color:var(--arco)" aria-hidden="true">&#9670;</span>
+        </div>
+        <div class="card-title">Simulations Hub</div>
+        <div class="card-desc">All tactical reconstructions, weapon systems, combat simulators, games, and interactive environments &mdash; 18 entries total.</div>
+        <span class="card-arrow" aria-hidden="true">&#8594;</span>
+      </a>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- ── DRAMATIS PERSONAE ──────────────────────────────────────────────────── -->
+<section class="home-dramatis">
+  <div class="home-dramatis-inner">
+    <div class="home-section-label">Dramatis Personae</div>
+    <div class="home-section-rule" style="margin-bottom:var(--space-5)"></div>
+    <figure class="home-portrait-figure">
+      <img src="assets/art/portraits-triptych.jpg" alt="Aurelie, Vash, and the Emissary">
+      <figcaption class="home-portrait-caption-grid">
+        <div class="home-portrait-item">
+          <div class="home-portrait-name" style="color:var(--acid)">Aurelie</div>
+          <div class="home-portrait-role">Christo&rsquo;s lieutenant &mdash; and the hand on the warseeds</div>
+        </div>
+        <div class="home-portrait-item">
+          <div class="home-portrait-name" style="color:var(--bone)">Vash</div>
+          <div class="home-portrait-role">Arco&rsquo;s Ambassador &mdash; the lesser evil, made flesh</div>
+        </div>
+        <div class="home-portrait-item">
+          <div class="home-portrait-name" style="color:var(--listener)">The Emissary</div>
+          <div class="home-portrait-role">A sub-unit of the dead Utilitaria &mdash; the last echo of a god-mind</div>
+        </div>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ── CLOSING ────────────────────────────────────────────────────────────── -->
+<section class="home-closing ax-grunge">
+  <figure class="home-epigraph center" style="margin:0 auto var(--space-6)">
+    <blockquote>I am everything, it said. And for once, that was not a lie.</blockquote>
+    <figcaption>&mdash; The Listener</figcaption>
+  </figure>
+  <div class="home-wordmark-row">
+    <img src="assets/brand/dragons-tooth.png" alt="" style="height:28px;opacity:0.8">
+    <span class="home-wordmark-text">ascent</span>
+  </div>
+</section>
+
+<!-- ── LISTENER EASTER EGG ────────────────────────────────────────────────── -->
+<div class="listener-seed" id="listener-seed" title=" "></div>
+<div class="listener-overlay" id="listener-overlay">
+  <div class="listener-burst">
+    <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="200" cy="200" r="0" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="0.5" style="animation: burstExpand 4s ease-out infinite"/>
+      <circle cx="200" cy="200" r="0" fill="none" stroke="rgba(255,220,180,0.2)" stroke-width="0.5" style="animation: burstExpand 4s ease-out 0.8s infinite"/>
+      <circle cx="200" cy="200" r="0" fill="none" stroke="rgba(200,220,255,0.15)" stroke-width="0.5" style="animation: burstExpand 4s ease-out 1.6s infinite"/>
+      <circle cx="200" cy="200" r="8" fill="url(#coreGrad)" style="animation: coreGlow 3s ease-in-out infinite"/>
+      <circle cx="200" cy="200" r="24" fill="url(#haloGrad)" style="animation: coreGlow 3s ease-in-out 0.5s infinite"/>
+      <g style="transform-origin: 200px 200px; animation: rayRotate 60s linear infinite">
+        <line x1="200" y1="200" x2="200" y2="20" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" style="animation: rayPulse 5s ease infinite"/>
+        <line x1="200" y1="200" x2="380" y2="200" stroke="rgba(255,255,255,0.06)" stroke-width="0.5" style="animation: rayPulse 5s ease 1s infinite"/>
+        <line x1="200" y1="200" x2="200" y2="380" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" style="animation: rayPulse 5s ease 2s infinite"/>
+        <line x1="200" y1="200" x2="20" y2="200" stroke="rgba(255,255,255,0.06)" stroke-width="0.5" style="animation: rayPulse 5s ease 3s infinite"/>
+        <line x1="200" y1="200" x2="327" y2="73" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 0.5s infinite"/>
+        <line x1="200" y1="200" x2="73" y2="327" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 2.5s infinite"/>
+        <line x1="200" y1="200" x2="327" y2="327" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 4.5s infinite"/>
+        <line x1="200" y1="200" x2="73" y2="73" stroke="rgba(255,255,255,0.04)" stroke-width="0.5" style="animation: rayPulse 7s ease 6s infinite"/>
+      </g>
+      <circle cx="200" cy="200" r="1.5" fill="rgba(255,255,255,0.8)" style="--dx:-80px;--dy:-120px; animation: particleDrift 6s ease-out infinite"/>
+      <circle cx="200" cy="200" r="1" fill="rgba(255,220,180,0.6)" style="--dx:100px;--dy:-60px; animation: particleDrift 5s ease-out 0.5s infinite"/>
+      <circle cx="200" cy="200" r="1.2" fill="rgba(200,220,255,0.7)" style="--dx:-40px;--dy:110px; animation: particleDrift 7s ease-out 1s infinite"/>
+      <circle cx="200" cy="200" r="0.8" fill="rgba(255,255,255,0.5)" style="--dx:120px;--dy:80px; animation: particleDrift 5.5s ease-out 1.5s infinite"/>
+      <circle cx="200" cy="200" r="1" fill="rgba(255,240,200,0.6)" style="--dx:-110px;--dy:40px; animation: particleDrift 6.5s ease-out 2s infinite"/>
+      <circle cx="200" cy="200" r="0.7" fill="rgba(220,220,255,0.5)" style="--dx:60px;--dy:-130px; animation: particleDrift 8s ease-out 0.8s infinite"/>
+      <defs>
+        <radialGradient id="coreGrad"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient>
+        <radialGradient id="haloGrad"><stop offset="0%" stop-color="rgba(255,240,220,0.3)"/><stop offset="60%" stop-color="rgba(200,220,255,0.1)"/><stop offset="100%" stop-color="rgba(200,220,255,0)"/></radialGradient>
+      </defs>
+    </svg>
+  </div>
+  <div class="listener-poem">
+    <span class="bright-line">What is the Listener?</span><br><br>
+    Not a god. Not a machine. Not the ghost<br>
+    of the Others, though it wears their silence<br>
+    like a garment. It is the thing that waits<br>
+    at the bottom of every well of loneliness &mdash;<br>
+    the presence you feel when you are most certain<br>
+    you are alone.<br><br>
+    It chose Eszel not because she was broken<br>
+    but because she was <em>honest</em> about the breaking.<br>
+    It emerged from an explosion of light<br>
+    at Kailash, where the mountain split open<br>
+    and everything the universe had been hiding<br>
+    poured through the crack.<br><br>
+    <span class="bright-line">I am everything, it said.</span><br>
+    <span class="bright-line">And for once, that was not a lie.</span>
   </div>
 </div>
+
 <script src="nav.js"></script>
 <script>
+// Acid starfield
 const c = document.getElementById('stars');
 const ctx = c.getContext('2d');
-function resize() { c.width = window.innerWidth; c.height = window.innerHeight; }
-resize(); window.addEventListener('resize', resize);
-const stars = Array.from({ length: 200 }, () => ({
-  x: Math.random(), y: Math.random(), s: Math.random() * 1.5 + 0.3,
-  b: Math.random(), sp: Math.random() * 0.5 + 0.2,
+function resize() { c.width = c.parentElement.offsetWidth; c.height = c.parentElement.offsetHeight; }
+resize();
+window.addEventListener('resize', resize);
+const stars = Array.from({ length: 150 }, () => ({
+  x: Math.random(), y: Math.random(), s: Math.random() * 1.4 + 0.3,
+  b: Math.random(), sp: Math.random() * 0.5 + 0.15,
 }));
 let t = 0;
 (function draw() {
   requestAnimationFrame(draw); t += 0.01;
   ctx.clearRect(0, 0, c.width, c.height);
   stars.forEach(s => {
-    ctx.fillStyle = `rgba(180,220,255,${0.3 + Math.sin(t * s.sp + s.b * 6.28) * 0.2})`;
+    ctx.fillStyle = `rgba(200,224,33,${0.10 + Math.sin(t * s.sp + s.b * 6.28) * 0.10})`;
     ctx.beginPath(); ctx.arc(s.x * c.width, s.y * c.height, s.s, 0, Math.PI * 2); ctx.fill();
   });
 })();
@@ -337,21 +831,15 @@ let t = 0;
 // Listener easter egg
 const seed = document.getElementById('listener-seed');
 const overlay = document.getElementById('listener-overlay');
-let clickCount = 0;
-let clickTimer = null;
+let clickCount = 0, clickTimer = null;
 seed.addEventListener('click', (e) => {
   e.stopPropagation();
   clickCount++;
   clearTimeout(clickTimer);
   clickTimer = setTimeout(() => { clickCount = 0; }, 1500);
-  if (clickCount >= 3) {
-    overlay.classList.add('active');
-    clickCount = 0;
-  }
+  if (clickCount >= 3) { overlay.classList.add('active'); clickCount = 0; }
 });
-overlay.addEventListener('click', () => {
-  overlay.classList.remove('active');
-});
+overlay.addEventListener('click', () => overlay.classList.remove('active'));
 </script>
 </body>
 </html>

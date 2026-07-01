@@ -197,14 +197,16 @@ body { overflow: hidden; }
       <div class="scn-grid" id="scn-grid"></div>
       <div class="ov-rule"></div>
       <table class="spec-tbl">
-        <tr><td>BASTION-CLASS DESTROYER</td><td>240 m &middot; 28,000 t &middot; fusion torch 10 G mil / 30 G destruct &middot; 6&times; 300 mm railguns (20 kps) &middot; 36 torpedoes (50 G, &Delta;v 250 kps) &middot; 24&times; PDC</td></tr>
+        <tr><td>BASTION-CLASS DESTROYER</td><td>240 m &middot; 28,000 t &middot; fusion torch 10 G mil / 30 G destruct &middot; 6&times; 300 mm railguns (20 kps) &middot; 36 Casaba-Fusion torpedoes (50 G, &Delta;v 250 kps) &middot; 24&times; PDC</td></tr>
         <tr><td>INCISOR-CLASS INTERDICTOR</td><td>120 m &middot; 1,600 t &middot; ABC drive 12 G / 28 G burst &middot; 500 mm spinal Diamond Duster (2,000 kps) &middot; 100 GW X-ray laser &middot; UV laser grid</td></tr>
         <tr><td>ANNIHILATOR-CLASS IPAV</td><td>200 m &middot; 4,000 t &middot; ABC drive 5 G cmb / 20 G pk &middot; Neutraliser proton beam (1 TJ) &middot; 4&times; 100 GW X-ray &middot; F-AM micromissiles (250 G)</td></tr>
       </table>
       <div class="ctl">
         <b>RAILGUNS [R]</b> designate a target &mdash; 20 kps rounds rarely hit a 28 G dart, but ships dodging
         your fire cannot aim their dusters. <i>&ldquo;Keep them dodging.&rdquo;</i><br>
-        <b>TORPEDOES [T]</b> lasers intercept across 20,000 km &mdash; mass your volleys and fire close<br>
+        <b>TORPEDOES [T]</b> Casaba-Fusion warheads &mdash; a nuclear device shaped to dump most of its
+        yield into a narrow forward cone rather than an even sphere, so it hits like a directed lance
+        instead of a bomb. Lasers intercept across 20,000 km &mdash; mass your volleys and fire close<br>
         <b>PLAY DEAD [D]</b> drives cold; dark hulks are ignored beyond ~2,500 km<br>
         <b>30G CHARGE [X]</b> irreversible &mdash; the crew will not survive &mdash; launched from cold it strikes unawares<br>
         <b>TIME</b> 1&times; / 4&times; / 16&times; / 64&times; compression &mdash; real space is slow; use it
@@ -251,8 +253,10 @@ body { overflow: hidden; }
         <b>DUSTER</b> 500 mm spinal, micron hyperdiamond dust at 2,000 kps. Invisible to radar. Effective
         to ~25,000 km. When ships start dying without cause &mdash; analyse the logs.<br>
         <b>X-RAY LASERS</b> 100 GW bursts, damaging to ~30,000 km, brutal inside 8,000 km.<br>
-        <b>F-AM MISSILES</b> 250 G, 0.5 Kt antimatter, detonating 600 km out &mdash; beyond effective PDC range.
-        Spread your groups: the gamma flood splashes 1,500 km.<br>
+        <b>F-AM MISSILES</b> Focused-Antimatter warheads: a shaped antimatter charge, 250 G, 0.5 Kt,
+        detonating 600 km out &mdash; beyond effective PDC range. The charge itself is directional, but
+        a standoff burst still floods the surrounding volume with gamma and pion output: spread your
+        groups, the flood splashes 1,500 km.<br>
         <b>NEUTRALISER</b> Annihilator spinal proton beam, 1 TJ per shot. You will know it when it fires.<br>
         <b>ENEMY DOCTRINE</b> They hold standoff outside your reach, designate a priority target, and
         bombard. Every few minutes the Incisors run coordinated strikes from divergent vectors, timed
@@ -671,6 +675,24 @@ function updateGroup(g, dt){
   }
 }
 
+/* ── union fleet commander (autoplay tactical AI) ─────────────────── */
+const unionCmdr = { evalT:0, priority:null };
+function isClosing(a, b){
+  /* >0 while the separation between a and b is shrinking — the only
+     geometry in which a torpedo volley or a 30G charge can connect */
+  const dx = b.x-a.x, dy = b.y-a.y, d = Math.hypot(dx,dy) || 1e-9;
+  const rvx = b.vx-a.vx, rvy = b.vy-a.vy;
+  return -(dx*rvx + dy*rvy)/d;
+}
+function arcoThreatScore(a, ref){
+  /* higher = more worth Union attention right now */
+  let s = (1 - a.hp/a.maxHp)*2;
+  if (a.dusterState) s += 3;           /* interrupt the spinal aim */
+  if (a.strikeRole) s += 2;            /* inbound strike run */
+  s -= dist(a, ref)/20000;
+  return s;
+}
+
 /* ── enemy fleet commander ───────────────────────────────────────── */
 const cmdr = { phase:'posture', priority:null, evalT:0, strikeT:60, strike:null, herdLogged:false };
 
@@ -736,6 +758,22 @@ function updateCommander(dt){
       }
       const s = unionScore(g);
       if (s > bs){ bs = s; best = g; }
+    }
+    if (!best){
+      /* everyone remaining has gone dark and none are close enough to spot —
+         command still needs a target to hunt, or the whole engagement (and
+         every strike-run trigger downstream) stalls out permanently */
+      let cx = 0, cy = 0, n = 0;
+      for (const a of arco){ if (!a.dead && !a.escaped){ cx += a.x; cy += a.y; n++; } }
+      if (n){
+        cx /= n; cy /= n;
+        let bd = Infinity;
+        for (const g of groups){
+          if (g.dead || g.derelict) continue;
+          const d = Math.hypot(g.x-cx, g.y-cy);
+          if (d < bd){ bd = d; best = g; }
+        }
+      }
     }
     cmdr.priority = best;
     if (best && dist(best, INTERSTICE) < 11000 && !cmdr.herdLogged){
@@ -1151,16 +1189,42 @@ function finishAnalyse(){
 }
 
 /* ── autoplay AI (sim mode) ──────────────────────────────────────── */
+/* Doctrine, per the fleet's own tactical reference: mass volleys on the
+   inbound leg only, use railgun fire to spoil enemy duster aim, keep
+   wounded groups falling back on mutual support instead of trading blows
+   solo, and reserve play-dead / the 30G charge for a target that is
+   actually closing — nothing in this fleet can stern-chase a receding
+   dart, so doctrine forbids trying. */
 function updateAutoplay(dt){
   if (!game.autoplay || !game.weaponsFree) return;
   game.autoT -= dt;
   if (game.autoT > 0) return;
-  game.autoT = 3 + rnd()*5;
+  game.autoT = 2 + rnd()*2;
 
   if (game.analyse === 1){ startAnalyse(); }
 
   const alive = arco.filter(a => !a.dead && !a.escaped);
   if (!alive.length) return;
+
+  const active = groups.filter(g => !g.dead && !g.derelict);
+  if (!active.length) return;
+  let cx = 0, cy = 0;
+  for (const g of active){ cx += g.x; cy += g.y; }
+  cx /= active.length; cy /= active.length;
+
+  /* shared fleet priority: focus fire on whichever contact is most
+     worth killing right now (wounded, duster-charging, or mid strike-run)
+     rather than each group chasing its own nearest ship independently */
+  unionCmdr.evalT -= dt;
+  if (unionCmdr.evalT <= 0 || !unionCmdr.priority || unionCmdr.priority.dead || unionCmdr.priority.escaped){
+    unionCmdr.evalT = 10;
+    let best = null, bs = -Infinity;
+    for (const a of alive){
+      const s = arcoThreatScore(a, {x:cx,y:cy});
+      if (s > bs){ bs = s; best = a; }
+    }
+    unionCmdr.priority = best;
+  }
 
   for (const g of groups){
     if (g.dead || g.derelict || g.charging) continue;
@@ -1169,32 +1233,68 @@ function updateAutoplay(dt){
       return (!best || d < best.d) ? {a, d} : best;
     }, null);
     if (!nearest) continue;
-    const a = nearest.a, d = nearest.d;
+    let a = nearest.a, d = nearest.d;
 
-    /* railgun targeting: pick nearest or strike-running target */
-    const striker = alive.find(s => s.strikeRole && cmdr.strike);
-    g.railTarget = striker || a;
+    /* engage the fleet priority target if it's within reach; otherwise
+       whatever's nearest this group */
+    const pri = unionCmdr.priority;
+    if (pri && !pri.dead && !pri.escaped && dist(g, pri) < 9000){ a = pri; d = dist(g, a); }
 
-    /* torpedo volleys at inbound targets inside 8000 km */
-    if (d < 8000 && g.torps > 0 && (a.strikeRole || d < 4000)){
+    /* railgun: designate whichever nearby contact is most dangerous right
+       now — a ship mid-duster-aim or mid-strike-run takes priority over
+       plain nearest, since suppressing its aim is the actual objective */
+    let railTgt = null, railScore = -Infinity;
+    for (const e of alive){
+      const de = dist(g, e);
+      if (de > CLS.destroyer.railDesigRange*1.6) continue;
+      const s = arcoThreatScore(e, g) - de/20000;
+      if (s > railScore){ railScore = s; railTgt = e; }
+    }
+    g.railTarget = railTgt || a;
+
+    /* torpedo volleys: only on the inbound leg, inside the envelope —
+       firing at a receding or crossing target just burns fish for nothing */
+    const closing = isClosing(g, a);
+    if (d < 6000 && g.torps > 0 && closing > -5 && (a.strikeRole || d < 4000)){
       fireVolley(g, a, Math.min(6, g.torps), false);
     }
 
-    /* play dead if nothing close, wake up if enemy nearby */
-    if (d > 20000 && !g.playingDead && g.torps > 12 && rnd() < 0.1){
-      g.playingDead = true; g.dest = null; g.attackTarget = null; g.railTarget = null;
-    }
-    if (g.playingDead && d < 4000){
-      g.playingDead = false;
-      if (g.torps > 0) fireVolley(g, a, Math.min(g.torps, 6), false);
+    /* mutual support: a badly damaged group falls back on the rest of the
+       fleet rather than slugging it out alone at the edge of the cordon */
+    const hurt = g.hp < g.maxHp*0.35;
+    if (hurt && !g.playingDead && d > 3000){
+      const ang = Math.atan2(cy-g.y, cx-g.x);
+      g.dest = { x: clamp(g.x + Math.cos(ang)*4000, 300, WORLD.w-300), y: clamp(g.y + Math.sin(ang)*4000, 300, WORLD.h-300) };
+    } else if (!hurt && g.dest){
+      g.dest = null;
     }
 
-    /* 30G charge: last resort when low on torps and enemy is close */
-    if (!g.playingDead && g.torps <= 2 && d < 6000 && g.hp < 50){
+    /* play dead: a deliberate ambush posture — go cold only when clear of
+       any near threat, still carrying enough fish to make it worthwhile,
+       and only while the fleet isn't already mostly dark. A cordon that
+       goes entirely silent can never be found again by its own command:
+       Arco loses every non-dark contact to prioritise, coordinated strikes
+       stop triggering, and the engagement stalls out with nobody firing.
+       A hard timeout forces a wake-up even with no contact nearby. */
+    g.coldT = g.playingDead ? (g.coldT||0) + game.autoT : 0;
+    const coldNow = active.filter(x => x.playingDead).length;
+    if (d > 20000 && !g.playingDead && g.torps > 12 && coldNow < Math.ceil(active.length*0.4) && rnd() < 0.15){
+      g.playingDead = true; g.dest = null; g.attackTarget = null; g.railTarget = null; g.coldT = 0;
+    }
+    if (g.playingDead && (d < 4000 || g.coldT > 150)){
+      g.playingDead = false;
+      if (d < 4000 && g.torps > 0) fireVolley(g, a, Math.min(g.torps, 6), false);
+    }
+
+    /* 30G charge: last resort, and only against a target actually closing
+       on us — doctrine is explicit that a receding or crossing dart cannot
+       be run down */
+    if (!g.playingDead && g.torps <= 2 && d < 6000 && g.hp < g.maxHp*0.4 && closing > -10){
       orderCharge(g, a);
     }
-    /* Isidore gambit: cold hull close range */
-    if (g.playingDead && d < 3000 && g.torps <= 6){
+    /* Isidore gambit: cold hull, point-blank, and still only against a
+       target that is actually inbound */
+    if (g.playingDead && d < 3000 && g.torps <= 6 && closing > -10){
       orderCharge(g, a);
     }
   }

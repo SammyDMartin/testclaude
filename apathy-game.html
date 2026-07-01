@@ -217,9 +217,10 @@ body { overflow: hidden; }
       </table>
       <div class="ov-rule"></div>
       <div class="ctl">
-        <b>SLASHERS [T]</b> micro-singularity torpedoes &mdash; frameshift-boosted, devastating on impact<br>
+        <b>SLASHERS [T]</b> monopole/micro-singularity torpedoes &mdash; frameshift-boosted, devastating on impact<br>
         <b>GAMMA [G]</b> 2,200 GW gamma cannons &mdash; long-range capital ship weapons<br>
-        <b>CONVERSION [C]</b> matter-to-energy bombs &mdash; teraton yield, slow to arm, your best weapon<br>
+        <b>CONVERSION [C]</b> false-vacuum energy release, not simple antimatter &mdash; hundred-teraton
+        yield, slow to arm, restricted to Utilitaria-controlled hulls, your single most powerful weapon<br>
         <b>FRAMESHIFT [V]</b> tactical FTL jump &mdash; 0.99c, 1M km max range, 1s cooldown<br>
         <b>OVERLOAD [X]</b> detonate reactor &mdash; massive blast, kills the ship, damages anything nearby<br>
         <b>A-SPHERE DOCTRINE</b> fast and fragile. Frameshift in, fire, frameshift out. Die in seconds under direct fire.<br>
@@ -321,6 +322,33 @@ const stats = {
 
 const units = [], enemies = [], projectiles = [], beams = [], fx = [];
 let selected = new Set();
+
+/* ── relativistic transit: at 33 light-seconds across, nothing here is
+   instantaneous. Frameshift is an Alcubierre bubble at 0.99c, not a
+   teleport — a jump takes real transit time, and the ship is causally
+   disconnected (untargetable, weapons offline) for its duration. Beam
+   weapons (lasers, gamma cannons, graver spikes, the shearing wave) are
+   light-speed-limited: a shot fired at a distant target lands only after
+   the light-travel delay, during which the target can already be gone —
+   which is what makes hit-and-fade a real tactic rather than free damage. */
+const C_MM = C / Mm;              // true lightspeed, Mm/s (~299.792)
+const FS_C_MM = C_MM * 0.99;      // frameshift transit speed, Mm/s
+const pendingHits = [];           // { dueT, target, dmg, targetIsApathy, sx, sy, color, w, dmgType }
+function scheduleBeamHit(sx, sy, target, dmg, targetIsApathy, color, w, dmgType){
+  const d = Math.hypot(target.x-sx, target.y-sy);
+  pendingHits.push({ dueT: game.t + d/C_MM, target, dmg, targetIsApathy, sx, sy, color, w, dmgType });
+}
+function processPendingHits(){
+  for (let i = pendingHits.length-1; i >= 0; i--){
+    const p = pendingHits[i];
+    if (game.t < p.dueT) continue;
+    pendingHits.splice(i, 1);
+    if (p.target.dead) continue;                 /* arrived at empty space */
+    if (p.target.transitT > 0) continue;          /* target mid-frameshift — beam passes through */
+    beams.push({ x1:p.sx, y1:p.sy, x2:p.target.x, y2:p.target.y, life:0.3, color:p.color, w:p.w });
+    if (p.targetIsApathy) hitApathy(p.target, p.dmg); else hitUnit(p.target, p.dmg, p.dmgType || 'beam');
+  }
+}
 let mode = null;
 let intelTarget = null;
 let dragStart = null, dragNow = null, panning = false, panLast = null;
@@ -451,10 +479,14 @@ function initGame(){
     units.push(u);
   }
 
-  // Apathy: arrives from the right edge
+  // Apathy: arrives from the right edge. Its interstellar cruise speed
+  // (up to 0.95c) is long since bled off by 40,000 G deceleration before
+  // it ever reaches this local battlespace — what's left is a terminal
+  // approach velocity of order 1,000-4,000 km/s, scaled by scenario.
   const apathyHp = Math.min(scn.mass / 100, 10000);
   const ap = makeApathy(WORLD.w - 300, WORLD.h/2, apathyHp);
-  ap.vx = -scn.speed * C / Mm * 0.001; // very slow in world coords, decelerating
+  ap.approachVmax = 1200 + scn.speed * 2600;         // km/s
+  ap.approachAcc = 622.8 * (0.5 + scn.speed);        // km/s^2 — same order as 40,000 G
   enemies.push(ap);
 
   game.evacRate = 800000; // people per second through the interstice
@@ -481,6 +513,7 @@ function hitUnit(u, dmg, type){
   u.armor -= absorbed * 0.1;
   u.hp -= (dmg - absorbed);
   u.flash = 0.25;
+  if (type === 'wave') u.frameshiftCd = Math.max(u.frameshiftCd, 10);
   if (u.hp <= 0) destroyUnit(u);
 }
 function destroyUnit(u){
@@ -538,15 +571,21 @@ function fireConversion(u, target){
   log(u.name + ': Conversion bomb away. Teraton yield. Arm time ' + CLS[u.cls].conversionArm + 's.', 'good');
 }
 function doFrameshift(u, tx, ty){
-  if (u.dead || u.frameshiftCd > 0) return;
+  if (u.dead || u.frameshiftCd > 0 || u.transitT > 0) return;
   const maxR = CLS[u.cls].frameshiftRange;
+  const d0 = Math.hypot(tx-u.x, ty-u.y);
+  if (d0 > maxR){ tx = u.x + (tx-u.x)/d0*maxR; ty = u.y + (ty-u.y)/d0*maxR; }
   const d = Math.hypot(tx-u.x, ty-u.y);
-  if (d > maxR){ tx = u.x + (tx-u.x)/d*maxR; ty = u.y + (ty-u.y)/d*maxR; }
+  /* real transit at 0.99c — not a teleport. The ship is in an Alcubierre
+     bubble for this whole duration: untargetable, weapons offline, no
+     other action possible. See updateUnit() for the transit-state branch. */
+  u.transitFromX = u.x; u.transitFromY = u.y;
+  u.transitToX = tx; u.transitToY = ty;
+  u.transitDur = Math.max(0.05, d/FS_C_MM);
+  u.transitT = u.transitDur;
   fx.push({ type:'ring', x:u.x, y:u.y, t:0, dur:0.6, maxR:40, color:'rgba(160,200,255,0.8)' });
-  u.x = tx; u.y = ty;
   u.frameshiftCd = CLS[u.cls].frameshiftCd;
   stats.frameshifts++;
-  fx.push({ type:'ring', x:u.x, y:u.y, t:0, dur:0.8, maxR:50, color:'rgba(160,200,255,0.9)' });
 }
 function doOverload(u){
   if (u.dead) return;
@@ -572,10 +611,29 @@ function updateUnit(u, dt){
   u.frameshiftCd = Math.max(0, u.frameshiftCd - dt);
   const c = CLS[u.cls];
 
+  /* in transit: an Alcubierre bubble is a real journey, not a teleport.
+     The ship is causally disconnected until it collapses — no weapons,
+     no orders, no incoming fire. Interpolate position, then bail out. */
+  if (u.transitT > 0){
+    u.transitT = Math.max(0, u.transitT - dt);
+    const frac = 1 - u.transitT/u.transitDur;
+    u.x = u.transitFromX + (u.transitToX-u.transitFromX)*frac;
+    u.y = u.transitFromY + (u.transitToY-u.transitFromY)*frac;
+    if (u.transitT <= 0){
+      fx.push({ type:'ring', x:u.x, y:u.y, t:0, dur:0.8, maxR:50, color:'rgba(160,200,255,0.9)' });
+    }
+    return;
+  }
+
   // Movement
   if (u.attackTarget && !u.attackTarget.dead){
     const d = dist(u, u.attackTarget);
-    const standoff = u.cls === 'dsphere' ? 600 : 300;
+    /* D-sphere doctrine: area denial from just outside graver-spike range
+       (800 Mm-scale units) — gamma cannons (1200) reach from here, X-ray
+       (600) only when the enemy closes on its own. A-spheres hold closer,
+       inside slasher range, since autoplay (below) handles their actual
+       hit-and-fade cycle via frameshift. */
+    const standoff = u.cls === 'dsphere' ? 900 : 300;
     if (d > standoff) pursue(u, u.attackTarget.x, u.attackTarget.y, c.acc, dt, c.vmax);
     else brake(u, c.acc, dt);
   } else if (u.dest){
@@ -597,22 +655,21 @@ function updateUnit(u, dt){
   const d = dist(u, target);
 
   if (u.cls === 'dsphere'){
-    // X-ray lasers: continuous barrage
+    // X-ray lasers: continuous barrage — light-speed limited like every beam here
     u.xrayCd -= dt;
     if (u.xrayCd <= 0 && d < c.xrayRange){
       u.xrayCd = c.xrayCycle / moraleF;
-      beams.push({ x1:u.x, y1:u.y, x2:target.x, y2:target.y, life:0.2, color:'rgba(255,235,255,0.85)', w:1.5 });
-      hitApathy(target, c.xrayDmg);
+      scheduleBeamHit(u.x, u.y, target, c.xrayDmg, true, 'rgba(255,235,255,0.85)', 1.5);
     }
     // Gamma cannons
     u.gammaCd -= dt;
     if (u.gammaCd <= 0 && d < c.gammaRange){
       u.gammaCd = c.gammaCycle / moraleF;
-      beams.push({ x1:u.x, y1:u.y, x2:target.x, y2:target.y, life:0.4, color:'rgba(140,255,160,0.95)', w:3 });
-      hitApathy(target, c.gammaDmg);
+      scheduleBeamHit(u.x, u.y, target, c.gammaDmg, true, 'rgba(140,255,160,0.95)', 3);
       stats.gammaFired++;
     }
-    // Masscannons
+    // Masscannons: hyper-velocity kinetic slugs, not light-speed — short
+    // range and high rate makes the flight time negligible at this scale
     u.massCd -= dt;
     if (u.massCd <= 0 && d < c.massRange){
       u.massCd = c.massCycle;
@@ -623,14 +680,12 @@ function updateUnit(u, dt){
     u.pdcCd -= dt;
     if (u.pdcCd <= 0 && d < c.pdcRange){
       u.pdcCd = c.pdcCycle / moraleF;
-      beams.push({ x1:u.x, y1:u.y, x2:target.x, y2:target.y, life:0.1, color:'rgba(200,255,220,0.7)', w:1 });
-      hitApathy(target, c.pdcDmg);
+      scheduleBeamHit(u.x, u.y, target, c.pdcDmg, true, 'rgba(200,255,220,0.7)', 1);
     }
     u.gammaCd = (u.gammaCd || 0) - dt;
     if (u.gammaCd <= 0 && d < c.graverRange){
       u.gammaCd = c.graverCycle / moraleF;
-      beams.push({ x1:u.x, y1:u.y, x2:target.x+rnd()*20-10, y2:target.y+rnd()*20-10, life:0.3, color:'rgba(160,220,255,0.9)', w:2 });
-      hitApathy(target, c.graverDmg);
+      scheduleBeamHit(u.x, u.y, target, c.graverDmg, true, 'rgba(160,220,255,0.9)', 2);
     }
   }
 }
@@ -640,29 +695,43 @@ function updateApathy(a, dt){
   if (a.dead) return;
   a.flash = Math.max(0, a.flash - dt);
 
-  // Approach the interstice/planet
+  // Approach the interstice/planet — cruise at terminal approach speed for
+  // most of the transit, then brake hard only in the final stretch, which
+  // is what a many-thousand-G deceleration capability actually looks like
+  // at this scale (canon: "the insane... deceleration the A-sphere could
+  // manage" but scaled far down; the Apathy's own 40,000 G is the same
+  // idea two more orders of magnitude up).
   if (a.state === 'approach'){
-    arrive(a, PLANET.x, PLANET.y, CLS.apathy.acc * 0.0001, dt, 200);
+    arrive(a, PLANET.x, PLANET.y, a.approachAcc, dt, a.approachVmax);
   }
   a.x += a.vx/Mm*dt; a.y += a.vy/Mm*dt;
 
-  // Pick target: nearest unit
-  const alive = units.filter(u => !u.dead);
+  // Pick target: nearest unit. A ship mid-frameshift is causally
+  // disconnected — invisible to targeting, not just untouchable.
+  const alive = units.filter(u => !u.dead && !(u.transitT > 0));
   if (!alive.length) return;
   let nearest = null, nd = Infinity;
   for (const u of alive){ const d = dist(a, u); if (d < nd){ nd = d; nearest = u; } }
   a.target = nearest;
 
-  // Graver spikes: predictive targeting
+  // Graver spikes: predictive targeting — the Apathy's most precise weapon
+  // is aimed at whichever contact is most worth killing, not at random.
+  // Every shot here is light-speed limited: at these ranges the hit lands
+  // seconds after the shot is decided, giving a real window to break contact.
   a.graverCd -= dt;
   if (a.graverCd <= 0 && nd < CLS.apathy.graverRange){
     a.graverCd = CLS.apathy.graverCycle;
-    const tgt = alive[Math.floor(rnd()*alive.length)];
-    if (tgt && dist(a, tgt) < CLS.apathy.graverRange){
+    let tgt = null, ts = -Infinity;
+    for (const u of alive){
+      const du = dist(a, u);
+      if (du > CLS.apathy.graverRange) continue;
+      const s = (u.cls === 'dsphere' ? 3 : 1) + (1 - u.hp/u.maxHp)*2 - du/400;
+      if (s > ts){ ts = s; tgt = u; }
+    }
+    if (tgt){
       const d2 = dist(a, tgt);
       const p = d2 < 100 ? 0.7 : d2 < 300 ? 0.4 : 0.2;
-      beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.5, color:'rgba(255,60,60,0.95)', w:4 });
-      if (rnd() < p) hitUnit(tgt, CLS.apathy.graverDmg, 'graver');
+      if (rnd() < p) scheduleBeamHit(a.x, a.y, tgt, CLS.apathy.graverDmg, false, 'rgba(255,60,60,0.95)', 4, 'graver');
       else fx.push({ type:'ring', x:tgt.x, y:tgt.y, t:0, dur:0.4, maxR:30, color:'rgba(255,60,60,0.5)' });
     }
   }
@@ -674,21 +743,20 @@ function updateApathy(a, dt){
     const targets = alive.sort(() => rnd()-0.5).slice(0, 3);
     for (const tgt of targets){
       if (dist(a, tgt) < CLS.apathy.laserRange){
-        beams.push({ x1:a.x, y1:a.y, x2:tgt.x, y2:tgt.y, life:0.3, color:'rgba(255,120,40,0.9)', w:2.5 });
-        hitUnit(tgt, CLS.apathy.laserDmg, 'laser');
+        scheduleBeamHit(a.x, a.y, tgt, CLS.apathy.laserDmg, false, 'rgba(255,120,40,0.9)', 2.5, 'laser');
       }
     }
   }
 
-  // Shearing gravity wave (close range area effect)
+  // Shearing gravity wave (close range area effect) — a gravitational
+  // pulse still propagates at c, so even this doesn't land instantly
   a.waveCd -= dt;
   if (a.waveCd <= 0){
     a.waveCd = 20;
     let hit = false;
     for (const u of alive){
       if (dist(a, u) < CLS.apathy.waveRange){
-        hitUnit(u, CLS.apathy.waveDmg, 'wave');
-        u.frameshiftCd = Math.max(u.frameshiftCd, 10);
+        scheduleBeamHit(a.x, a.y, u, CLS.apathy.waveDmg, false, 'rgba(255,40,40,0.5)', 3, 'wave');
         hit = true;
       }
     }
@@ -784,46 +852,85 @@ function updateProjectiles(dt){
   /* beams & fx decay in REAL time (in loop) so they stay visible at high compression */
 }
 
-/* ── autoplay AI ─────────────────────────────────────────────────── */
+/* ── autoplay AI — hit-and-fade harassment doctrine ────────────────── */
+/* Canon (The War of All Wars): static "joust" formations — a long run-up,
+   a firing wall — are explicitly obsolete against the Apathy. What works
+   is frameshift hit-and-fade: jump in, fire immediately, jump clear before
+   it can retaliate with graver spikes or the shearing wave. D-spheres
+   anchor the line at standoff and let their batteries run continuously;
+   A-spheres never linger, and conversion bombs — the rarest, most
+   powerful weapon in the arsenal — are saved for a real kill window. */
 function updateAutoplay(dt){
   if (!game.autoplay) return;
   game.autoT -= dt;
   if (game.autoT > 0) return;
-  game.autoT = 2 + rnd()*3;
+  game.autoT = 1 + rnd()*1.5;
 
   const target = enemies.find(e => !e.dead);
   if (!target) return;
 
+  const engageRange = 450;   // effective slasher envelope for A-spheres
+  const engaged = units.filter(u => !u.dead && u.cls === 'asphere' && dist(u, target) < engageRange).length;
+
   for (const u of units){
-    if (u.dead) continue;
+    if (u.dead || u.transitT > 0) continue;   // mid-frameshift — no orders reach it until it collapses
+    const c = CLS[u.cls];
     const d = dist(u, target);
 
     if (u.cls === 'asphere'){
-      u.attackTarget = target;
-      // Fire slashers at medium range
-      if (d < 500 && u.slashers > 0 && rnd() < 0.3){
-        fireSlasher(u, target);
+      const hurt = u.hp < c.hull * 0.3;
+
+      if (hurt && u.frameshiftCd <= 0 && d < 700){
+        /* wounded: break contact now rather than trade further */
+        const ang = rnd()*Math.PI*2;
+        doFrameshift(u, target.x + Math.cos(ang)*900, target.y + Math.sin(ang)*900);
+        u.attackTarget = null;
+        continue;
       }
-      // Conversion bombs at closer range
-      if (d < 300 && u.conversions > 0 && rnd() < 0.1){
+
+      if (d >= engageRange){
+        /* close the gap — frameshift in if it's up, conventional thrust otherwise */
+        if (u.frameshiftCd <= 0 && d > 400){
+          const ang = Math.atan2(u.y-target.y, u.x-target.x) + (rnd()-0.5)*1.2;
+          doFrameshift(u, target.x + Math.cos(ang)*350, target.y + Math.sin(ang)*350);
+        }
+        u.attackTarget = target;
+        continue;
+      }
+
+      /* in range: fire immediately, then ALWAYS break off — this is the
+         crux of hit-and-fade. Lingering in the shearing-wave radius (400
+         units, one-shot lethal to a 40-hull A-sphere) while waiting out
+         a frameshift cooldown is exactly the static "joust" posture
+         doctrine rejects, so retreat under conventional thrust when the
+         frameshift isn't ready rather than sit still pursuing inward. */
+      if (u.slashers > 0) fireSlasher(u, target);
+      /* conversion bomb: reserved for a real kill window — the target
+         critically wounded, or enough A-spheres committed at once that
+         its graver spikes are divided several ways */
+      if (u.conversions > 0 && (target.hp < target.maxHp*0.35 || engaged >= 4) && rnd() < 0.5){
         fireConversion(u, target);
       }
-      // Frameshift repositioning
-      if (d < 150 && u.frameshiftCd <= 0 && rnd() < 0.2){
+      if (u.frameshiftCd <= 0){
         const ang = rnd()*Math.PI*2;
-        doFrameshift(u, target.x + Math.cos(ang)*350, target.y + Math.sin(ang)*350);
+        doFrameshift(u, target.x + Math.cos(ang)*750, target.y + Math.sin(ang)*750);
+        u.attackTarget = null;
+      } else {
+        const ang = Math.atan2(u.y-target.y, u.x-target.x);
+        u.attackTarget = null;
+        u.dest = { x: u.x + Math.cos(ang)*600, y: u.y + Math.sin(ang)*600 };
       }
-      // Overload when nearly dead and close
-      if (u.hp < 10 && d < 100){
+      if (u.hp < c.hull*0.12 && d < 100){
         doOverload(u);
       }
     } else {
-      // D-sphere: maintain standoff, fire everything
+      /* D-sphere: batteries fire automatically regardless of autoplay
+         (see updateUnit) — autoplay here only manages limited ordnance */
       u.attackTarget = target;
-      if (u.slashers > 0 && rnd() < 0.15){
+      if (u.slashers > 0 && rnd() < 0.2){
         fireSlasher(u, target);
       }
-      if (u.conversions > 0 && d < 800 && rnd() < 0.05){
+      if (u.conversions > 0 && d < 800 && (target.hp < target.maxHp*0.5 || rnd() < 0.08)){
         fireConversion(u, target);
       }
     }
@@ -971,8 +1078,7 @@ function handlePrimary(px, py, additive){
       } else if (mode === 'gamma'){
         const ds = sel.filter(u => u.cls === 'dsphere');
         for (const u of ds){
-          beams.push({ x1:u.x, y1:u.y, x2:e.x, y2:e.y, life:0.6, color:'rgba(140,255,160,0.95)', w:4 });
-          hitApathy(e, CLS.dsphere.gammaDmg * 2);
+          scheduleBeamHit(u.x, u.y, e, CLS.dsphere.gammaDmg * 2, true, 'rgba(140,255,160,0.95)', 4);
           stats.gammaFired++;
         }
         if (!ds.length) log('Gamma cannons require a Defence Sphere in the selection.', 'warn');
@@ -1392,6 +1498,7 @@ function update(dt){
   for (const u of units) updateUnit(u, dt);
   for (const e of enemies) updateApathy(e, dt);
   updateProjectiles(dt);
+  processPendingHits();
   updateAutoplay(dt);
 
   for (let i=projectiles.length-1;i>=0;i--) if (projectiles[i].dead) projectiles.splice(i,1);
@@ -1482,7 +1589,7 @@ refreshEnemyStrip();
 document.getElementById('btn-speed').textContent = game.timeScale + '×';
 requestAnimationFrame(loop);
 
-window.__woaw = { game, units, enemies, projectiles, update, draw, stats, CLS, SCENARIOS,
+window.__woaw = { game, units, enemies, projectiles, pendingHits, update, draw, stats, CLS, SCENARIOS,
                   setScenario(k){ scnKey = k; initGame(); } };
 
 })();

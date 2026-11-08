@@ -1,0 +1,8 @@
+12:13 main seed 1 exit 0 in 1852 s; last: 16385,0.137562,7.373162,131068,0.000023,4096,0,0,0,-1
+12:48 main seed 2 exit 0 in 2087 s; last: 12545,4.337047,1.395424,47295,0.000832,4096,4057,64,64,12033
+13:37 main seed 3 exit 0 in 2911 s; last: 16385,0.139983,7.370402,131071,0.000015,4096,0,0,0,-1
+14:19 main seed 4 done; last: 16385,0.122758,7.377444,131070,0.000023,4096,0,0,0,-1
+15:22 container restarted; sham seed 1 had reached epoch 4993; resuming from checkpoint 4096
+15:40 sham seed 1 exit 0 in 1103 s; last: 16385,-0.006675,8.000009,131072,0.000008,4096,0,0,0,-1
+15:47 calibration done in 413 s: N 10000000 hits 0
+15:47 STAGE1 COMPLETE (curtailed)

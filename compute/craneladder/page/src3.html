@@ -1,0 +1,704 @@
+<meta charset="utf-8">
+<title>From So Simple a Beginning</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Besley:ital,wght@0,500;0,800;1,500&family=Libre+Franklin:ital,wght@0,400;0,600;1,400&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Ledger paper and engineering drawings. The page reads top to bottom as an argument:
+   the claim, the ladder, the rules, what happened, how the winner works, the results, the books.
+   One light look by choice. */
+:root{
+  --paper:#ECF0E6; --sheet:#F7F9F3; --rule:#C3D5BF; --rule-strong:#8DAE88;
+  --ink:#1B2340; --pencil:#5A6357; --red:#B3261E; --tape:#F2D46A; --tape-dark:#D9B640;
+  --pen:#5E2D91; --green:#2E6B3F;
+  --famA:#C2571A;  /* first copier family */
+  --famB:#5E2D91;  /* the family that took over */
+  --famX:#B08A1E;  /* a common non-copying pattern */
+  --dot:#A3AD9F;   /* programs in no family */
+  --display:"Besley", "Clarendon", Georgia, serif;
+  --text:"Libre Franklin", "Franklin Gothic Book", "Helvetica Neue", Arial, sans-serif;
+  --machine:"Courier Prime", "Courier New", Courier, monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink)}
+body{margin:0;font-family:var(--text);font-size:17px;line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:0 80px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column}
+h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;text-wrap:balance;color:var(--ink)}
+h1{font-size:clamp(2.6rem,9vw,5.4rem);line-height:.95;letter-spacing:-.01em;max-width:12ch}
+h2{font-size:clamp(1.6rem,4.6vw,2.4rem);line-height:1.05}
+h3{font-size:1.2rem;line-height:1.2}
+p{margin:0;max-width:68ch}
+a{color:var(--ink);text-decoration-color:var(--rule-strong);text-underline-offset:3px}
+code,.machine{font-family:var(--machine);font-variant-numeric:tabular-nums}
+code{background:var(--sheet);border:1px solid var(--rule);padding:0 4px;font-size:.95em;white-space:nowrap}
+.quiet{color:var(--pencil)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:18px;padding-block:48px 0;scroll-margin-top:12px}
+section::before{content:"";display:block;height:5px;border-top:1px solid var(--rule-strong);border-bottom:1px solid var(--rule-strong);margin-bottom:22px}
+.kicker{font-family:var(--machine);font-size:.85rem;color:var(--pencil);letter-spacing:.04em}
+.mast{display:flex;flex-direction:column;gap:18px;padding-top:40px}
+.dek{font-size:1.15rem;max-width:60ch}
+.darwin{font-family:var(--display);font-style:italic;font-weight:500;color:var(--pencil);font-size:1rem;max-width:60ch}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9rem;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 0}
+nav.toc a{text-decoration:none;color:var(--pencil)} nav.toc a b{font-family:var(--machine);color:var(--ink);margin-right:4px}
+.cols{display:grid;gap:24px}
+@media(min-width:880px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.cols.wide-left{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}}
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.caption{font-size:.9rem;color:var(--pencil);max-width:70ch}
+.panel{background:var(--sheet);border:1px solid var(--rule-strong);min-width:0}
+.bar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 12px;border-top:1px solid var(--rule)}
+.btn{background:var(--ink);color:var(--sheet);border:0;padding:9px 14px;cursor:pointer;min-height:40px;font-weight:600;font-size:.92rem}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+input[type=range]{flex:1 1 180px;min-width:0;accent-color:var(--ink);height:40px}
+.readout{font-family:var(--machine);font-size:.9rem}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;color:var(--pencil)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;display:inline-block;border-radius:50%}
+.sq{width:12px;height:12px;display:inline-block}
+canvas{display:block;width:100%}
+
+/* 1. argument figure */
+.triptych{display:grid;gap:14px}
+@media(min-width:760px){.triptych{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.triptych figure{margin:0;display:flex;flex-direction:column;gap:8px}
+.triptych svg{width:100%;height:auto;background:var(--sheet);border:1px solid var(--rule-strong)}
+.triptych figcaption{font-size:.92rem}
+.triptych figcaption b{font-family:var(--display);font-size:1.05rem}
+.books{display:grid;gap:12px}
+@media(min-width:760px){.books{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.books>div{background:var(--sheet);border:1px solid var(--rule-strong);padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.books .big{font-family:var(--machine);font-size:1.35rem;font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.books .red, .red{color:var(--red)}
+.books h3{font-size:1.05rem}
+
+/* 2. ladder */
+.tower{display:flex;flex-direction:column-reverse;border:1px solid var(--rule-strong);background:var(--sheet)}
+.rung{display:grid;grid-template-columns:76px minmax(0,1fr);border-top:1px solid var(--rule);min-height:110px}
+.rung:last-child{border-top:0}
+.rung .art{position:relative;border-right:3px double var(--rule-strong)}
+.rung .art svg{position:absolute;inset:0;width:100%;height:100%}
+.rung .txt{padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.rung .st{font-family:var(--machine);font-size:.82rem;color:var(--pencil)}
+.rung .st.now{color:var(--pen);font-weight:700;font-family:var(--text);font-size:.88rem}
+.rung.ground{background:var(--paper)}
+
+/* 3. rules */
+.ops{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;align-items:baseline;font-size:.95rem}
+.ops code{font-size:1.05rem;font-weight:700;text-align:center;min-width:3.4em}
+.steps3{display:grid;gap:12px}
+@media(min-width:760px){.steps3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.steps3 figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.steps3 svg{width:100%;height:auto;background:var(--sheet);border:1px solid var(--rule-strong)}
+.steps3 figcaption{font-size:.92rem}
+
+/* 4. program space */
+.space-wrap{position:relative}
+#space{height:min(72vw,480px);touch-action:pan-y;cursor:grab}
+#space:active{cursor:grabbing}
+.space-tag{position:absolute;left:12px;top:10px;font-family:var(--machine);font-size:.9rem;background:rgba(247,249,243,.85);padding:2px 6px;pointer-events:none}
+.beats{display:flex;flex-wrap:wrap;gap:8px}
+.beats .btn{font-size:.85rem;min-height:36px;padding:7px 11px}
+.beat-now{border-left:4px solid var(--ink);padding:10px 14px;background:var(--sheet);min-height:5.5em}
+.beat-now h3{font-size:1.05rem;margin-bottom:4px}
+
+/* 5. ring */
+.ring-wrap{display:flex;justify-content:center;padding:8px}
+#ring{max-width:560px;touch-action:manipulation}
+.listing{display:flex;flex-direction:column;gap:10px;font-size:.95rem}
+.listing ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
+.strip{display:grid;grid-template-columns:repeat(32,minmax(0,1fr));gap:1px;max-width:640px}
+.strip i{aspect-ratio:1/1.35;display:flex;align-items:center;justify-content:center;font-style:normal;font-family:var(--machine);font-weight:700;font-size:clamp(.5rem,1.9vw,.85rem);background:var(--tape);color:var(--ink)}
+.strip i.op{color:var(--sheet)}
+.strip i.z{background:var(--paper);outline:1px solid var(--rule)}
+
+/* 6. scoreboard */
+.board{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.card{background:var(--sheet);border:1px solid var(--rule-strong);display:flex;flex-direction:column}
+.card canvas{height:70px}
+.card .t{padding:8px 10px;font-size:.82rem;display:flex;flex-direction:column;gap:2px}
+.card .t b{font-family:var(--display);font-size:.95rem}
+.card.hit{border-color:var(--pen);box-shadow:inset 0 0 0 1px var(--pen)}
+.card.notrun{background:transparent;border-style:dashed;color:var(--pencil)}
+.card.notrun canvas{opacity:0}
+
+/* tables */
+.table-wrap{overflow-x:auto;max-width:100%;border:1px solid var(--rule-strong);background:var(--sheet)}
+table.ledger{border-collapse:collapse;width:100%;min-width:760px;font-size:.92rem}
+.ledger th{font-family:var(--display);font-weight:800;text-align:left;padding:10px 12px;border-bottom:3px double var(--rule-strong);font-size:.95rem}
+.ledger td{padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+.ledger td.num{font-family:var(--machine);font-size:.88rem;min-width:9rem}
+.ledger td.red, .ledger th.red{color:var(--red)}
+.ledger td.first, .ledger th.first{border-right:3px double var(--red)}
+.ledger td.mark{width:44px}
+.ledger tr.exhibit td{background:var(--paper)}
+.ledger svg{width:30px;height:30px;display:block}
+.verdict{font-family:var(--machine);font-size:.85rem;font-weight:700}
+ul.plain{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:64ch}
+footer{padding-top:40px;font-size:.85rem;color:var(--pencil)}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <h1>From So Simple a Beginning</h1>
+    <p class="dek">An experiment in where design comes from. Random 64-byte programs, ten instructions, no fitness function and no replicator written in. Stage 1 asked whether copiers arise on their own. In one of four runs, they did, and this page shows how.</p>
+    <p class="darwin">“…from so simple a beginning endless forms most beautiful and most wonderful have been, and are being, evolved.” Darwin, 1859</p>
+    <nav class="toc" aria-label="Contents">
+      <a href="#argument"><b>1</b>The argument</a><a href="#ladder"><b>2</b>The ladder</a><a href="#rules"><b>3</b>The rules</a><a href="#takeover"><b>4</b>The takeover</a><a href="#copier"><b>5</b>The copier</a><a href="#results"><b>6</b>Stage 1 results</a><a href="#ledger"><b>7</b>The books</a><a href="#checks"><b>8</b>Checked</a>
+    </nav>
+  </header>
+
+  <!-- 1 -->
+  <section id="argument" aria-labelledby="h-argument">
+    <span class="kicker">1 · THE ARGUMENT</span>
+    <h2 id="h-argument">Cranes, skyhooks, and who pays for the information</h2>
+    <div class="triptych">
+      <figure>
+        <svg viewBox="0 0 300 230" role="img" aria-label="A platform hanging from a cable that disappears into a cloud">
+          <g fill="none" stroke="var(--pencil)" stroke-width="1.6">
+            <path d="M92 34a16 16 0 0 1 22-14a20 20 0 0 1 36-6a18 18 0 0 1 32 6a15 15 0 0 1 16 16h-108z" fill="var(--paper)"/>
+            <path d="M150 38v62" stroke-dasharray="4 4"/>
+            <path d="M150 100v8a6 6 0 1 1-6-6"/>
+            <path d="M150 112l-56 12M150 112l56 12"/>
+          </g>
+          <rect x="86" y="124" width="128" height="10" fill="var(--ink)"/>
+          <text x="150" y="152" text-anchor="middle" font-family="Courier Prime, monospace" font-size="11" fill="var(--ink)">the next rung</text>
+          <path d="M14 206h272" stroke="var(--ink)" stroke-width="2"/>
+          <g stroke="var(--ink)" stroke-width="1">
+            <path d="M24 206l-8 10M44 206l-8 10M64 206l-8 10M84 206l-8 10M104 206l-8 10M124 206l-8 10M144 206l-8 10M164 206l-8 10M184 206l-8 10M204 206l-8 10M224 206l-8 10M244 206l-8 10M264 206l-8 10M284 206l-8 10"/>
+          </g>
+          <text x="150" y="196" text-anchor="middle" font-family="Courier Prime, monospace" font-size="11" fill="var(--pencil)">what is already there</text>
+        </svg>
+        <figcaption><b>A skyhook.</b> A rung of design held up from above, with nothing on the ground to explain it: a designer, or a lucky draw too improbable to credit.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 300 230" role="img" aria-label="A crane standing on a lower platform lifts the next platform">
+          <g stroke="var(--ink)" stroke-width="1.6" fill="none">
+            <path d="M62 206v-50M238 206v-50M62 156l176 50M238 156l-176 50"/>
+            <path d="M88 146V38M100 146V38M88 146l12-12M88 134l12-12M88 122l12-12M88 110l12-12M88 98l12-12M88 86l12-12M88 74l12-12M88 62l12-12M88 50l12-12"/>
+            <path d="M60 38h190M60 30h190M80 30l8 8M100 30l8 8M120 30l8 8M140 30l8 8M160 30l8 8M180 30l8 8M200 30l8 8M220 30l8 8M240 30l8 8"/>
+            <path d="M94 38L94 14L60 30M94 14L250 30"/>
+            <path d="M228 38v52"/>
+            <path d="M228 90v8a6 6 0 1 1-6-6"/>
+            <path d="M228 102l-44 10M228 102l44 10"/>
+          </g>
+          <rect x="54" y="30" width="16" height="16" fill="var(--ink)"/>
+          <rect x="52" y="146" width="196" height="10" fill="var(--ink)"/>
+          <rect x="178" y="112" width="100" height="9" fill="var(--pen)"/>
+          <path d="M14 206h272" stroke="var(--ink)" stroke-width="2"/>
+          <g stroke="var(--ink)" stroke-width="1"><path d="M24 206l-8 10M44 206l-8 10M64 206l-8 10M84 206l-8 10M104 206l-8 10M124 206l-8 10M144 206l-8 10M164 206l-8 10M184 206l-8 10M204 206l-8 10M224 206l-8 10M244 206l-8 10M264 206l-8 10M284 206l-8 10"/></g>
+          <text x="178" y="140" text-anchor="middle" font-family="Courier Prime, monospace" font-size="11" fill="var(--ink)">the rung below</text>
+        </svg>
+        <figcaption><b>A crane.</b> A rung lifted by machinery that stands on the rung below. Dennett’s reading of Darwin: biology is cranes all the way up, each one built by the last.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 300 230" role="img" aria-label="The same crane, but its own platform hangs from cables into a cloud">
+          <g fill="none" stroke="var(--red)" stroke-width="1.6">
+            <path d="M6 22a12 12 0 0 1 16-10a15 15 0 0 1 26-4a13 13 0 0 1 22 6a11 11 0 0 1 10 12h-74z" fill="var(--paper)"/>
+            <path d="M30 26l26 120M58 26l180 120" stroke-dasharray="4 4"/>
+          </g>
+          <g stroke="var(--ink)" stroke-width="1.6" fill="none">
+            <path d="M118 146V60M130 146V60M118 146l12-12M118 134l12-12M118 122l12-12M118 110l12-12M118 98l12-12M118 86l12-12M118 74l12-12"/>
+            <path d="M96 60h176M96 52h176M110 52l8 8M140 52l8 8M170 52l8 8M200 52l8 8M230 52l8 8M260 52l8 8"/>
+            <path d="M124 60L124 38L96 52M124 38L272 52"/>
+            <path d="M252 60v46M252 106v8a6 6 0 1 1-6-6M252 118l-36 8M252 118l36 8"/>
+          </g>
+          <rect x="90" y="52" width="14" height="14" fill="var(--ink)"/>
+          <rect x="52" y="146" width="196" height="10" fill="var(--ink)"/>
+          <rect x="212" y="126" width="80" height="9" fill="var(--pen)"/>
+          <path d="M14 206h272" stroke="var(--ink)" stroke-width="2"/>
+          <g stroke="var(--ink)" stroke-width="1"><path d="M24 206l-8 10M44 206l-8 10M64 206l-8 10M84 206l-8 10M104 206l-8 10M124 206l-8 10M144 206l-8 10M164 206l-8 10M184 206l-8 10M204 206l-8 10M224 206l-8 10M244 206l-8 10M264 206l-8 10M284 206l-8 10"/></g>
+          <text x="150" y="182" text-anchor="middle" font-family="Courier Prime, monospace" font-size="11" fill="var(--red)">bits owed</text>
+        </svg>
+        <figcaption><b>Dembski and Marks’s reply.</b> A crane that works is itself improbable. Finding one costs at least as many bits as it saves, so the bill moves down a rung. The red cables are what this project tries to measure.</figcaption>
+      </figure>
+    </div>
+    <div class="cols">
+      <div class="stack">
+        <p>Dembski and Marks put the argument in numbers. Any search that hits a target more often than blind sampling has been given information, and they measure how much in bits: <b>active information</b> is log₂ of the search’s success rate divided by blind sampling’s. Their conservation theorem adds that a search this good is at least as hard to find, by blind search among searches, as the target was to begin with. Evolution, on this view, can only spend information that was put in somewhere.</p>
+        <p>This project builds rungs from random programs and keeps books on each one. Nothing scores the programs and no copier is written in, so if copiers appear, the dynamics found them. The books record three numbers per rung, all in bits:</p>
+      </div>
+      <div class="books" style="grid-template-columns:1fr">
+        <div><h3>Chance cost</h3><p>How improbable the target is under blind sampling. For Stage 1’s main target, a soup whose programs are full of copies, it is at least</p><span class="big">8,388,608 bits</span><p class="caption">One bit per byte of the soup: 131,072 programs × 64 bytes. By counting, no more than one random soup in 2<sup>8,388,608</sup> compresses this well.</p></div>
+        <div><h3>Active information</h3><p>How much the rules raise the odds over blind sampling. One run in four reached the target, so it is at least about</p><span class="big">8,388,606 bits</span><p class="caption">Chance cost minus log₂(4). The figure grows with the size of the soup; the comparison that matters is with the red column.</p></div>
+        <div><h3 class="red">Designer bits</h3><p>Everything put in by hand: the rule code, every configuration tried, every labelled shortcut. So far:</p><span class="big red">≤ 3,184 bits, plus the rarity of the rules</span><p class="caption">3,184 bits is cubff’s rule code compressed. One configuration was tried and nothing was injected. How rare rules like these are among all simple rule sets is what Stage 2 measures, and it is where Dembski’s accounting would have to find the other 8.4 million bits.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="ladder" aria-labelledby="h-ladder">
+    <span class="kicker">2 · THE LADDER</span>
+    <h2 id="h-ladder">Four rungs and the ground they stand on</h2>
+    <p>Each rung is a stage of the project, read from the ground up. A crane means the rung has been reached from the one below with nothing injected; a dashed cable means it is not reached yet. Every stage runs a sham beside the real thing and waits for a go-ahead before it starts.</p>
+    <div class="tower" id="tower"></div>
+  </section>
+
+  <!-- 3 -->
+  <section id="rules" aria-labelledby="h-rules">
+    <span class="kicker">3 · THE RULES</span>
+    <h2 id="h-rules">What the programs are, and what happens to them</h2>
+    <div class="steps3">
+      <figure>
+        <svg viewBox="0 0 300 150" role="img" aria-label="A grid of programs with two picked at random" id="step1"></svg>
+        <figcaption><b>1. Pick two.</b> The soup is 131,072 programs of 64 random bytes. Two are picked at random.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 300 150" role="img" aria-label="The two programs joined into one tape with two heads" id="step2"></svg>
+        <figcaption><b>2. Join and run.</b> They are joined into one 128-byte tape and run from its first byte, for up to 8,192 steps. The code can read and write anywhere on the tape, including its partner.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 300 150" role="img" aria-label="The tape cut back into two programs that return to the soup" id="step3"></svg>
+        <figcaption><b>3. Cut and return.</b> The tape is cut back into two programs, changed or not, and both go back. 65,536 pairings make one epoch.</figcaption>
+      </figure>
+    </div>
+    <div class="cols">
+      <div class="stack">
+        <p>Nothing scores a program and nothing is removed. About one byte in 4,096 is replaced at random in each pairing, and that is the only outside change. A program spreads only if running it writes a copy of itself over its partner. Of the 256 possible byte values, ten are instructions and the rest do nothing.</p>
+        <p class="caption">The rules are BFF, from Agüera y Arcas and colleagues (2024), run with their own code, cubff, at their size and settings.</p>
+      </div>
+      <div class="ops" aria-label="The ten instructions">
+        <code>&lt; &gt;</code><span>move head 0 one byte left, right</span>
+        <code>{ }</code><span>move head 1 one byte left, right</span>
+        <code>+ -</code><span>add or subtract 1 at head 0</span>
+        <code>.</code><span>copy the byte at head 0 onto head 1</span>
+        <code>,</code><span>copy the byte at head 1 onto head 0</span>
+        <code>[</code><span>if the byte at head 0 is zero, jump past the matching <code>]</code></span>
+        <code>]</code><span>if the byte at head 0 is not zero, jump back to the matching <code>[</code></span>
+        <code>other</code><span>246 byte values: do nothing</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="takeover" aria-labelledby="h-takeover">
+    <span class="kicker">4 · THE TAKEOVER</span>
+    <h2 id="h-takeover">Seed 2: two copier families, one poisoned by its own zeros</h2>
+    <p>Each dot is one of 2,000 programs at fixed places in the soup, followed through time. Programs with similar code sit near each other: the code of each is turned into a list of which instruction sits at which byte, and the 640-number lists are squashed into three dimensions. Random programs make a loose cloud. Copies of one program sit on top of each other, so a family that copies itself pulls its dots into clumps. Drag to turn it.</p>
+    <div class="panel">
+      <div class="space-wrap"><canvas id="space" role="img" aria-label="Program space: 2,000 programs as dots, coloured by family, moving as the soup changes"></canvas><span class="space-tag" id="space-tag"></span></div>
+      <canvas id="muller" role="img" aria-label="Recorder: share of the soup held by each family, and share of bytes that are zero"></canvas>
+      <div class="bar"><button class="btn" id="sp-play" type="button">Play</button><input type="range" id="sp-scrub" min="0" max="1000" value="0" step="1" aria-label="Epoch"><span class="readout" id="sp-read"></span></div>
+    </div>
+    <div class="key">
+      <span><i class="sw" style="background:var(--dot)"></i>no family</span>
+      <span><i class="sw" style="background:var(--famX)"></i>a common pattern that does not copy</span>
+      <span><i class="sw" style="background:var(--famA)"></i>family A, the first copiers</span>
+      <span><i class="sw" style="background:var(--famB)"></i>family B, the copiers that took over</span>
+      <span><i class="sq" style="background:var(--red);height:3px"></i>zero bytes, share of the soup</span>
+    </div>
+    <div class="beats" id="beats"></div>
+    <div class="beat-now" id="beat-now" aria-live="polite"></div>
+  </section>
+
+  <!-- 5 -->
+  <section id="copier" aria-labelledby="h-copier">
+    <span class="kicker">5 · THE COPIER</span>
+    <h2 id="h-copier">How the winner copies: a mirror, twice</h2>
+    <p>The ring is the 128-byte tape of one pairing, bent into a circle: the copier on the right, its partner on the left, and the tape’s first byte at the top. Head 1 reads down the copier; head 0 writes down the partner. Every copy joins a byte to its mirror image across the ring, so the partner ends up holding the copier back to front. Run it, then run the next generation.</p>
+    <div class="cols wide-left">
+      <div class="panel">
+        <div class="ring-wrap"><canvas id="ring" role="img" aria-label="The tape as a ring, with the copy drawn as lines between each byte and its mirror"></canvas></div>
+        <div class="bar" role="group" aria-label="Which program">
+          <button class="btn ghost" type="button" data-prog="B" aria-pressed="true">Family B</button>
+          <button class="btn ghost" type="button" data-prog="A" aria-pressed="false">Family A</button>
+          <button class="btn ghost" type="button" data-prog="A0" aria-pressed="false">Family A, partner with zeros</button>
+        </div>
+        <div class="bar"><button class="btn" id="ring-play" type="button">Run</button><button class="btn ghost" id="ring-next" type="button" disabled>Next generation</button><span class="readout" id="ring-read"></span></div>
+      </div>
+      <div class="listing">
+        <div class="key"><span><i class="sq" style="background:var(--ink)"></i>head moves</span><span><i class="sq" style="background:var(--red)"></i>copy</span><span><i class="sq" style="background:var(--green)"></i>loop</span><span><i class="sq" style="background:var(--tape)"></i>does nothing</span><span><i class="sq" style="background:var(--paper);outline:1px solid var(--rule)"></i>zero</span></div>
+        <div class="strip" id="strip" aria-label="The program's 64 bytes"></div>
+        <div id="listing-text"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="results" aria-labelledby="h-results">
+    <span class="kicker">6 · STAGE 1 RESULTS</span>
+    <h2 id="h-results">Partial: four main seeds, one sham, the calibration</h2>
+    <p id="results-lede"></p>
+    <div class="board" id="board"></div>
+    <div class="table-wrap"><table class="ledger" id="criteria"></table></div>
+    <p class="caption" id="criteria-note"></p>
+  </section>
+
+  <!-- 7 -->
+  <section id="ledger" aria-labelledby="h-ledger">
+    <span class="kicker">7 · THE BOOKS</span>
+    <h2 id="h-ledger">The ledger so far</h2>
+    <div class="table-wrap"><table class="ledger" id="ledger-table"></table></div>
+    <p class="caption">Reference lines from Dembski: 10¹²⁰ events in the history of the universe is 398.6 bits; his universal probability bound, 10⁻¹⁵⁰, is 498 bits. The two rows at the bottom are exhibits from the 12 October simulations, kept for comparison.</p>
+  </section>
+
+  <!-- 8 -->
+  <section id="checks" aria-labelledby="h-checks">
+    <span class="kicker">8 · CHECKED</span>
+    <h2 id="h-checks">Checked and not checked</h2>
+    <div class="cols">
+      <div><h3>Checked</h3><ul class="plain" id="checked"></ul></div>
+      <div><h3>Not checked</h3><ul class="plain" id="unchecked"></ul></div>
+    </div>
+  </section>
+  <footer>Sources: Agüera y Arcas et al., <a href="https://arxiv.org/abs/2406.19108">Computational Life</a> (2024); Knierim et al., <a href="https://arxiv.org/abs/2607.01483">BFF: simple explanations</a> (2026); <a href="https://github.com/paradigms-of-intelligence/cubff">cubff</a>; Dembski and Marks, “Conservation of Information in Search” (2009); Dennett, <i>Darwin’s Dangerous Idea</i> (1995). Pre-registration and code: <a href="https://github.com/SammyDMartin/testclaude/tree/compute-craneladder/compute/craneladder">compute-craneladder</a>.</footer>
+</div>
+
+<script type="application/json" id="page-data">null</script>
+<script id="engine-src" type="text/plain">
+/*ENGINE*/
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const D = JSON.parse(document.getElementById('page-data').textContent);
+const css = getComputedStyle(document.documentElement);
+const tok = n => css.getPropertyValue(n).trim();
+const C = {paper:tok('--paper'),sheet:tok('--sheet'),rule:tok('--rule'),ruleStrong:tok('--rule-strong'),ink:tok('--ink'),pencil:tok('--pencil'),red:tok('--red'),tape:tok('--tape'),tapeDark:tok('--tape-dark'),pen:tok('--pen'),green:tok('--green'),famA:tok('--famA'),famB:tok('--famB'),famX:tok('--famX'),dot:tok('--dot')};
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+(new Function(document.getElementById('engine-src').textContent)).call(window);
+const B = window.BFF;
+const fmt = n => n.toLocaleString('en-GB');
+const pct = (x,d=1) => (x*100).toFixed(d)+'%';
+const hexToBytes = h => { const a = new Uint8Array(h.length/2); for (let i=0;i<a.length;i++) a[i]=parseInt(h.substr(i*2,2),16); return a; };
+const b64ToBytes = s => { const bin = atob(s); const a = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) a[i]=bin.charCodeAt(i); return a; };
+function rgb(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+const GLYPH = {60:'<',62:'>',123:'{',125:'}',43:'+',45:'-',46:'.',44:',',91:'[',93:']'};
+function byteColour(v){
+  if(v===0) return C.paper;
+  if(v===60||v===62||v===123||v===125) return C.ink;
+  if(v===43||v===45) return C.pen;
+  if(v===46||v===44) return C.red;
+  if(v===91||v===93) return C.green;
+  const t=rgb(C.tape),td=rgb(C.tapeDark),k=(v*37%256)/255;
+  return `rgb(${t[0]+(td[0]-t[0])*k|0},${t[1]+(td[1]-t[1])*k|0},${t[2]+(td[2]-t[2])*k|0})`;
+}
+function sizeCanvas(cv, h, w){w=w||cv.parentElement.clientWidth;const dpr=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.height=h+'px';cv.style.width=w+'px';const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return {x,w,h};}
+function rng(seed){return B.rng(seed);}
+const S = D.summary || null;
+
+/* ================= 1 & 2: the ladder ================= */
+const ICON={
+  crane:'<svg viewBox="0 0 76 110" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="1.6"><path d="M28 104V24M36 104V24M28 98l8-8M28 86l8-8M28 74l8-8M28 62l8-8M28 50l8-8M28 38l8-8M14 24h52M32 24V12L14 24M32 12l34 12M60 24v26"/></g><rect x="52" y="50" width="16" height="6" fill="var(--pen)"/><rect x="10" y="22" width="8" height="8" fill="var(--ink)"/></svg>',
+  hook:'<svg viewBox="0 0 76 110" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><g fill="none" stroke="var(--pencil)" stroke-width="1.6"><path d="M38 0v58" stroke-dasharray="4 4"/><path d="M38 58v6a5 5 0 1 1-5-5M38 68l-20 8M38 68l20 8"/></g><rect x="14" y="76" width="48" height="6" fill="none" stroke="var(--pencil)" stroke-dasharray="3 3"/></svg>',
+  ground:'<svg viewBox="0 0 76 110" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><g stroke="var(--ink)" stroke-width="1.6"><path d="M6 70h64"/><path d="M12 70l-6 8M24 70l-6 8M36 70l-6 8M48 70l-6 8M60 70l-6 8M72 70l-6 8" stroke-width="1"/></g><g fill="none" stroke="var(--red)" stroke-width="1.4"><circle cx="38" cy="46" r="11"/><path d="M46 54l10 10"/></g></svg>'};
+const st1 = S ? `Partial. ${S.main_takeovers} main seeds took over (the paper’s rate predicts about 1.6 in 4); the copy-disabled sham ${S.sham_takeovers.startsWith('0')?'did not':'did'}${S.calibration_hits_in_1e7!=null?`; ${S.calibration_hits_in_1e7} replicators in 10 million random programs`:''}. Six main seeds and four shams were dropped for time.` : 'Running.';
+const RUNGS=[
+  ['ground','The ground: the rules','Ten instructions, random pairing, rare mutation. Stage 2 measures how rare rules like these are among simple rule sets: the experiment Dembski’s accounting now turns on.','Stage 2 · next, after your go-ahead; it needs GitHub compute, which I will ask about first'],
+  ['crane','Rung 1 · Copiers (Stage 1)','From random programs to self-copying ones, with no fitness function and no copier written in.',st1,true],
+  ['hook','Rung 2 · Succession (Stage 3)','On a grid where running and copying cost energy, do new lineages keep replacing old ones, across a sweep of settings fixed in advance?','later'],
+  ['hook','Rung 3 · Novelty (Stage 4)','Do new families and new kinds keep appearing, measured against a shadow run in which nothing is selected?','later'],
+  ['hook','Rung 4 · Behaviour (Stage 5)','Given sensor and motor ports, do programs arise that move toward light, beyond ports wired to noise?','later · Stage 6 writes it all up, every rung replayed beside its sham']];
+document.getElementById('tower').innerHTML=RUNGS.map(r=>`<div class="rung${r[0]==='ground'?' ground':''}"><div class="art">${ICON[r[0]]}</div><div class="txt"><h3>${r[1]}</h3><p>${r[2]}</p><span class="st${r[4]?' now':''}">${r[3]}</span></div></div>`).join('');
+
+/* ================= 3: rules diagrams ================= */
+(function(){
+  const r=rng(41);
+  const strip=(x,y,w,h,bytes,hi)=>{let s='';const cw=w/bytes.length;bytes.forEach((v,j)=>{s+=`<rect x="${(x+j*cw).toFixed(2)}" y="${y}" width="${(cw+.3).toFixed(2)}" height="${h}" fill="${byteColour(v)}"/>`;});if(hi)s+=`<rect x="${x-1.5}" y="${y-1.5}" width="${w+3}" height="${h+3}" fill="none" stroke="${hi}" stroke-width="2"/>`;return s;};
+  const rb=n=>Array.from({length:n},()=>(r()*256)|0);
+  let s1='';
+  for(let i=0;i<9;i++)for(let j=0;j<3;j++){const hi=(i===2&&j===0)?C.ink:(i===6&&j===2)?C.ink:null;s1+=strip(14+j*94,10+i*14,82,8,rb(32),hi);}
+  document.getElementById('step1').innerHTML=s1;
+  const a=rb(64),b=rb(64); a[5]=91;a[9]=60;a[12]=44;a[15]=125;a[20]=93;
+  let s2=strip(10,64,140,20,a)+strip(150,64,140,20,b);
+  s2+=`<path d="M150 56v36" stroke="${C.ink}" stroke-width="1.2" stroke-dasharray="3 2"/>`;
+  s2+=`<path d="M12 56v-10h8" stroke="${C.pen}" stroke-width="2" fill="none"/><text x="24" y="50" font-family="Courier Prime,monospace" font-size="11" fill="${C.pen}">the code runs from byte 0</text>`;
+  s2+=`<path d="M12 90l-5 8h10z" fill="${C.ink}"/><text x="22" y="98" font-family="Courier Prime,monospace" font-size="11" fill="${C.ink}">heads 0 and 1 start on byte 0 too</text>`;
+  s2+=`<text x="10" y="138" font-family="Courier Prime,monospace" font-size="11" fill="${C.pencil}">bytes 0 to 63</text><text x="290" y="138" text-anchor="end" font-family="Courier Prime,monospace" font-size="11" fill="${C.pencil}">64 to 127</text>`;
+  document.getElementById('step2').innerHTML=s2;
+  const a2=a.slice(),b2=b.slice();for(let k=0;k<20;k++)b2[63-k]=a2[k];
+  let s3=strip(10,40,130,18,a2)+strip(160,40,130,18,b2);
+  s3+=`<path d="M75 66v34M70 94l5 8 5-8M225 66v34M220 94l5 8 5-8" stroke="${C.ink}" stroke-width="1.4" fill="none"/>`;
+  s3+=`<text x="150" y="124" text-anchor="middle" font-family="Courier Prime,monospace" font-size="11" fill="${C.pencil}">back into the soup</text>`;
+  s3+=`<text x="290" y="30" text-anchor="end" font-family="Courier Prime,monospace" font-size="11" fill="${C.ink}">partner, partly overwritten</text>`;
+  document.getElementById('step3').innerHTML=s3;
+})();
+
+/* ================= 4: program space ================= */
+(function(){
+  const E=D.evo, N=E.slots;
+  const frames=E.frames.map(f=>{const q=b64ToBytes(f.xyz);return {epoch:f.epoch,xyz:new Int8Array(q.buffer,q.byteOffset,q.length),fam:b64ToBytes(f.fam)};});
+  const muller=E.muller, zeros=E.zeros;
+  const FAMCOL={0:C.famX,1:C.famA,2:C.famB,255:C.dot};
+  const beats=E.beats;
+  const jit=new Float32Array(N*3);{const r=rng(5);for(let i=0;i<jit.length;i++)jit[i]=(r()-.5)*6;}
+  const cen=[0,0,0];let ext=1;{let n=0;for(const f of frames)for(let k=0;k<N;k++){for(let a=0;a<3;a++)cen[a]+=f.xyz[k*3+a];n++;}for(let a=0;a<3;a++)cen[a]/=n;for(const f of frames)for(let k=0;k<N*3;k++)ext=Math.max(ext,Math.abs(f.xyz[k]-cen[k%3]));}
+  const SC=118/ext;
+  const space=document.getElementById('space'), mul=document.getElementById('muller'), scrub=document.getElementById('sp-scrub'), read=document.getElementById('sp-read'), tag=document.getElementById('space-tag'), playB=document.getElementById('sp-play');
+  const e0=frames[0].epoch, e1=frames.at(-1).epoch;
+  let t=0; // fractional frame index
+  const epochAt=t=>{const i=Math.min(frames.length-2,Math.floor(t)),f=t-i;return frames[i].epoch+(frames[i+1].epoch-frames[i].epoch)*f;};
+  const frameForEpoch=e=>{for(let i=0;i<frames.length-1;i++)if(frames[i+1].epoch>=e)return i+(e-frames[i].epoch)/(frames[i+1].epoch-frames[i].epoch);return frames.length-1;};
+  const nearest=(arr,e)=>{let b=arr[0];for(const r of arr){if(r[0]<=e)b=r;else break;}return b;};
+  // ---- 3D ----
+  let renderer=null, scene, camera, pts, posAttr, colAttr, yaw=0.6, pitch=0.3, dist=400, needs=true, visible=true;
+  const famRGB={};for(const k in FAMCOL){const c=rgb(FAMCOL[k]);famRGB[k]=[c[0]/255,c[1]/255,c[2]/255];}
+  function setup3D(){
+    if(!window.THREE)return false;
+    try{renderer=new THREE.WebGLRenderer({canvas:space,antialias:true});}catch(e){return false;}
+    renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));renderer.setClearColor(new THREE.Color(C.sheet),1);
+    scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(38,1,1,3000);
+    const g=new THREE.BufferGeometry();posAttr=new THREE.BufferAttribute(new Float32Array(N*3),3);colAttr=new THREE.BufferAttribute(new Float32Array(N*3),3);
+    g.setAttribute('position',posAttr);g.setAttribute('color',colAttr);
+    const dotTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle='#fff';x.beginPath();x.arc(32,32,28,0,7);x.fill();const tx=new THREE.CanvasTexture(c);return tx;})();
+    pts=new THREE.Points(g,new THREE.PointsMaterial({size:5,sizeAttenuation:false,vertexColors:true,map:dotTex,alphaTest:.5}));
+    scene.add(pts);
+    const box=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(260,260,260)),new THREE.LineBasicMaterial({color:new THREE.Color(C.rule)}));scene.add(box);
+    const grid=new THREE.GridHelper(260,8,new THREE.Color(C.ruleStrong),new THREE.Color(C.rule));grid.position.y=-130;scene.add(grid);
+    return true;
+  }
+  const has3D=setup3D();
+  const ctx2=has3D?null:space.getContext('2d');
+  function resize(){const w=space.parentElement.clientWidth,h=Math.round(Math.min(w*0.72,480));
+    if(has3D){renderer.setSize(w,h,false);space.style.height=h+'px';camera.aspect=w/h;camera.updateProjectionMatrix();pts.material.size=w<600?3.6:5;}
+    else sizeCanvas(space,h,w);
+    needs=true;}
+  function updatePoints(){
+    const i=Math.min(frames.length-2,Math.floor(t)),f=Math.min(1,t-i),A=frames[i].xyz,Bz=frames[i+1].xyz,fam=frames[Math.round(t)].fam;
+    const P=has3D?posAttr.array:new Float32Array(N*3),Cl=has3D?colAttr.array:null;
+    for(let k=0;k<N*3;k++)P[k]=(A[k]+(Bz[k]-A[k])*f-cen[k%3])*SC+jit[k];
+    if(has3D){for(let k=0;k<N;k++){const c=famRGB[fam[k]]||famRGB[255];Cl[k*3]=c[0];Cl[k*3+1]=c[1];Cl[k*3+2]=c[2];}posAttr.needsUpdate=true;colAttr.needsUpdate=true;}
+    return {P,fam};
+  }
+  function render(){
+    const u=updatePoints();
+    if(has3D){camera.position.set(dist*Math.cos(pitch)*Math.sin(yaw),dist*Math.sin(pitch),dist*Math.cos(pitch)*Math.cos(yaw));camera.lookAt(0,0,0);renderer.render(scene,camera);}
+    else{ // flat fallback: first two axes
+      const w=space.clientWidth,h=space.clientHeight,x=ctx2;x.fillStyle=C.sheet;x.fillRect(0,0,w,h);
+      const s=Math.min(w,h)/290;for(let k=0;k<N;k++){x.fillStyle=FAMCOL[u.fam[k]]||C.dot;x.fillRect(w/2+u.P[k*3]*s-1.5,h/2-u.P[k*3+1]*s-1.5,3,3);}
+    }
+    const e=Math.round(epochAt(t)),m=nearest(muller,e),z=nearest(zeros,e);
+    tag.textContent=`epoch ${fmt(e)}`;
+    read.textContent=`A ${pct(m[2])} · B ${pct(m[3])} · zero bytes ${pct(z[1])}`;
+    drawMuller(e);
+    showBeat(e);
+  }
+  // ---- recorder ----
+  const xr=[e0,e1];
+  function drawMuller(cur){
+    const narrow=innerWidth<600,g=sizeCanvas(mul,narrow?170:190),x=g.x,W=g.w,pl=10,pr=10;
+    const X=e=>pl+(W-pl-pr)*(e-xr[0])/(xr[1]-xr[0]);
+    x.fillStyle=C.sheet;x.fillRect(0,0,W,g.h);
+    const t1=22,h1=narrow?78:92,t2=t1+h1+8,h2=narrow?32:38;
+    // grid
+    for(const [top,h] of [[t1,h1],[t2,h2]])for(let i=0;i<=4;i++){const y=top+h*i/4;x.strokeStyle=i%2?C.rule:C.ruleStrong;x.lineWidth=i%2?.5:1;x.beginPath();x.moveTo(pl,y);x.lineTo(W-pr,y);x.stroke();}
+    for(let e=Math.ceil(xr[0]/250)*250;e<=xr[1];e+=250){x.strokeStyle=C.rule;x.lineWidth=.5;x.beginPath();x.moveTo(X(e),t1);x.lineTo(X(e),t2+h2);x.stroke();}
+    // stacked shares: X bottom, then A, then B
+    const rows=muller.filter(r=>r[0]>=xr[0]);
+    const order=[[1,C.famX],[2,C.famA],[3,C.famB]];
+    let base=rows.map(()=>0);
+    for(const [col,colour] of order){
+      x.beginPath();rows.forEach((r,i)=>{const y=t1+h1*(1-(base[i]+r[col]));i?x.lineTo(X(r[0]),y):x.moveTo(X(r[0]),y);});
+      for(let i=rows.length-1;i>=0;i--)x.lineTo(X(rows[i][0]),t1+h1*(1-base[i]));
+      x.closePath();x.fillStyle=colour;x.fill();
+      base=base.map((b,i)=>b+rows[i][col]);
+    }
+    // zero bytes (0 to 15%)
+    x.strokeStyle=C.red;x.lineWidth=1.6;x.beginPath();zeros.filter(r=>r[0]>=xr[0]).forEach((r,i)=>{const y=t2+h2*(1-Math.min(1,r[1]/.15));i?x.lineTo(X(r[0]),y):x.moveTo(X(r[0]),y);});x.stroke();
+    x.font='600 11px "Libre Franklin", sans-serif';x.fillStyle=C.ink;x.fillText('share of the soup, by family (0 to 100%)',pl+4,t1+13);
+    x.fillStyle=C.red;x.fillText('zero bytes (0 to 15%)',pl+4,t2+12);
+    // beat markers
+    beats.forEach((b,i)=>{const bx=Math.min(W-9,Math.max(9,X(b.epoch)));x.fillStyle=C.ink;x.beginPath();x.arc(bx,9,7,0,7);x.fill();x.fillStyle=C.sheet;x.font='700 10px "Courier Prime", monospace';x.textAlign='center';x.fillText(i+1,bx,12.5);x.textAlign='left';});
+    x.fillStyle=C.pencil;x.font='11px "Courier Prime", monospace';
+    const tk=narrow?500:250;for(let e=Math.ceil(xr[0]/tk)*tk;e<=xr[1];e+=tk){x.textAlign='center';x.fillText(fmt(e),Math.min(Math.max(X(e),20),W-24),g.h-4);}x.textAlign='left';
+    x.strokeStyle=C.ink;x.lineWidth=1.25;x.beginPath();x.moveTo(X(cur),16);x.lineTo(X(cur),g.h-14);x.stroke();
+    mul._X=X;mul._W=W;
+  }
+  mul.addEventListener('click',ev=>{const r=mul.getBoundingClientRect(),px=ev.clientX-r.left;const e=xr[0]+(xr[1]-xr[0])*(px-10)/(mul._W-20);stop();seek(frameForEpoch(Math.max(xr[0],Math.min(xr[1],e))));});
+  // ---- beats ----
+  const bwrap=document.getElementById('beats'),bnow=document.getElementById('beat-now');
+  bwrap.innerHTML=beats.map((b,i)=>`<button class="btn ghost" type="button" data-i="${i}">${i+1}. ${b.title}</button>`).join('');
+  bwrap.querySelectorAll('button').forEach(btn=>btn.onclick=()=>{stop();seek(frameForEpoch(beats[+btn.dataset.i].epoch));});
+  let lastBeat=-1;
+  function showBeat(e){let k=0;beats.forEach((b,i)=>{if(e>=b.epoch-1)k=i;});if(k===lastBeat)return;lastBeat=k;
+    bnow.innerHTML=`<h3>${k+1}. ${beats[k].title}</h3><p>${beats[k].text}</p>`;
+    bwrap.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',i===k?'true':'false'));}
+  // ---- controls ----
+  function seek(v){t=Math.max(0,Math.min(frames.length-1,v));scrub.value=Math.round(t/(frames.length-1)*1000);needs=true;}
+  scrub.oninput=()=>{stop();seek(scrub.value/1000*(frames.length-1));};
+  let playing=false,last=0;
+  function stop(){playing=false;playB.textContent='Play';}
+  playB.onclick=()=>{if(playing){stop();return;}if(t>=frames.length-1.01)t=0;playing=true;playB.textContent='Pause';last=performance.now();};
+  let drag=null;
+  space.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw,pitch,type:e.pointerType};});
+  addEventListener('pointermove',e=>{if(!drag)return;yaw=drag.yaw-(e.clientX-drag.x)*.008;if(drag.type==='mouse')pitch=Math.max(-1.2,Math.min(1.2,drag.pitch+(e.clientY-drag.y)*.006));needs=true;});
+  addEventListener('pointerup',()=>{drag=null;});
+  new IntersectionObserver(es=>{visible=es[0].isIntersecting;}).observe(space);
+  function loop(now){
+    if(visible){
+      if(playing){t+=(now-last)/1000*(reduce?2:6);if(t>=frames.length-1){t=frames.length-1;stop();}scrub.value=Math.round(t/(frames.length-1)*1000);needs=true;}
+      if(!reduce&&!drag&&has3D){yaw+=(now-last)/1000*.12;needs=true;}
+      if(needs){render();needs=false;}
+    }
+    last=now;requestAnimationFrame(loop);
+  }
+  addEventListener('resize',resize);resize();
+  seek(frameForEpoch(beats[0].epoch));render();requestAnimationFrame(t0=>{last=t0;loop(t0);});
+})();
+
+/* ================= 5: the ring ================= */
+(function(){
+  const F=D.evo.families;
+  const progs={B:hexToBytes(F[2].rep),A:hexToBytes(F[1].rep)};
+  const cv=document.getElementById('ring'),readEl=document.getElementById('ring-read'),playB=document.getElementById('ring-play'),nextB=document.getElementById('ring-next');
+  const famCol={B:C.famB,A:C.famA,A0:C.famA};
+  let mode='B',orig,tape,trace,step,gen,rot=0,rotAnim=null,timer=null,chords=[],done=false,halted=false,copied=0;
+  function partnerFor(m,g){const r=rng(m==='A0'?77+g:11+g*7);const q=new Uint8Array(64);for(let j=0;j<64;j++){q[j]=(m==='A0'&&r()<.125)?0:1+((r()*255)|0);}return q;}
+  function makeTrace(t){ // record every step of cubff's interpreter on tape t (copy of)
+    t=t.slice();let pc=0,h0=0,h1=0;const ev=[];
+    for(let i=0;i<8192;i++){h0&=127;h1&=127;const c=t[pc];let cf=-1,ct=-1;
+      switch(c){case 60:h0--;break;case 62:h0++;break;case 123:h1--;break;case 125:h1++;break;
+        case 43:t[h0]=(t[h0]+1)&255;break;case 45:t[h0]=(t[h0]+255)&255;break;
+        case 46:cf=h0;ct=h1;t[h1]=t[h0];break;case 44:cf=h1;ct=h0;t[h0]=t[h1];break;
+        case 91:if(t[h0]===0){let d=1;pc++;for(;pc<128&&d>0;pc++){if(t[pc]===93)d--;if(t[pc]===91)d++;}pc--;if(d!==0)pc=128;}break;
+        case 93:if(t[h0]!==0){let d=1;pc--;for(;pc>=0&&d>0;pc--){if(t[pc]===93)d++;if(t[pc]===91)d--;}pc++;if(d!==0)pc=-1;}break;}
+      ev.push({pc:Math.max(0,Math.min(127,pc)),h0:h0&127,h1:h1&127,cf,ct});
+      if(pc<0)break;pc++;if(pc>=128)break;}
+    return ev;
+  }
+  function start(m){mode=m;gen=1;orig=progs[m==='A0'?'A':m];tape=new Uint8Array(128);tape.set(orig,0);tape.set(partnerFor(m,1),64);begin();paintStrip(orig);writeListing();}
+  function begin(){trace=makeTrace(tape);step=0;chords=[];done=false;halted=false;copied=0;nextB.disabled=true;draw();status();}
+  function advance(n){
+    for(let k=0;k<n&&!done;k++){
+      const e=trace[step];
+      if(e.cf>=0){tape[e.ct]=tape[e.cf];chords.push([e.cf,e.ct]);if(chords.length>80)chords.shift();if(e.ct>=64)copied++;}
+      step++;
+      if(copied>=64&&e.cf>=0&&e.ct>=64){done=true;}
+      if(step>=trace.length){done=true;halted=step<8192;}
+    }
+    if(done){stopRun();if(!halted||mode!=='A0')nextB.disabled=(gen>=2);}
+  }
+  function status(){
+    let m=0;for(let j=0;j<64;j++)if(tape[64+j]===(gen===1?orig[63-j]:orig[j]))m++;
+    let s=gen===1?`Generation 1. ${copied} bytes written into the partner.`:`Generation 2: the back-to-front copy is now the copier. ${copied} bytes written into a fresh partner.`;
+    if(done){
+      if(mode==='A0'&&copied<64) s=`Generation 1. The loop stopped after ${copied} bytes: the next byte it was about to overwrite was zero.`;
+      else if(gen===1) s=`Generation 1 done: the partner holds the program back to front (${m} of 64 bytes${mode==='A'?', shifted one place':''}). Press Next generation.`;
+      else s=`Generation 2 done: the new partner matches the original program in ${m} of 64 bytes. Two mirrorings make a copy.`;
+    }
+    readEl.textContent=s;
+  }
+  function geom(){const w=Math.min(cv.parentElement.clientWidth-16,560);return {w,cx:w/2,cy:w/2,r1:w*.44,r0:w*.355};}
+  function ang(i){return -Math.PI/2+(i+.5)*Math.PI*2/128+rot;}
+  function draw(){
+    const G=geom(),g=sizeCanvas(cv,G.w,G.w),x=g.x;x.fillStyle=C.sheet;x.fillRect(0,0,G.w,G.w);
+    const d=Math.PI*2/128;
+    for(let i=0;i<128;i++){const a=ang(i);x.beginPath();x.arc(G.cx,G.cy,G.r1,a-d/2+.004,a+d/2-.004);x.arc(G.cx,G.cy,G.r0,a+d/2-.004,a-d/2+.004,true);x.closePath();x.fillStyle=byteColour(tape[i]);x.fill();if(tape[i]===0){x.strokeStyle=C.rule;x.lineWidth=.6;x.stroke();}}
+    // mirror axis and labels
+    const ax=Math.PI*2*0+rot;
+    x.save();x.translate(G.cx,G.cy);x.rotate(rot);x.setLineDash([3,4]);x.strokeStyle=C.ruleStrong;x.lineWidth=1;x.beginPath();x.moveTo(0,-G.r1-14);x.lineTo(0,G.r1+14);x.stroke();x.setLineDash([]);x.restore();
+    const pt=(i,r)=>{const a=ang(i);return [G.cx+r*Math.cos(a),G.cy+r*Math.sin(a)];};
+    // chords
+    chords.forEach((c,k)=>{const [x1,y1]=pt(c[0],G.r0-3),[x2,y2]=pt(c[1],G.r0-3);x.strokeStyle=famCol[mode];x.globalAlpha=k===chords.length-1?1:.18+.5*k/chords.length;x.lineWidth=k===chords.length-1?2.2:1;x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();});
+    x.globalAlpha=1;
+    if(!rotAnim&&step>0&&!done||(done&&step>0)){const e=trace[Math.min(step,trace.length)-1];
+      // pc dot
+      const [px,py]=pt(e.pc,G.r0-9);x.fillStyle=C.pen;x.beginPath();x.arc(px,py,3.2,0,7);x.fill();
+      // heads: triangles outside the ring
+      const tri=(i,fill,label)=>{const a=ang(i),r=G.r1+4,s=8;const bx=G.cx+(r+s*1.6)*Math.cos(a),by=G.cy+(r+s*1.6)*Math.sin(a);const tx=G.cx+r*Math.cos(a),ty=G.cy+r*Math.sin(a);const nx=-Math.sin(a)*s*.7,ny=Math.cos(a)*s*.7;x.beginPath();x.moveTo(tx,ty);x.lineTo(bx+nx,by+ny);x.lineTo(bx-nx,by-ny);x.closePath();if(fill){x.fillStyle=C.ink;x.fill();}else{x.fillStyle=C.sheet;x.fill();x.strokeStyle=C.ink;x.lineWidth=1.5;x.stroke();}
+        x.fillStyle=C.ink;x.font='700 11px "Courier Prime", monospace';x.textAlign='center';x.fillText(label,G.cx+(r+s*3.2)*Math.cos(a),G.cy+(r+s*3.2)*Math.sin(a)+4);x.textAlign='left';};
+      tri(e.h1,false,'read');tri(e.h0,true,'write');
+    }
+    x.fillStyle=C.pencil;x.font='600 12px "Libre Franklin", sans-serif';x.textAlign='center';
+    if(!rotAnim){x.fillText('copier',G.cx+G.r0*.5,G.cy+4);x.fillText(gen===1?'partner':'new partner',G.cx-G.r0*.5,G.cy+4);}
+    x.font='11px "Courier Prime", monospace';x.fillText('byte 0',G.cx+22,G.cy-G.r1-6);x.fillText('127',G.cx-16,G.cy-G.r1-6);x.textAlign='left';
+  }
+  function runStep(){advance(reduce?240:8);draw();status();}
+  function stopRun(){if(timer){clearInterval(timer);timer=null;}playB.textContent=done?'Run again':'Run';}
+  playB.onclick=()=>{if(timer){stopRun();return;}if(done){start(mode);}playB.textContent='Pause';timer=setInterval(runStep,reduce?200:16);};
+  nextB.onclick=()=>{ // the partner becomes the copier: turn the ring half a turn, then a fresh random partner
+    nextB.disabled=true;const t0=performance.now(),dur=reduce?1:900;chords=[];
+    const spin=now=>{const f=Math.min(1,(now-t0)/dur);rot=Math.PI*(f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2);rotAnim=f<1;draw();
+      if(f<1){requestAnimationFrame(spin);return;}
+      rot=0;rotAnim=null;const nt=new Uint8Array(128);nt.set(tape.subarray(64),0);nt.set(partnerFor(mode,2),64);tape=nt;gen=2;begin();paintStrip(tape.subarray(0,64));
+      playB.textContent='Pause';timer=setInterval(runStep,reduce?200:16);};
+    requestAnimationFrame(spin);};
+  document.querySelectorAll('[data-prog]').forEach(b=>b.onclick=()=>{stopRun();document.querySelectorAll('[data-prog]').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));start(b.dataset.prog);});
+  function paintStrip(p){document.getElementById('strip').innerHTML=Array.from(p,(v,i)=>{const g=GLYPH[v];return `<i class="${g?'op':''}${v===0?' z':''}" style="${v?`background:${byteColour(v)}`:''}" title="byte ${i}">${g||''}</i>`;}).join('');}
+  const LIST={
+    B:`<h3>Family B, decompiled</h3><ol>
+      <li>Bytes 0 to 8 do nothing. Byte 9 is <code>[</code>; the byte under head 0 is not zero, so it carries on.</li>
+      <li>The loop, bytes 9 to 33: <code>&lt;</code> moves head 0 back a byte. It starts on byte 0, so the first move wraps it to byte 127, the partner’s last byte. <code>,</code> copies the byte under head 1 onto head 0. <code>}</code> moves head 1 forward a byte. <code>]</code> goes round again unless the byte just written is zero.</li>
+      <li>Head 1 reads the copier forward from byte 0 while head 0 writes the partner backward from byte 127. After 64 rounds the partner holds the copier back to front.</li>
+      <li>Bytes 34 to 58 hold the same four instructions in reverse order. They do nothing here. In the back-to-front copy they come first, in the right order, so the copy runs the same loop and writes the original out again.</li>
+      <li>The program has no zero bytes, so <code>]</code> never sees a zero and nothing stops the copy. After 64 rounds the loop carries on, rewriting bytes with copies of themselves, until the 8,192-step budget runs out.</li></ol>`,
+    A:`<h3>Family A, decompiled</h3><ol>
+      <li>Also a mirror copier, offset by one byte. The loop is bytes 11 to 18: <code>,</code> copies, <code>&lt;</code> moves head 0 back, <code>}</code> moves head 1 forward, <code>]</code> checks.</li>
+      <li>The order matters. Because <code>&lt;</code> comes after the copy, <code>]</code> checks the partner byte it is <em>about to</em> overwrite. If that byte is zero, the loop ends and the copy is left unfinished.</li>
+      <li>The program carries 19 zero bytes of its own, and every copy plants them in the soup.</li></ol>
+      <p class="caption">Measured with this program: against partners from a soup with 0.4% zero bytes, 80% of copies finish. At 12.5% zeros, 3 in 10,000 do. Family B finished all 20,000 test copies at both rates.</p>`};
+  LIST.A0=LIST.A;
+  function writeListing(){document.getElementById('listing-text').innerHTML=LIST[mode];}
+  addEventListener('resize',draw);
+  start('B');
+})();
+
+/* ================= 6: results ================= */
+(function(){
+  const runs=D.runs, lede=document.getElementById('results-lede');
+  const cards=[];
+  for(let s=1;s<=10;s++)cards.push(['main',s]);
+  for(let s=1;s<=5;s++)cards.push(['sham',s]);
+  const board=document.getElementById('board');
+  const missing=cards.filter(([k,s])=>!runs[k+'_'+s]);
+  const rng2=(k)=>{const ss=missing.filter(c=>c[0]===k).map(c=>c[1]);return ss.length?`${k} seed${ss.length>1?'s':''} ${ss.length>1?ss[0]+' to '+ss.at(-1):ss[0]}`:'';};
+  board.innerHTML=cards.filter(([k,s])=>runs[k+'_'+s]).map(([k,s])=>{const r=runs[k+'_'+s];
+    const hit=r.confirmed!=null;
+    const txt=r.incomplete?`running: epoch ${fmt(r.epochs_run)}`:hit?`took over: entropy first above 1 at ${fmt(r.f1)}, confirmed at ${fmt(r.confirmed)}`:r.max_hoe<0.01?`no takeover; entropy stayed at zero`:`no takeover by 16,384; entropy rose to ${r.max_hoe.toFixed(2)} early, then settled at ${r.hoe.at(-1)[1].toFixed(2)}`;
+    return `<div class="card${hit?' hit':''}"><canvas data-run="${k}_${s}"></canvas><div class="t"><b>${k==='main'?'Main':'Sham'} seed ${s}${k==='sham'?' · copying off':''}</b><span>${txt}</span></div></div>`;}).join('')+
+    `<div class="card"><canvas data-calib="1"></canvas><div class="t"><b>Calibration</b><span>${D.calib?`${fmt(D.calib.n)} random programs: ${D.calib.hits} scored 48 or more`:'running'}</span></div></div>`+
+    (missing.length?`<div class="card notrun"><div class="t" style="padding:14px 12px"><b>Not run</b><span>${[rng2('main'),rng2('sham')].filter(Boolean).join('; ').replace(/^./,c=>c.toUpperCase())}: dropped when Stage 1 was cut short</span></div></div>`:'');
+  function drawCards(){
+    board.querySelectorAll('canvas[data-run]').forEach(cv=>{const r=runs[cv.dataset.run],g=sizeCanvas(cv,70),x=g.x,W=g.w,H=70;
+      x.fillStyle=C.sheet;x.fillRect(0,0,W,H);const X=e=>4+(W-8)*e/16384,Y=v=>H-6-(H-12)*Math.max(0,Math.min(5,v))/5;
+      x.strokeStyle=C.rule;x.lineWidth=.5;for(let v=0;v<=5;v++){x.beginPath();x.moveTo(4,Y(v));x.lineTo(W-4,Y(v));x.stroke();}
+      x.setLineDash([3,3]);x.strokeStyle=C.red;x.beginPath();x.moveTo(4,Y(1));x.lineTo(W-4,Y(1));x.stroke();x.setLineDash([]);
+      x.strokeStyle=r.confirmed!=null?C.pen:C.ink;x.lineWidth=1.6;x.beginPath();r.hoe.forEach((p,i)=>{i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1]));});x.stroke();
+      if(r.f1!=null){x.fillStyle=C.pen;x.beginPath();x.arc(X(r.f1),Y(1),3.5,0,7);x.fill();}
+    });
+    board.querySelectorAll('canvas[data-calib]').forEach(cv=>{const g=sizeCanvas(cv,70),x=g.x,W=g.w;x.fillStyle=C.sheet;x.fillRect(0,0,W,70);
+      x.font='700 22px "Courier Prime", monospace';x.fillStyle=C.ink;x.textAlign='center';x.fillText(D.calib?`${D.calib.hits} in 10⁷`:'…',W/2,44);x.textAlign='left';});
+  }
+  addEventListener('resize',drawCards);drawCards();
+  if(S){
+    const lo=S.main_wilson95[0],hi=S.main_wilson95[1];
+    lede.textContent=`Stage 1 was cut short at your request: four of ten main seeds, one of five shams, and the chance calibration. Each card is one run’s high-order entropy, 0 to 5 bits per byte over 16,384 epochs; the dashed line is the takeover threshold.`;
+    const rows=[
+      ['Main seeds that take over by 16,384 epochs','About 4 in 10 (p ≈ 0.41)',`${S.main_takeovers} (95% interval ${Math.round(lo*100)}% to ${Math.round(hi*100)}%)`,'No verdict: the criterion was 2 or more of 10, and only 4 ran. If our build matches the paper, 1 in 4 happens 34% of the time.'],
+      ['Takeovers with a program scoring 48 or more','Most',S.takeovers_with_a_48_replicator+' of '+S.main_takeovers.split(' of ')[0]+(S.first_rep?` (first at epoch ${fmt(S.first_rep)})`:''),'Reported'],
+      ['Distinct programs fall below half the soup within 512 epochs','Yes, each time',(S.distinct_collapse_per_takeover||[]).map(v=>v?'yes':'no').join(', ')+(S.collapse_detail?` (${S.collapse_detail})`:''),'Reported'],
+      ['Sham takeovers, copying disabled','0 of 5',S.sham_takeovers+(S.sham_max_hoe!=null&&S.sham_max_hoe<0.01?`; entropy never rose above zero${S.sham_max_top_share<2/131072?' and no two programs were ever identical':''}`:S.sham_max_hoe!=null?`; entropy at most ${S.sham_max_hoe.toFixed(3)}`:''),'Reported'],
+      ['Chance calibration, 10⁷ uniform programs','About 0.3 replicators',S.calibration_hits_in_1e7==null?'running':String(S.calibration_hits_in_1e7),S.calibration_hits_in_1e7==null?'pending':(S.pass_calibration?'Pass (0 to 3)':'Fail: more than 3')]];
+    document.getElementById('criteria').innerHTML='<thead><tr><th class="first">Measure, as pre-registered</th><th>Prediction</th><th>Result</th><th>Verdict</th></tr></thead><tbody>'+rows.map(r=>`<tr><td class="first">${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td><td class="verdict">${r[3]}</td></tr>`).join('')+'</tbody>';
+    document.getElementById('criteria-note').innerHTML=`Pre-registered before any counted run and amended once, at 14:08, to record the curtailment: <a href="https://github.com/SammyDMartin/testclaude/blob/compute-craneladder/compute/craneladder/prereg/stage1.md">stage1.md</a>. ${D.note||''}`;
+  }
+})();
+
+/* ================= 7: ledger ================= */
+(function(){
+  const ICON={
+    crane:'<svg viewBox="0 0 30 30" aria-label="crane"><path d="M7 28V5M11 28V5M7 9l4-4M7 13l4-4M7 17l4-4M7 21l4-4M7 25l4-4M4 5h24M22 5v9" fill="none" stroke="var(--ink)" stroke-width="1.6"/><path d="M19 14h6v4h-6z" fill="var(--ink)"/></svg>',
+    skyhook:'<svg viewBox="0 0 30 30" aria-label="not yet reached"><path d="M15 1v15" stroke="var(--pencil)" stroke-width="1.6" stroke-dasharray="2.5 2.5"/><path d="M15 16v4a3.5 3.5 0 1 1-3.5-3.5" fill="none" stroke="var(--pencil)" stroke-width="1.6"/><path d="M5 28h20" stroke="var(--pencil)" stroke-width="1.6"/></svg>',
+    prop:'<svg viewBox="0 0 30 30" aria-label="labelled injection"><path d="M4 8h22M6 8l5 20M24 8l-5 20M3 28h24" fill="none" stroke="var(--red)" stroke-width="2"/></svg>',
+    ground:'<svg viewBox="0 0 30 30" aria-label="ground"><path d="M3 20h24M6 24h18M9 28h12" stroke="var(--ink)" stroke-width="1.6"/></svg>'};
+  const k=S?S.main_takeovers:'pending';
+  const rows=[
+    ['ground','Rules','The ten BFF instructions and the pairing scheme','none claimed','none claimed','≤ 3,184 (cubff’s rule code, compressed). Their rarity among simple rule sets: Stage 2'],
+    ['crane','Copiers (Stage 1)','A program scoring 48 of 64 on the replication check','≈ 24.8 (published)'+(D.calib?`; ours: ${D.calib.hits} in 10⁷`+(D.calib.hits===0?', so ≥ 21.7 at 95% confidence':''):''),'small: blind sampling at the same budget would find one too','configurations tried: 1 (0 bits); injected: 0'],
+    ['crane','Copiers (Stage 1)','Soup high-order entropy above 1 bit per byte','≥ 8,388,608 (counting bound)',S?`≥ 8,388,606 (${k} runs)`:'pending','≤ 3,184 written; rarity of the rules: Stage 2'],
+    ['skyhook','Succession (Stage 3)','Lineages replacing one another under an energy budget','pending','pending','pending'],
+    ['skyhook','Novelty (Stage 4)','New families and kinds against a shadow run','pending','pending','pending'],
+    ['skyhook','Behaviour (Stage 5)','Movement toward light, against noise-wired ports','pending','pending','pending'],
+    ['prop','12 Oct creatures (exhibit)','Sex, learning and motor correction from zero','not measured','not measured','Labelled props: replication, genome encoding, brain architecture, senses, food model'],
+    ['crane','12 Oct walker (exhibit)','A 2,000-move walk ending at maximum distance','1,998 (exact)','≈ 1,998 (the climber hits it every run)','not measured; the filter is one line']];
+  document.getElementById('ledger-table').innerHTML='<thead><tr><th class="first"></th><th>Rung</th><th>Target</th><th>Chance cost, bits</th><th>Active information, bits</th><th class="red">Designer bits</th></tr></thead><tbody>'+
+    rows.map(r=>`<tr class="${r[1].includes('exhibit')?'exhibit':''}"><td class="first mark">${ICON[r[0]]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td><td class="red">${r[5]}</td></tr>`).join('')+'</tbody>';
+  document.getElementById('checked').innerHTML=(D.checked||[]).map(s=>`<li>${s}</li>`).join('');
+  document.getElementById('unchecked').innerHTML=(D.unchecked||[]).map(s=>`<li>${s}</li>`).join('');
+})();
+})();
+</script>

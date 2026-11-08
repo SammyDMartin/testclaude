@@ -57,6 +57,9 @@ summary = {
     'pass_takeover': k >= 2, 'takeovers_with_a_48_replicator': k48, 'distinct_collapse_per_takeover': fp_all,
     'sham_takeovers': f'{ks} of {len(res["sham"])}', 'calibration_hits_in_1e7': hits,
     'pass_calibration': hits is not None and hits <= 3, 'runs': res}
+if n < 10:  # amendment 1: curtailed at 4 of the 10 planned main seeds, so the 2-of-10 criterion gets no verdict
+    summary['pass_takeover'] = None
+    summary['takeover_verdict'] = f'none: curtailed at {n} of 10 main seeds (amendment 1)'
 os.makedirs(out, exist_ok=True)
 json.dump(summary, open(os.path.join(out, 'summary.json'), 'w'), indent=1)
 P = k / n if n else 0

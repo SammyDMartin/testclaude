@@ -12,3 +12,10 @@ branch on an old test repository; nothing here touches the website on `master`.
 
 To reproduce: clone cubff at the commit above, apply `cubff-patch/main.cc.diff`, copy `bff_nocopy.cu` in,
 `make CUDA=0`, then run the commands in the relevant pre-registration file.
+
+## Stage 1 result (partial, 8 November 2026)
+
+Curtailed by amendment 1 to main seeds 1 to 4, sham seed 1 and the calibration. Takeovers: 1 of 4 main seeds
+(seed 2; Wilson 95% interval 5% to 70%, against the paper's 41%); no verdict on the 2-of-10 criterion. Sham seed 1
+(copying off): no takeover, entropy never above zero. Calibration: 0 of 10^7 random programs scored 48 or more.
+Results in `runs/stage1/`, analysis in `runs/stage1/analysis/`, the page and its data builder in `page/` and `tools/`.

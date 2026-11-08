@@ -1,0 +1,92 @@
+{
+ "main_takeovers": "1 of 4",
+ "main_wilson95": [
+  0.046,
+  0.699
+ ],
+ "pass_takeover": null,
+ "takeovers_with_a_48_replicator": 1,
+ "distinct_collapse_per_takeover": [
+  true
+ ],
+ "sham_takeovers": "0 of 1",
+ "calibration_hits_in_1e7": 0,
+ "pass_calibration": true,
+ "runs": {
+  "main": {
+   "1": {
+    "epochs_run": 16385,
+    "confirmed": null,
+    "counted": false,
+    "first_rep_ge48": null,
+    "fp_entropy": null,
+    "fp_distinct": null,
+    "distinct_collapse_within_512": null,
+    "max_hoe": 0.364137,
+    "max_top_share": 7.6e-05,
+    "max_sample_ge48": 0,
+    "final_top_hex": "3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a",
+    "final_top_score": 0
+   },
+   "2": {
+    "epochs_run": 12545,
+    "confirmed": 12033,
+    "counted": true,
+    "first_rep_ge48": 11649,
+    "fp_entropy": 11777,
+    "fp_distinct": 11905,
+    "distinct_collapse_within_512": true,
+    "max_hoe": 4.337047,
+    "max_top_share": 0.001762,
+    "max_sample_ge48": 4057,
+    "final_top_hex": "5c363d37145b52a14f1fb6a1f53c8ea12c4c4c7de6b42628b5c33636365d5d36369f36367326b4e67d4c4c2c07b63cf5a1b61f4f53565b14378b36dd2c4ef7f7",
+    "final_top_score": 64
+   },
+   "3": {
+    "epochs_run": 16385,
+    "confirmed": null,
+    "counted": false,
+    "first_rep_ge48": null,
+    "fp_entropy": null,
+    "fp_distinct": null,
+    "distinct_collapse_within_512": null,
+    "max_hoe": 0.386757,
+    "max_top_share": 6.1e-05,
+    "max_sample_ge48": 0,
+    "final_top_hex": "3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f",
+    "final_top_score": 0
+   },
+   "4": {
+    "epochs_run": 16385,
+    "confirmed": null,
+    "counted": false,
+    "first_rep_ge48": null,
+    "fp_entropy": null,
+    "fp_distinct": null,
+    "distinct_collapse_within_512": null,
+    "max_hoe": 0.380136,
+    "max_top_share": 6.9e-05,
+    "max_sample_ge48": 0,
+    "final_top_hex": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d",
+    "final_top_score": 0
+   }
+  },
+  "sham": {
+   "1": {
+    "epochs_run": 16385,
+    "confirmed": null,
+    "counted": false,
+    "first_rep_ge48": null,
+    "fp_entropy": null,
+    "fp_distinct": null,
+    "distinct_collapse_within_512": null,
+    "max_hoe": -2.5e-05,
+    "max_top_share": 8e-06,
+    "max_sample_ge48": 0,
+    "final_top_hex": "5d8cfd5ba60f79e0cba79477618b1b87c3c382fdd590ebcd91c17564322d35cc140657f3785488b05b9ea8e67e742cbf22d5308141b4ca1e71c17117f06f3ccd",
+    "final_top_score": 0
+   }
+  }
+ },
+ "takeover_verdict": "none: curtailed at 4 of 10 main seeds (amendment 1)"
+}

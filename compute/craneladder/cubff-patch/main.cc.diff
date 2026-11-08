@@ -1,0 +1,82 @@
+diff --git a/main.cc b/main.cc
+index 2bbd34f..3b06c5a 100644
+--- a/main.cc
++++ b/main.cc
+@@ -22,6 +22,7 @@
+ #include <string>
+ #include <type_traits>
+ #include <vector>
++#include <unordered_map>
+ 
+ #include "common.h"
+ 
+@@ -210,6 +211,11 @@ FLAG(std::string, draw_to_2d, "",
+      "be a square number)");
+ FLAG(size_t, grid_width_2d, 0, "width of the 2d grid");
+ FLAG(bool, disable_output, false, "disable printing to stdout");
++// --- crane-ladder additions (logging and early stop only; the simulation itself is unchanged) ---
++FLAG(size_t, selfrep_sample, 0, "run the self-replication check on this many sampled tapes at each log point");
++FLAG(std::string, stats_log, "", "CSV for crane-ladder stats (needs selfrep_sample > 0)");
++FLAG(size_t, stop_after_takeover, 0, "if > 0, stop this many epochs after takeover is confirmed");
++FLAG(size_t, takeover_score, 48, "self-replication score that counts as a replicator");
+ FLAG(std::optional<size_t>, stopping_selfrep_count, std::nullopt,
+      "stop when that many programs appear to be self-replicators");
+ 
+@@ -342,6 +348,17 @@ int main(int argc, char **argv) {
+       }
+     }
+ 
++    FILE *statsfile = nullptr;
++    size_t cl_sample = GetFlag(FLAGS_selfrep_sample);
++    size_t cl_stop = GetFlag(FLAGS_stop_after_takeover);
++    size_t cl_thr = GetFlag(FLAGS_takeover_score);
++    int cl_hoe_streak = 0;
++    long long cl_confirmed = -1;
++    if (!GetFlag(FLAGS_stats_log).empty()) {
++      statsfile = CheckFopen(GetFlag(FLAGS_stats_log).c_str(), "w");
++      fprintf(statsfile, "epoch,higher_entropy,brotli_bpb,distinct_tapes,top_share,sample_n,sample_ge_thr,sample_max,top_score,confirmed,top_hex\n");
++    }
++    LanguageInterface *cl_lang = const_cast<LanguageInterface *>(language);
+     auto callback = [&](const SimulationState &state) {
+       int repl_count = 0;
+       for (size_t i = 0; i < state.replication_per_prog.size(); i++) {
+@@ -458,6 +475,39 @@ int main(int argc, char **argv) {
+                   params.num_programs / grid_width_2d * 8, draw_buf_2d);
+       }
+ 
++      if (statsfile && cl_sample > 0) {
++        size_t n = state.soup.size() / kSingleTapeSize;
++        std::unordered_map<std::string, size_t> counts;
++        counts.reserve(n * 2);
++        size_t top = 0, top_idx = 0;
++        for (size_t i = 0; i < n; i++) {
++          std::string k((const char *)state.soup.data() + i * kSingleTapeSize, kSingleTapeSize);
++          size_t c = ++counts[k];
++          if (c > top) { top = c; top_idx = i; }
++        }
++        uint64_t x = 0x9E3779B97F4A7C15ULL ^ (params.seed * 1000003ULL) ^ state.epoch;
++        size_t ge = 0, mx = 0;
++        for (size_t s2 = 0; s2 < cl_sample; s2++) {
++          x ^= x << 13; x ^= x >> 7; x ^= x << 17;
++          size_t idx = x % n;
++          std::vector<uint8_t> prog(state.soup.begin() + idx * kSingleTapeSize,
++                                    state.soup.begin() + (idx + 1) * kSingleTapeSize);
++          size_t sc = cl_lang->EvalParsedSelfrep(prog, state.epoch, params.seed + s2, false);
++          if (sc >= cl_thr) ge++;
++          if (sc > mx) mx = sc;
++        }
++        std::vector<uint8_t> topprog(state.soup.begin() + top_idx * kSingleTapeSize,
++                                     state.soup.begin() + (top_idx + 1) * kSingleTapeSize);
++        size_t top_score = cl_lang->EvalParsedSelfrep(topprog, state.epoch, params.seed, false);
++        cl_hoe_streak = state.higher_entropy >= 1.0 ? cl_hoe_streak + 1 : 0;
++        if (cl_confirmed < 0 && cl_hoe_streak >= 3 && (ge > 0 || top_score >= cl_thr)) cl_confirmed = state.epoch;
++        fprintf(statsfile, "%zu,%f,%f,%zu,%f,%zu,%zu,%zu,%zu,%lld,", state.epoch, state.higher_entropy,
++                state.brotli_bpb, counts.size(), top * 1.0 / n, cl_sample, ge, mx, top_score, cl_confirmed);
++        for (int j = 0; j < kSingleTapeSize; j++) fprintf(statsfile, "%02x", topprog[j]);
++        fprintf(statsfile, "\n");
++        fflush(statsfile);
++        if (cl_stop > 0 && cl_confirmed >= 0 && state.epoch >= (size_t)cl_confirmed + cl_stop) return true;
++      }
+       if (max_epochs.has_value() && state.epoch > *max_epochs) {
+         return true;
+       }

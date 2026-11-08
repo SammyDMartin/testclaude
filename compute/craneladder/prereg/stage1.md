@@ -77,3 +77,12 @@ fixed (it selected no frames when the takeover began after epoch 1,536).
 
 Any change after the first counted run is recorded here with its time and reason, and adds one to the
 configurations-tried count.
+
+### Amendment 1 (14:08, 8 November): curtailed for time
+
+Sammy asked at 14:07 to cut Stage 1 short because the runs were taking far longer than expected. After main
+seed 4, Stage 1 runs only sham seed 1 and the chance calibration. Main seeds 5 to 10 and sham seeds 2 to 5 are
+not run. No parameter changed, so the configurations-tried count stays at 1. With 4 of the 10 planned main
+seeds, the takeover criterion (2 or more of 10) cannot be judged: Stage 1 is reported as partial, with the
+observed count and its interval set against the paper's rate, and no pass or fail verdict on that row.
+Also: the revision heading above says 11:45; the commit time, 11:42:14, is the authoritative one.

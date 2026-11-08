@@ -1,5 +1,5 @@
 diff --git a/main.cc b/main.cc
-index 2bbd34f..3b06c5a 100644
+index 2bbd34f..9531df4 100644
 --- a/main.cc
 +++ b/main.cc
 @@ -22,6 +22,7 @@
@@ -22,7 +22,7 @@ index 2bbd34f..3b06c5a 100644
  FLAG(std::optional<size_t>, stopping_selfrep_count, std::nullopt,
       "stop when that many programs appear to be self-replicators");
  
-@@ -342,6 +348,17 @@ int main(int argc, char **argv) {
+@@ -342,6 +348,18 @@ int main(int argc, char **argv) {
        }
      }
  
@@ -32,15 +32,16 @@ index 2bbd34f..3b06c5a 100644
 +    size_t cl_thr = GetFlag(FLAGS_takeover_score);
 +    int cl_hoe_streak = 0;
 +    long long cl_confirmed = -1;
++    long long cl_first_rep = -1;
 +    if (!GetFlag(FLAGS_stats_log).empty()) {
 +      statsfile = CheckFopen(GetFlag(FLAGS_stats_log).c_str(), "w");
-+      fprintf(statsfile, "epoch,higher_entropy,brotli_bpb,distinct_tapes,top_share,sample_n,sample_ge_thr,sample_max,top_score,confirmed,top_hex\n");
++      fprintf(statsfile, "epoch,higher_entropy,brotli_bpb,distinct_tapes,top_share,sample_n,sample_ge_thr,sample_max,top_score,confirmed,first_rep,top_hex\n");
 +    }
 +    LanguageInterface *cl_lang = const_cast<LanguageInterface *>(language);
      auto callback = [&](const SimulationState &state) {
        int repl_count = 0;
        for (size_t i = 0; i < state.replication_per_prog.size(); i++) {
-@@ -458,6 +475,39 @@ int main(int argc, char **argv) {
+@@ -458,8 +476,45 @@ int main(int argc, char **argv) {
                    params.num_programs / grid_width_2d * 8, draw_buf_2d);
        }
  
@@ -69,14 +70,21 @@ index 2bbd34f..3b06c5a 100644
 +                                     state.soup.begin() + (top_idx + 1) * kSingleTapeSize);
 +        size_t top_score = cl_lang->EvalParsedSelfrep(topprog, state.epoch, params.seed, false);
 +        cl_hoe_streak = state.higher_entropy >= 1.0 ? cl_hoe_streak + 1 : 0;
-+        if (cl_confirmed < 0 && cl_hoe_streak >= 3 && (ge > 0 || top_score >= cl_thr)) cl_confirmed = state.epoch;
-+        fprintf(statsfile, "%zu,%f,%f,%zu,%f,%zu,%zu,%zu,%zu,%lld,", state.epoch, state.higher_entropy,
-+                state.brotli_bpb, counts.size(), top * 1.0 / n, cl_sample, ge, mx, top_score, cl_confirmed);
++        if (cl_confirmed < 0 && cl_hoe_streak >= 3) cl_confirmed = state.epoch;
++        if (cl_first_rep < 0 && (ge > 0 || top_score >= cl_thr)) cl_first_rep = state.epoch;
++        fprintf(statsfile, "%zu,%f,%f,%zu,%f,%zu,%zu,%zu,%zu,%lld,%lld,", state.epoch, state.higher_entropy,
++                state.brotli_bpb, counts.size(), top * 1.0 / n, cl_sample, ge, mx, top_score, cl_confirmed, cl_first_rep);
 +        for (int j = 0; j < kSingleTapeSize; j++) fprintf(statsfile, "%02x", topprog[j]);
 +        fprintf(statsfile, "\n");
 +        fflush(statsfile);
 +        if (cl_stop > 0 && cl_confirmed >= 0 && state.epoch >= (size_t)cl_confirmed + cl_stop) return true;
 +      }
        if (max_epochs.has_value() && state.epoch > *max_epochs) {
-         return true;
+-        return true;
++        bool mid_streak = statsfile && cl_confirmed < 0 && cl_hoe_streak > 0;
++        bool following_up = statsfile && cl_confirmed >= 0 && cl_stop > 0 &&
++                            state.epoch < (size_t)cl_confirmed + cl_stop;
++        if (!mid_streak && !following_up) return true;
        }
+       if (stopping_bpb.has_value() && state.brotli_bpb < *stopping_bpb) {
+         return true;

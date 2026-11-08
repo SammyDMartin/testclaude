@@ -17,7 +17,7 @@ stats = [[int(r['epoch']), round(float(r['higher_entropy']), 4), round(float(r['
 confirmed = max(int(r['confirmed']) for r in rows)
 assert confirmed > 0, 'no confirmed takeover in this run'
 # onset: first log where the commonest program holds 0.1% of the soup or a sampled program scores 48
-onset = next(s[0] for s in stats if s[2] >= 0.001 or s[3] > 0)
+onset = next(s[0] for s in stats if s[2] >= 0.001 or s[3] > 0 or s[1] >= 0.5)
 start = max(0, onset - 1536)
 ck_epochs = sorted(int(os.path.basename(p)[:-4]) for p in glob.glob(os.path.join(run, 'ckpt', '*.dat')))
 ck = max([e for e in ck_epochs if e <= start] or [ck_epochs[0]])
@@ -25,19 +25,23 @@ end = confirmed + 512
 tmp = os.path.join(run, 'replay_ckpt')
 shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
 subprocess.run([CUBFF, '--lang', lang, '--seed', str(seed), '--load', os.path.join(run, 'ckpt', '%010d.dat' % ck),
-                '--max_epochs', str(end), '--print_interval', '16', '--save_interval', '16',
+                '--max_epochs', str(end), '--print_interval', '32', '--save_interval', '32',
                 '--checkpoint_dir', tmp, '--disable_output'], check=True)
 files = sorted(glob.glob(os.path.join(tmp, '*.dat')))
 rng = np.random.default_rng(seed)
 pick = None
 frames = []
-# frame schedule: dense around the rise, sparse elsewhere; about 60 frames
-eps = [int(os.path.basename(p)[:-4]) for p in files]
+# frame schedule on the epoch stored in each file's header (loop epoch + 1, the same numbering as stats.csv):
+# every 32 epochs around the rise, every 128 elsewhere
+def header_epoch(p):
+    with open(p, 'rb') as f:
+        return struct.unpack('<QQQ', f.read(24))[2]
+eps = [header_epoch(p) for p in files]
 want = set()
 span = max(1, end - start)
 for e in eps:
     if e < start: continue
-    if onset - 256 <= e <= confirmed + 64: want.add(e) if (e - start) % 32 == 0 else None
+    if onset - 256 <= e <= confirmed + 64: want.add(e)
     elif (e - start) % 128 == 0: want.add(e)
 for p, e in zip(files, eps):
     if e not in want: continue
